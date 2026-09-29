@@ -1,0 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Alejandro Pérez García
+// SPDX-License-Identifier: Apache-2.0
+
+package tenterexample
+
+import io.archinaut.tenter.panel.PanelId
+
+internal enum class ExamplePanelId : PanelId {
+    ROWS,
+    HELP,
+}

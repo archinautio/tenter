@@ -1,0 +1,51 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+plugins {
+    kotlin("jvm")
+    id("com.diffplug.spotless")
+}
+
+repositories {
+    mavenCentral()
+}
+
+val libs = the<VersionCatalogsExtension>().named("libs")
+
+kotlin {
+    val isClaudeCloud = providers.environmentVariable("CLAUDE_CODE").isPresent
+    val jvmVersion =
+        if (isClaudeCloud) "21" // Claude Cloud only support Java 21
+        else libs.findVersion("jvm").get().toString()
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(jvmVersion)
+    }
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(jvmVersion)
+    }
+    explicitApi()
+}
+
+spotless {
+    kotlin {
+        licenseHeader(
+            "// SPDX-FileCopyrightText: 2026 Alejandro Pérez García\n" +
+                "// SPDX-License-Identifier: Apache-2.0\n\n"
+        )
+    }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    testLogging {
+        events(TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+    }
+}
+
+dependencies {
+    testImplementation(platform(libs.findLibrary("junit-bom").get()))
+    testImplementation(libs.findBundle("junit").get())
+    testImplementation(libs.findLibrary("mockk").get())
+    testImplementation(libs.findLibrary("assertj-core").get())
+    testRuntimeOnly(libs.findLibrary("junit-jupiter-engine").get())
+    testRuntimeOnly(libs.findLibrary("junit-platform-launcher").get())
+}

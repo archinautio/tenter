@@ -1,0 +1,39 @@
+@file:OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+
+plugins {
+    id("tenter.kotlin-library")
+    `maven-publish`
+}
+
+group = "io.archinaut"
+version = libs.versions.tenter.get()
+
+kotlin {
+    abiValidation {
+        referenceDumpDir.set(layout.projectDirectory.dir("api"))
+    }
+}
+
+dependencies {
+    api(libs.mordant)
+    api(libs.kotlinx.coroutines.core)
+    testImplementation(libs.konsist)
+    testImplementation(libs.kotlinx.coroutines.test)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            artifactId = "tenter"
+            pom {
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+            }
+        }
+    }
+}
