@@ -1,3 +1,5 @@
+<img src="docs/assets/tenter-logo.svg" alt="Tenter logo: terminal panels forming a T" width="128" height="128">
+
 # Tenter
 
 Tenter is a JVM terminal-UI toolkit built on Mordant. Callers describe prepared content, dispatch
