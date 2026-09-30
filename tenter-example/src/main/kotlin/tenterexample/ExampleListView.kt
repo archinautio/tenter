@@ -33,6 +33,7 @@ internal class ExampleListView(
                     1 -> "row $index — 中 rendered as a wide glyph"
                     else -> "row $index — decomposed e\u0301 accent"
                 }
+                // --8<-- [start:rows]
                 SelectableRow.draw(
                     content = cursor,
                     label = label,
@@ -40,8 +41,10 @@ internal class ExampleListView(
                     cursor = index == state.selectedRow,
                     glyphs = CheckboxGlyphs.ASCII,
                 )
+                // --8<-- [end:rows]
             }
         }
+        // --8<-- [start:columns]
         val catalog = Columns(
             children = listOf(
                 Columns.Child(MARKER_WIDTH, markerColumn),
@@ -49,6 +52,7 @@ internal class ExampleListView(
             ),
             gutter = COLUMN_GUTTER,
         )
+        // --8<-- [end:columns]
         val footer = contentView { cursor ->
             cursor.newLine()
             cursor.writeLine("600 rows • CJK 中 • decomposed e\u0301 • click or use the keyboard")

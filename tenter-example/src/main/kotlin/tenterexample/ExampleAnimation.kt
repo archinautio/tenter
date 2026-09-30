@@ -12,6 +12,7 @@ import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.view.View
 
+// --8<-- [start:animation]
 internal class ExampleAnimation : Animation {
     override val size: AnimationSize = AnimationSize(width = 3, height = 1)
     override val frameCount: Int = 2
@@ -33,6 +34,7 @@ internal class ExampleAnimation : Animation {
     }
 }
 
+// --8<-- [end:animation]
 internal fun animationProbe(): AnimationProbe {
     val playback = AnimationPlayback(
         listOf(AnimationPlayback.Clip(animation = ExampleAnimation(), value = "demo")),

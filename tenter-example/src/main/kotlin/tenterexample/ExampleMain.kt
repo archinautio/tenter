@@ -29,10 +29,12 @@ import io.archinaut.tenter.terminal.withScreen
  * widget glyphs, keymap dispatch, scrolling, reveal following, panel states, and animation.
  */
 public fun runHeadlessSmoke(): SmokeResult {
+    // --8<-- [start:padding]
     val framed = Bordered.prepared(Padded.prepared(Insets.all(1), contentView { cursor ->
         cursor.writeLine("OK")
         cursor.markRevealAt(0)
     })).layout(8)
+    // --8<-- [end:padding]
     val framedCanvas = Canvas.offscreen(framed.width, framed.height)
     framed.draw(framedCanvas)
     check(framed.height == 5 && framedCanvas.get(2, 2).char == "O")
@@ -111,6 +113,7 @@ private fun runInteractive(terminal: Terminal, renderer: ScreenRenderer) {
     var size = terminal.updateSize()
     renderer.render(app.render(size.width, size.height))
 
+    // --8<-- [start:input-loop]
     runBlocking {
         merge(
             terminal.inputEvents(MouseTracking.Normal) { event ->
@@ -126,6 +129,7 @@ private fun runInteractive(terminal: Terminal, renderer: ScreenRenderer) {
             if (app.running) renderer.render(app.render(size.width, size.height))
         }
     }
+    // --8<-- [end:input-loop]
 }
 
 private fun renderAnimationFrame(view: io.archinaut.tenter.view.View): ScreenBuffer {

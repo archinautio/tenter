@@ -8,8 +8,6 @@ import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.ajalt.mordant.terminal.TerminalRecorder
 import kotlinx.coroutines.flow.flow
-import java.nio.file.Files
-import java.nio.file.Path
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -17,15 +15,6 @@ import io.archinaut.tenter.terminal.terminalEvents
 import tenterexample.hello.runHello
 
 internal class HelloExampleTest {
-    @Test
-    fun `readme entry point is the compiled hello source`() {
-        val readme = Files.readString(Path.of("../README.md"))
-        val snippet = readme.substringAfter("```kotlin\n").substringBefore("\n```")
-        val source = Files.readString(Path.of("src/main/kotlin/tenterexample/hello/HelloMain.kt"))
-
-        assertEquals(source.substringAfter("package tenterexample.hello\n").trim(), snippet.trim())
-    }
-
     @Test
     fun `hello paints before reading and quits without consuming later input`() {
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.NONE, width = 50, height = 8)

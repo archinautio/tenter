@@ -1,0 +1,35 @@
+[project]
+site_name = "Tenter"
+site_description = "Build JVM terminal applications with Tenter: installation, examples, and usage guides."
+site_url = "https://archinautio.github.io/tenter/"
+repo_url = "https://github.com/archinautio/tenter"
+docs_dir = "docs/site"
+site_dir = "build/site"
+strict = true
+nav = [
+  { "Getting started" = "index.md" },
+  { "Content and layouts" = "layouts.md" },
+  { "Scrolling and panels" = "panels.md" },
+  { "Input and resizing" = "input.md" },
+  { "Widgets and styling" = "styling.md" },
+  { "Animation" = "animation.md" },
+  { "Examples and troubleshooting" = "examples.md" },
+]
+
+[project.theme]
+language = "en"
+logo = "assets/tenter-logo.svg"
+favicon = "assets/tenter-logo.svg"
+features = ["content.code.copy", "navigation.footer"]
+font = false
+
+[project.validation]
+invalid_links = true
+invalid_link_anchors = true
+
+[project.markdown_extensions]
+admonition = {}
+toc.permalink = true
+pymdownx.highlight = { pygments_lang_class = true }
+pymdownx.superfences = {}
+pymdownx.snippets = { base_path = ["."], check_paths = true, dedent_subsections = true }

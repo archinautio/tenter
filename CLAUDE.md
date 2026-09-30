@@ -7,7 +7,6 @@ Tenter is a JVM terminal-UI toolkit built on Mordant.
 Callers describe prepared content, dispatch input intent, and inspect completed-frame observations;
 Tenter owns glyph integrity, layout size, scroll following, panel geometry, and terminal-scope cleanup.
 
-
 ## Technology Stack
 
 - Kotlin 2.4

@@ -38,12 +38,14 @@ internal class ExampleApp(
 
     internal fun render(width: Int, height: Int): ScreenBuffer {
         val buffer = ScreenBuffer(width.coerceAtLeast(1), height.coerceAtLeast(1))
+        // --8<-- [start:panel-render]
         lastLayout = panels.render(
             canvas = Canvas.of(buffer),
             inputs = state,
             visible = VISIBLE,
             reservedTop = 0,
         )
+        // --8<-- [end:panel-render]
         return buffer
     }
 
@@ -72,6 +74,7 @@ internal class ExampleApp(
     }
 
     internal fun handleMouse(event: MouseEvent) {
+        // --8<-- [start:mouse]
         val hit = panels.hitTest(event.x, event.y)
         val scrollDelta = MouseInput.scrollDelta(event)
         if (scrollDelta != null) {
@@ -87,6 +90,7 @@ internal class ExampleApp(
             checkedRows = state.checkedRows.toggle(contentPoint.y),
         )
         panels.focus(ExamplePanelId.ROWS)
+        // --8<-- [end:mouse]
     }
 
     internal fun cycleHelp(): PanelState? {
@@ -106,6 +110,7 @@ internal class ExampleApp(
     }
 
     private fun createPanelSet(mode: ExampleLayoutMode): PanelSet<ExamplePanelId, ExampleState> {
+        // --8<-- [start:panels]
         val rows = Panel<ExamplePanelId, ExampleState>(
             id = ExamplePanelId.ROWS,
             title = "CATALOG",
@@ -120,6 +125,7 @@ internal class ExampleApp(
             minimized = { input -> Panel.Presentation.fixedWidth(helpContent(input), width = Panel.MINIMIZED_WIDTH) },
             maximized = { input -> Panel.Presentation.allocated(helpContent(input)) },
         )
+        // --8<-- [end:panels]
         return when (mode) {
             ExampleLayoutMode.MAIN_AND_SIDES -> PanelSet.mainAndSides(rows, listOf(help))
             ExampleLayoutMode.UNIFORM -> PanelSet.uniform(
