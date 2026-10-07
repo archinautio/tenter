@@ -47,7 +47,7 @@ when painting a raw view into an already allocated area.
 
 Create a `ScreenBuffer` for the current terminal size, wrap it with `Canvas.of(buffer)`,
 call your content's `draw` method, and send the buffer to the renderer. The
-[getting started program](index.md#write-your-first-application) shows these steps.
+[getting started program](index.md#write-your-first-application-hello-tenter) shows these steps.
 For content taller than the destination, add a [viewport or panels](panels.md).
 
 ## Reuse content safely
