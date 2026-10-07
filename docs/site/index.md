@@ -21,7 +21,11 @@ cd tenter
 ./gradlew :tenter:publishToMavenLocal
 ```
 
-In a separate Gradle application, use this `build.gradle.kts`:
+## Write your first application "hello-tenter"
+
+Create a separate directory with a Gradle application.
+
+Add `rootProject.name = "hello-tenter"` to `settings.gradle.kts` and use this `build.gradle.kts`:
 
 ```kotlin
 plugins {
@@ -42,21 +46,20 @@ kotlin { jvmToolchain(25) }
 application { mainClass.set("MainKt") }
 ```
 
-Add `rootProject.name = "hello-tenter"` to `settings.gradle.kts` and use a Gradle
-9.7.1 wrapper (`gradle wrapper --gradle-version 9.7.1` with Gradle installed).
-The dependency above resolves from your machine's Maven Local repository; it is
-not an instruction to download Tenter from Maven Central.
+The dependency above resolves from your machine's Maven Local repository.
 
-## Write your first application
+### The main loop
 
 Save the following as `src/main/kotlin/Main.kt`. This is a complete program: it paints
 a greeting and waits for `q`. The code is included from the compiled
 [hello example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/hello/HelloMain.kt),
-with its example package declaration omitted.
+with its example package declaration omitted (use whichever package you want).
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/hello/HelloMain.kt:6:"
 ```
+
+### Run the application
 
 Build a launcher and run it from a real terminal:
 
@@ -69,7 +72,7 @@ On Windows, use `gradlew.bat` and the generated `hello-tenter.bat` launcher.
 See [input and lifecycle](input.md) for managing terminal cleanup and your application
 event loop.
 
-## Continue building
+## Continue with:
 
 - [Content and layouts](layouts.md): compose text, columns, padding, and borders.
 - [Scrolling and panels](panels.md): show more content than fits on screen.
