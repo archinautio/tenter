@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Serve the Zensical documentation site locally with live reload.
 # Creates .venv-docs and installs requirements-docs.txt on first run.
 set -euo pipefail
