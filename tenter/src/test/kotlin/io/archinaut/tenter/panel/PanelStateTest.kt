@@ -5,7 +5,7 @@ package io.archinaut.tenter.panel
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import io.archinaut.tenter.view.contentView
+import io.archinaut.tenter.widget.contentWidget
 
 private enum class TestPanelId : PanelId { A, B }
 
@@ -17,9 +17,9 @@ internal class PanelStateTest {
     ): Panel<TestPanelId, Unit> = Panel(
         id = TestPanelId.A,
         title = "T",
-        normal = { Panel.Presentation.fixedWidth(contentView { }, 20) },
-        minimized = if (minimized) ({ Panel.Presentation.fixedWidth(contentView { }, Panel.MINIMIZED_WIDTH) }) else null,
-        maximized = if (maximized) ({ Panel.Presentation.allocated(contentView { }) }) else null,
+        normal = { Panel.Presentation.fixedWidth(contentWidget { }, 20) },
+        minimized = if (minimized) ({ Panel.Presentation.fixedWidth(contentWidget { }, Panel.MINIMIZED_WIDTH) }) else null,
+        maximized = if (maximized) ({ Panel.Presentation.allocated(contentWidget { }) }) else null,
     )
 
     @Test
@@ -54,7 +54,7 @@ internal class PanelStateTest {
         val b = Panel<TestPanelId, Unit>(
             id = TestPanelId.B,
             title = "B",
-            normal = { Panel.Presentation.fixedWidth(contentView { }, 20) },
+            normal = { Panel.Presentation.fixedWidth(contentWidget { }, 20) },
         )
         val set = PanelSet.uniform(listOf(a, b))
         set.cycleFocusedState(-1)
@@ -68,7 +68,7 @@ internal class PanelStateTest {
     fun `fixed presentation rejects nonpositive widths`() {
         for (width in listOf(-1, 0)) {
             org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
-                Panel.Presentation.fixedWidth(contentView { }, width)
+                Panel.Presentation.fixedWidth(contentWidget { }, width)
             }
         }
     }

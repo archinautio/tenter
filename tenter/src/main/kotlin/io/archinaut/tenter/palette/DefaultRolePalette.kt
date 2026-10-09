@@ -6,8 +6,8 @@ package io.archinaut.tenter.palette
 /**
  * A conservative ANSI-16 palette for consumers that need a working palette immediately.
  * ANSI-16 colors are terminal-defined, so the terminal's configured palette determines the
- * exact appearance. Construct a new palette/renderer to change roles; palettes are stable for a
- * renderer's lifetime.
+ * exact appearance. Construct a new palette and terminal to change roles; palettes are stable for a
+ * terminal's lifetime.
  */
 public object DefaultRolePalette : RolePalette {
 

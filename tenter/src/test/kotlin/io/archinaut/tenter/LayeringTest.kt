@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test
 
 /**
  * Enforces the internal layering `docs/architecture.md` describes for this module —
- * `text/input -> palette -> screen -> view -> widget/panel`, with terminal consuming input,
- * palette, and screen for scoped
- * lifecycle, never the reverse — as an allowed-dependency matrix
+ * `text/input -> palette -> screen -> widget -> animation/panel/terminal`, with terminal
+ * consuming input, palette, screen, and widget for frame drawing and scoped lifecycle, never
+ * the reverse — as an allowed-dependency matrix
  * between `tenter`'s direct child packages. [ArchitectureTest] enforces the module's *external*
  * seam (no `battletech.*` import, nothing outside an approved third-party allowlist); this
  * enforces the seams *between* its own packages, which nothing previously checked — a
@@ -28,14 +28,13 @@ class LayeringTest {
         "input" to emptySet(),
         "palette" to emptySet(),
         "screen" to setOf("palette", "text"),
-        "animation" to setOf("screen", "text", "view"),
-        "terminal" to setOf("input", "palette", "screen"),
-        "view" to setOf("input", "palette", "screen", "text"),
-        "widget" to setOf("palette", "screen", "text", "view"),
-        "panel" to setOf("palette", "screen", "view"),
+        "animation" to setOf("screen", "text", "widget"),
+        "terminal" to setOf("input", "palette", "screen", "widget"),
+        "widget" to setOf("input", "palette", "screen", "text"),
+        "panel" to setOf("palette", "screen", "widget"),
     )
 
-    /** The direct child of `tenter` [packageName] belongs to, e.g. `io.archinaut.tenter.view.scrolling` -> `"view"`. */
+    /** The direct child of `tenter` [packageName] belongs to, e.g. `io.archinaut.tenter.widget.fragment` -> `"widget"`. */
     private fun topPackage(packageName: String): String =
         packageName.removePrefix("io.archinaut.tenter.").substringBefore('.')
 

@@ -15,10 +15,10 @@ import io.archinaut.tenter.text.textClusters
  * wraps, truncates, and paints as one unit.
  *
  * It exists so a caller wanting two colors on one line stops hand-computing columns. The old
- * shape — a `writeString(column, …)` per fragment with the caller summing widths — collapses
+ * shape — a `setString(column, …)` per fragment with the caller summing widths — collapses
  * the moment the line also has to wrap or ellipsize, because the caller then owns break
  * decisions the wrap engine already knows how to make. Build one with [styled], hand it to
- * `io.archinaut.tenter.view.TextCursor.writeLine`, never compute a column.
+ * `io.archinaut.tenter.widget.TextCursor.writeLine`, never compute a column.
  *
  * Spans are canonical: empty spans are dropped and adjacent same-styled spans merged, so two
  * instances that paint identically are [equals] — which is what makes them usable in
@@ -29,7 +29,7 @@ import io.archinaut.tenter.text.textClusters
  */
 public class StyledText private constructor(public val spans: List<Span>) {
 
-    public data class Span(val text: String, val style: Cell.Style)
+    public data class Span(val text: String, val style: Style)
 
     /** The unstyled projection — what a plain-text consumer (a console log, an assertion) prints. */
     public val plain: String by lazy(LazyThreadSafetyMode.NONE) { spans.joinToString("") { it.text } }
@@ -80,13 +80,13 @@ public class StyledText private constructor(public val spans: List<Span>) {
     }
 
     /** The style covering code-unit [index]; clamps to the last span so an ellipsis at the end works. */
-    private fun styleAt(index: Int): Cell.Style {
+    private fun styleAt(index: Int): Style {
         var offset = 0
         for (span in spans) {
             offset += span.text.length
             if (index < offset) return span.style
         }
-        return spans.lastOrNull()?.style ?: Cell.Style.DEFAULT
+        return spans.lastOrNull()?.style ?: Style.DEFAULT
     }
 
     override fun equals(other: Any?): Boolean = other is StyledText && spans == other.spans
@@ -96,7 +96,7 @@ public class StyledText private constructor(public val spans: List<Span>) {
     public class Builder internal constructor() {
         private val spans = mutableListOf<Span>()
 
-        public fun append(text: String, style: Cell.Style = Cell.Style.DEFAULT) {
+        public fun append(text: String, style: Style = Style.DEFAULT) {
             if (text.isEmpty()) return
             val last = spans.lastOrNull()
             if (last != null && last.style == style) {
@@ -107,7 +107,7 @@ public class StyledText private constructor(public val spans: List<Span>) {
         }
 
         /** The overwhelmingly common case: a foreground color and nothing else. */
-        public fun append(text: String, fg: ColorRole): Unit = append(text, Cell.Style(fg = fg))
+        public fun append(text: String, fg: ColorRole): Unit = append(text, Style(fg = fg))
 
         public fun append(other: StyledText): Unit = other.spans.forEach { append(it.text, it.style) }
 
@@ -117,10 +117,10 @@ public class StyledText private constructor(public val spans: List<Span>) {
     public companion object {
         public val EMPTY: StyledText = StyledText(emptyList())
 
-        public fun of(text: String, style: Cell.Style = Cell.Style.DEFAULT): StyledText =
+        public fun of(text: String, style: Style = Style.DEFAULT): StyledText =
             if (text.isEmpty()) EMPTY else styled { append(text, style) }
 
-        public fun of(text: String, fg: ColorRole): StyledText = of(text, Cell.Style(fg = fg))
+        public fun of(text: String, fg: ColorRole): StyledText = of(text, Style(fg = fg))
 
         private fun normalizeSpans(spans: List<Span>): List<Span> {
             if (spans.isEmpty()) return emptyList()
@@ -139,7 +139,7 @@ public class StyledText private constructor(public val spans: List<Span>) {
             return normalized
         }
 
-        private fun styleAt(spans: List<Span>, index: Int): Cell.Style {
+        private fun styleAt(spans: List<Span>, index: Int): Style {
             var offset = 0
             for (span in spans) {
                 offset += span.text.length

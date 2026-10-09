@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import io.archinaut.tenter.view.contentView
+import io.archinaut.tenter.widget.contentWidget
 
 private enum class LayoutPanelId : PanelId { MAIN, A, B, C, FIXED }
 
@@ -20,15 +20,15 @@ internal class PanelLayoutTest {
     ): Panel<LayoutPanelId, Unit> = Panel(
         id = id,
         title = id.name,
-        normal = { Panel.Presentation.fixedWidth(contentView { }, width) },
-        minimized = { Panel.Presentation.fixedWidth(contentView { }, minimizedWidth) },
-        maximized = { Panel.Presentation.allocated(contentView { }) },
+        normal = { Panel.Presentation.fixedWidth(contentWidget { }, width) },
+        minimized = { Panel.Presentation.fixedWidth(contentWidget { }, minimizedWidth) },
+        maximized = { Panel.Presentation.allocated(contentWidget { }) },
     )
 
     private fun main() = Panel<LayoutPanelId, Unit>(
         id = LayoutPanelId.MAIN,
         title = "MAIN",
-        normal = { Panel.Presentation.allocated(contentView { }) },
+        normal = { Panel.Presentation.allocated(contentWidget { }) },
     )
 
     private fun widthOf(widths: Map<LayoutPanelId, Int>): (Panel<LayoutPanelId, Unit>) -> Int =
@@ -64,7 +64,7 @@ internal class PanelLayoutTest {
         set.cycleFocusedState(1)
 
         val layout = set.render(
-            io.archinaut.tenter.screen.Canvas.of(io.archinaut.tenter.screen.ScreenBuffer(100, 30)),
+            io.archinaut.tenter.screen.Canvas.of(io.archinaut.tenter.screen.Buffer(100, 30)),
             Unit,
             setOf(LayoutPanelId.A, LayoutPanelId.B),
             reservedTop = 4,

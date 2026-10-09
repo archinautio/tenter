@@ -8,7 +8,7 @@ import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.input.MouseTracking
 import com.github.ajalt.mordant.input.enterRawMode
 import com.github.ajalt.mordant.rendering.Size
-import com.github.ajalt.mordant.terminal.Terminal
+import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -74,7 +74,7 @@ public fun terminalEvents(raw: Flow<InputEvent>, isQuit: (KeyboardEvent) -> Bool
  * as this implementation does; callers own the dispatcher and confinement policy and should not
  * infer that a merged flow runs on one physical OS thread.
  */
-public fun Terminal.inputEvents(mouseTracking: MouseTracking, isQuit: (KeyboardEvent) -> Boolean): Flow<TerminalEvent> =
+public fun MordantTerminal.inputEvents(mouseTracking: MouseTracking, isQuit: (KeyboardEvent) -> Boolean): Flow<TerminalEvent> =
     terminalEvents(rawModePollingFlow(mouseTracking), isQuit).flowOn(Dispatchers.IO)
 
 /**
@@ -82,7 +82,7 @@ public fun Terminal.inputEvents(mouseTracking: MouseTracking, isQuit: (KeyboardE
  * indefinitely so that coroutine cancellation is observed promptly even while idle. See
  * [inputEvents] for why this matters.
  */
-private fun Terminal.rawModePollingFlow(
+private fun MordantTerminal.rawModePollingFlow(
     mouseTracking: MouseTracking,
     pollTimeout: Duration = 100.milliseconds,
 ): Flow<InputEvent> = flow {
@@ -95,7 +95,7 @@ private fun Terminal.rawModePollingFlow(
 }
 
 /**
- * Produces a cold [TerminalEvent.Resized] flow by polling [Terminal.updateSize] at [period]
+ * Produces a cold [TerminalEvent.Resized] flow by polling [MordantTerminal.updateSize] at [period]
  * intervals. [period] must be finite and strictly positive.
  *
  * The first emission fires once at startup (resulting in a harmless extra render); subsequent
@@ -103,7 +103,7 @@ private fun Terminal.rawModePollingFlow(
  *
  * ### Mordant 3.0.2: `Size` has no `equals`
  * [com.github.ajalt.mordant.rendering.Size] is a plain class, not a data class, so it inherits
- * identity equality — and [Terminal.updateSize] hands back a **fresh instance every call**.
+ * identity equality — and [MordantTerminal.updateSize] hands back a **fresh instance every call**.
  * Deduplicating on `Size` itself therefore never suppresses anything: every poll would emit, and
  * a naive collector would re-render several times a second forever. Worse than wasteful, that
  * repaint is indistinguishable from a real resize, so anything keyed off "the terminal resized"
@@ -114,7 +114,7 @@ private fun Terminal.rawModePollingFlow(
  * reads can be co-located with rendering without cross-thread synchronisation. The caller owns
  * that context; a merged flow does not promise one physical OS thread.
  */
-public fun Terminal.resizeEvents(period: Duration = 200.milliseconds): Flow<TerminalEvent> {
+public fun MordantTerminal.resizeEvents(period: Duration = 200.milliseconds): Flow<TerminalEvent> {
     require(period.isFinite() && period > Duration.ZERO) {
         "resize polling period must be finite and positive: $period"
     }

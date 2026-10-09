@@ -2,8 +2,9 @@
 
 ## Keep drawing and state updates together
 
-Create a `Terminal`, enter `terminal.withScreen(DefaultRolePalette)`, and render an
-initial frame. Collect input and resize events in one application execution context.
+Create a Mordant `Terminal` as the backend and enter
+`backend.withScreen(DefaultRolePalette) { terminal -> ... }`. The block receives Tenter's
+`Terminal`; call `terminal.draw { frame -> ... }` for the initial frame. Collect input and resize events in one application execution context.
 Update application state and repaint there as well.
 
 `withScreen` restores the screen and cursor when its block returns or throws.
@@ -16,8 +17,8 @@ bypasses normal cleanup.
 
 The compiled [interactive example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt)
 merges keyboard/mouse input with resize events. This excerpt runs inside
-`runInteractive`, after creating `app`, observing the terminal `size`, and drawing
-the initial frame. `renderer` comes from `withScreen`.
+`runInteractive`, after creating `app` and drawing the initial frame. `backend` is the
+Mordant terminal, and `terminal` is the Tenter `Terminal` that `withScreen` provides.
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt:input-loop"
@@ -25,7 +26,8 @@ the initial frame. `renderer` comes from `withScreen`.
 
 `TerminalEvent.Input` carries a Mordant input event. `Resized` supplies the new size.
 The quit predicate turns `q` into `TerminalEvent.Quit`, ending collection and allowing
-the terminal scope to close. Rebuild the frame using the new dimensions after a resize.
+the terminal scope to close. `terminal.draw` follows the backend's current size, so
+drawing again after a resize is enough; `frame.area` already has the new dimensions.
 
 ## Map keys to application actions
 
@@ -39,7 +41,7 @@ and `ExampleAction` are the example application's own types.
 
 Resolve a keyboard event with `map.resolve(listOf(context), event)` and handle the
 returned action in your application. A null result means no binding matched.
-`HelpView(listOf(map.hints(context)))` displays hints from the same definition.
+`HelpWidget(listOf(map.hints(context)))` displays hints from the same definition.
 
 Keys match the Mordant event exactly, including modifiers. Use unique exact bindings
 and nonblank hint ids. Group references must exist, sectionless credits must be

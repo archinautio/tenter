@@ -19,7 +19,7 @@ internal class StyledTextTest {
             append("bar", ChromeRole.DANGER)
         }
 
-        assertEquals(listOf(StyledText.Span("foobar", Cell.Style(ChromeRole.DANGER))), text.spans)
+        assertEquals(listOf(StyledText.Span("foobar", Style(ChromeRole.DANGER))), text.spans)
     }
 
     @Test
@@ -31,7 +31,7 @@ internal class StyledTextTest {
         }
 
         assertEquals(
-            listOf(StyledText.Span("foo", Cell.Style(ChromeRole.DANGER)), StyledText.Span("bar", Cell.Style(ChromeRole.SUCCESS))),
+            listOf(StyledText.Span("foo", Style(ChromeRole.DANGER)), StyledText.Span("bar", Style(ChromeRole.SUCCESS))),
             text.spans,
         )
     }
@@ -76,18 +76,18 @@ internal class StyledTextTest {
     fun `a span straddling a wrap point is sliced and each row keeps its style`() {
         val text = styled {
             append("Grasshopper", ChromeRole.ACCENT)
-            append(" hits ", Cell.Style.DEFAULT)
+            append(" hits ", Style.DEFAULT)
             append("Atlas", ChromeRole.DANGER)
         }
 
         val rows = text.wrap(firstWidth = 11, continuationWidth = 10)
 
         assertEquals(listOf("Grasshopper", "hits Atlas"), rows.map { it.plain })
-        assertEquals(listOf(StyledText.Span("Grasshopper", Cell.Style(ChromeRole.ACCENT))), rows[0].spans)
+        assertEquals(listOf(StyledText.Span("Grasshopper", Style(ChromeRole.ACCENT))), rows[0].spans)
         assertEquals(
             listOf(
-                StyledText.Span("hits ", Cell.Style.DEFAULT),
-                StyledText.Span("Atlas", Cell.Style(ChromeRole.DANGER)),
+                StyledText.Span("hits ", Style.DEFAULT),
+                StyledText.Span("Atlas", Style(ChromeRole.DANGER)),
             ),
             rows[1].spans,
         )
@@ -101,7 +101,7 @@ internal class StyledTextTest {
 
         assertEquals(listOf("supercal", "ifragili", "stic"), rows.map { it.plain })
         rows.forEach { row ->
-            assertEquals(listOf(Cell.Style(ChromeRole.DANGER)), row.spans.map { it.style }.distinct())
+            assertEquals(listOf(Style(ChromeRole.DANGER)), row.spans.map { it.style }.distinct())
         }
     }
 
@@ -117,9 +117,9 @@ internal class StyledTextTest {
 
         assertEquals(
             listOf(
-                StyledText.Span("foo", Cell.Style(ChromeRole.DANGER)),
-                StyledText.Span(" ", Cell.Style(ChromeRole.SUCCESS)),
-                StyledText.Span("bar", Cell.Style(ChromeRole.ACCENT)),
+                StyledText.Span("foo", Style(ChromeRole.DANGER)),
+                StyledText.Span(" ", Style(ChromeRole.SUCCESS)),
+                StyledText.Span("bar", Style(ChromeRole.ACCENT)),
             ),
             row.spans,
         )
@@ -140,7 +140,7 @@ internal class StyledTextTest {
         val truncated = text.ellipsize(5)
 
         assertEquals("hell…", truncated.plain)
-        assertEquals(listOf(StyledText.Span("hell…", Cell.Style(ChromeRole.DANGER))), truncated.spans)
+        assertEquals(listOf(StyledText.Span("hell…", Style(ChromeRole.DANGER))), truncated.spans)
     }
 
     @Test
@@ -154,7 +154,7 @@ internal class StyledTextTest {
 
         assertEquals("Atlas …", truncated.plain)
         assertEquals(
-            listOf(StyledText.Span("Atlas", Cell.Style(ChromeRole.DANGER)), StyledText.Span(" …", Cell.Style.DEFAULT)),
+            listOf(StyledText.Span("Atlas", Style(ChromeRole.DANGER)), StyledText.Span(" …", Style.DEFAULT)),
             truncated.spans,
         )
     }
@@ -185,9 +185,9 @@ internal class StyledTextTest {
 
         assertEquals(
             listOf(
-                StyledText.Span("Grasshopper", Cell.Style(ChromeRole.ACCENT)),
-                StyledText.Span(", ", Cell.Style.DEFAULT),
-                StyledText.Span("Atlas", Cell.Style(ChromeRole.DANGER)),
+                StyledText.Span("Grasshopper", Style(ChromeRole.ACCENT)),
+                StyledText.Span(", ", Style.DEFAULT),
+                StyledText.Span("Atlas", Style(ChromeRole.DANGER)),
             ),
             joined.spans,
         )
@@ -207,7 +207,7 @@ internal class StyledTextTest {
 
         assertEquals("foobar", sum.plain)
         assertEquals(
-            listOf(StyledText.Span("foo", Cell.Style(ChromeRole.ACCENT)), StyledText.Span("bar", Cell.Style(ChromeRole.DANGER))),
+            listOf(StyledText.Span("foo", Style(ChromeRole.ACCENT)), StyledText.Span("bar", Style(ChromeRole.DANGER))),
             sum.spans,
         )
     }
@@ -223,8 +223,8 @@ internal class StyledTextTest {
         assertEquals("e\u0301x", text.plain)
         assertEquals(
             listOf(
-                StyledText.Span("e\u0301", Cell.Style(ChromeRole.DANGER)),
-                StyledText.Span("x", Cell.Style(ChromeRole.ACCENT)),
+                StyledText.Span("e\u0301", Style(ChromeRole.DANGER)),
+                StyledText.Span("x", Style(ChromeRole.ACCENT)),
             ),
             text.spans,
         )
@@ -237,6 +237,6 @@ internal class StyledTextTest {
             append("‍💻", ChromeRole.SUCCESS)
         }
 
-        assertEquals(listOf(StyledText.Span("👩‍💻", Cell.Style(ChromeRole.DANGER))), text.spans)
+        assertEquals(listOf(StyledText.Span("👩‍💻", Style(ChromeRole.DANGER))), text.spans)
     }
 }

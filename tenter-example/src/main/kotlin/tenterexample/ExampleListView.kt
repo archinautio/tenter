@@ -3,30 +3,30 @@
 
 package tenterexample
 
-import io.archinaut.tenter.screen.Cell
+import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.palette.ChromeRole
-import io.archinaut.tenter.view.Columns
-import io.archinaut.tenter.view.ContentLayout
-import io.archinaut.tenter.view.ContentView
-import io.archinaut.tenter.view.Stack
-import io.archinaut.tenter.view.contentView
-import io.archinaut.tenter.widget.CheckState
-import io.archinaut.tenter.widget.CheckboxGlyphs
-import io.archinaut.tenter.widget.SelectableRow
+import io.archinaut.tenter.widget.Columns
+import io.archinaut.tenter.widget.ContentLayout
+import io.archinaut.tenter.widget.ContentWidget
+import io.archinaut.tenter.widget.Stack
+import io.archinaut.tenter.widget.contentWidget
+import io.archinaut.tenter.widget.fragment.CheckState
+import io.archinaut.tenter.widget.fragment.CheckboxGlyphs
+import io.archinaut.tenter.widget.fragment.SelectableRow
 
 /** The generated catalog content, deliberately composed from prepared stack and column views. */
 internal class ExampleListView(
     private val rowCount: Int,
     private val state: ExampleState,
-) : ContentView {
+) : ContentWidget {
     override fun layout(availableWidth: Int): ContentLayout {
-        val markerColumn = contentView { cursor ->
+        val markerColumn = contentWidget { cursor ->
             repeat(rowCount) { index ->
-                cursor.writeLine(if (index == state.selectedRow) "▶" else " ", Cell.Style(ChromeRole.ACCENT))
+                cursor.writeLine(if (index == state.selectedRow) "▶" else " ", Style(ChromeRole.ACCENT))
             }
         }
         val rowColumnWidth = (availableWidth - COLUMN_GUTTER - MARKER_WIDTH).coerceAtLeast(0)
-        val rowColumn = contentView { cursor ->
+        val rowColumn = contentWidget { cursor ->
             repeat(rowCount) { index ->
                 val label = when (index % 3) {
                     0 -> "row $index — ordinary text"
@@ -53,7 +53,7 @@ internal class ExampleListView(
             gutter = COLUMN_GUTTER,
         )
         // --8<-- [end:columns]
-        val footer = contentView { cursor ->
+        val footer = contentWidget { cursor ->
             cursor.newLine()
             cursor.writeLine("600 rows • CJK 中 • decomposed e\u0301 • click or use the keyboard")
         }

@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.screen.ScreenBuffer
-import io.archinaut.tenter.view.ContentView
-import io.archinaut.tenter.view.ScrollOffset
-import io.archinaut.tenter.view.contentView
-import io.archinaut.tenter.view.fixedContent
-import io.archinaut.tenter.view.View
+import io.archinaut.tenter.screen.Buffer
+import io.archinaut.tenter.widget.ContentWidget
+import io.archinaut.tenter.widget.ScrollOffset
+import io.archinaut.tenter.widget.contentWidget
+import io.archinaut.tenter.widget.fixedContent
+import io.archinaut.tenter.widget.Widget
 
 private enum class SetPanelId : PanelId { MAIN, A, B }
 
@@ -25,7 +25,7 @@ internal class PanelSetTest {
         val ids = setOf(SetPanelId.A, SetPanelId.B)
         val set = PanelSet.uniform(ids.map { id ->
             Panel<SetPanelId, Unit>(id, id.name, normal = {
-                Panel.Presentation.allocated(contentView { cursor ->
+                Panel.Presentation.allocated(contentWidget { cursor ->
                     repeat(100) { cursor.writeLine("row$it") }
                     cursor.markRevealAt(40)
                 })
@@ -94,14 +94,14 @@ internal class PanelSetTest {
     fun `failed later paint retains all offsets and queued scrolling and recenter until retry`() {
         var fail = false
         val a = Panel<SetPanelId, Unit>(SetPanelId.A, "A", normal = {
-            Panel.Presentation.allocated(contentView { cursor ->
+            Panel.Presentation.allocated(contentWidget { cursor ->
                 repeat(100) { cursor.writeLine("row$it") }
                 cursor.markRevealAt(40)
             })
         })
         val b = Panel<SetPanelId, Unit>(SetPanelId.B, "B", normal = {
-            Panel.Presentation.allocated(fixedContent(20, 100, object : View {
-                public override fun draw(canvas: Canvas) { check(!fail) }
+            Panel.Presentation.allocated(fixedContent(20, 100, object : Widget {
+                public override fun render(canvas: Canvas) { check(!fail) }
             }))
         })
         val set = PanelSet.uniform(listOf(a, b))
@@ -163,10 +163,10 @@ internal class PanelSetTest {
             var fail = false
             val panels = listOf(SetPanelId.A, SetPanelId.B).map { id ->
                 Panel<SetPanelId, Unit>(id, id.name, normal = {
-                    Panel.Presentation.allocated(fixedContent(30, 100, object : View {
-                        override fun draw(canvas: Canvas) {
+                    Panel.Presentation.allocated(fixedContent(30, 100, object : Widget {
+                        override fun render(canvas: Canvas) {
                             if (fail && id == failedId) error("paint failed")
-                            canvas.writeString(0, 0, "content")
+                            canvas.setString(0, 0, "content")
                         }
                     }))
                 })
@@ -191,8 +191,8 @@ internal class PanelSetTest {
     fun `a failed initial paint publishes no geometry and can be retried`() {
         var fail = true
         val panel = Panel<SetPanelId, Unit>(SetPanelId.A, "A", normal = {
-            Panel.Presentation.allocated(fixedContent(10, 10, object : View {
-                override fun draw(canvas: Canvas) { check(!fail) }
+            Panel.Presentation.allocated(fixedContent(10, 10, object : Widget {
+                override fun render(canvas: Canvas) { check(!fail) }
             }))
         })
         val set = PanelSet.uniform(listOf(panel))
@@ -250,7 +250,7 @@ internal class PanelSetTest {
         PanelSet.uniform(panels)
     }
 
-    private fun stubView(lines: Int = 40): ContentView = contentView { cursor ->
+    private fun stubView(lines: Int = 40): ContentWidget = contentWidget { cursor ->
         repeat(lines) { row -> cursor.writeLine("row$row") }
     }
 
@@ -277,7 +277,7 @@ internal class PanelSetTest {
         width: Int = 80,
         height: Int = 24,
     ): PanelLayout<SetPanelId> = set.render(
-        Canvas.of(ScreenBuffer(width, height)),
+        Canvas.of(Buffer(width, height)),
         Unit,
         visible,
         reservedTop = 0,
@@ -493,7 +493,7 @@ internal class PanelSetTest {
     @Test
     fun `hit testing identifies border and main panel without content point`() {
         val set = PanelSet.mainAndSides(mainPanel(), listOf(sidePanel(SetPanelId.A)))
-        val layout = set.render(Canvas.of(ScreenBuffer(60, 12)), Unit, setOf(SetPanelId.A), reservedTop = 2)
+        val layout = set.render(Canvas.of(Buffer(60, 12)), Unit, setOf(SetPanelId.A), reservedTop = 2)
         val main = checkNotNull(layout.main)
 
         assertEquals(SetPanelId.MAIN, set.hitTest(main.outer.x, main.outer.y)?.id)

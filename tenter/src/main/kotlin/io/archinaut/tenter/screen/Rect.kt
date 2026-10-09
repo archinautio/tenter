@@ -22,12 +22,12 @@ public data class Rect(
             x.toLong() < this.x.toLong() + width &&
             y.toLong() < this.y.toLong() + height
 
-    /** Removes [insets], clamping each edge so the result remains a valid rectangle. */
-    public fun inset(insets: Insets): Rect {
-        val left = insets.left.coerceAtMost(width)
-        val top = insets.top.coerceAtMost(height)
-        val right = insets.right.coerceAtMost(width - left)
-        val bottom = insets.bottom.coerceAtMost(height - top)
+    /** Removes [padding], clamping each edge so the result remains a valid rectangle. */
+    public fun inner(padding: Padding): Rect {
+        val left = padding.left.coerceAtMost(width)
+        val top = padding.top.coerceAtMost(height)
+        val right = padding.right.coerceAtMost(width - left)
+        val bottom = padding.bottom.coerceAtMost(height - top)
         return Rect(
             x = x + left,
             y = y + top,

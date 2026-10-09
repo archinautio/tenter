@@ -3,11 +3,11 @@
 
 package io.archinaut.tenter.animation
 
-import io.archinaut.tenter.view.View
+import io.archinaut.tenter.widget.Widget
 import kotlin.time.Duration
 
 /**
- * A finite sequence of equally timed, deterministic terminal views.
+ * A finite sequence of equally timed, deterministic terminal widgets.
  *
  * Implementations expose stable metadata: [frameCount] is positive and [frameDuration] is finite
  * and positive after construction. [frame] is non-advancing and deterministic for an index in
@@ -21,5 +21,5 @@ public interface Animation {
     public val frameDuration: Duration
 
     /** Returns the content for [index], where [index] is in `0 until [frameCount]`. */
-    public fun frame(index: Int): View
+    public fun frame(index: Int): Widget
 }

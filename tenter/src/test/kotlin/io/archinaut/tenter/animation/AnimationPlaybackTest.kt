@@ -16,13 +16,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
-import io.archinaut.tenter.view.View
-import io.archinaut.tenter.view.render
+import io.archinaut.tenter.widget.Widget
+import io.archinaut.tenter.widget.render
 
 internal class AnimationPlaybackTest {
 
-    private class LetterView(private val letter: Char) : View {
-        public override fun draw(canvas: Canvas) {
+    private class LetterWidget(private val letter: Char) : Widget {
+        public override fun render(canvas: Canvas) {
             canvas.set(0, 0, Cell(letter.toString()))
         }
     }
@@ -35,15 +35,15 @@ internal class AnimationPlaybackTest {
     ) : Animation {
         public override val size: AnimationSize = AnimationSize(width = 1, height = 1)
 
-        public override fun frame(index: Int): View {
+        public override fun frame(index: Int): Widget {
             calls += index
-            return LetterView((firstLetter.code + index % 26).toChar())
+            return LetterWidget((firstLetter.code + index % 26).toChar())
         }
     }
 
-    private class NumericView(private val value: Int) : View {
-        public override fun draw(canvas: Canvas) {
-            canvas.writeString(0, 0, value.toString())
+    private class NumericWidget(private val value: Int) : Widget {
+        public override fun render(canvas: Canvas) {
+            canvas.setString(0, 0, value.toString())
         }
     }
 
@@ -54,14 +54,14 @@ internal class AnimationPlaybackTest {
     ) : Animation {
         public override val size: AnimationSize = AnimationSize(width = 12, height = 1)
 
-        public override fun frame(index: Int): View {
+        public override fun frame(index: Int): Widget {
             calls += index
-            return NumericView(index)
+            return NumericWidget(index)
         }
     }
 
-    private fun AnimationPlayback.Frame<String>.letter(): Char =
-        render(content, size.width, size.height).get(0, 0).char.single()
+    private fun AnimationPlayback.VisibleFrame<String>.letter(): Char =
+        render(content, size.width, size.height).get(0, 0).symbol.single()
 
     @Test
     fun `immediate playback starts with frame zero`() {
@@ -205,7 +205,7 @@ internal class AnimationPlaybackTest {
         val rendered = render(sample.frames.single().content, animation.size.width, animation.size.height)
         assertEquals(
             (Int.MAX_VALUE - 1).toString(),
-            (0 until animation.size.width).joinToString("") { rendered.get(it, 0).char }.trim(),
+            (0 until animation.size.width).joinToString("") { rendered.get(it, 0).symbol }.trim(),
         )
     }
 
@@ -329,12 +329,12 @@ internal class AnimationPlaybackTest {
     }
 
     @Test
-    fun `ordinary views can be played without glyph grids`() {
+    fun `ordinary widgets can be played without glyph grids`() {
         val animation = object : Animation {
             override val size = AnimationSize(1, 1)
             override val frameCount = 1
             override val frameDuration = 1.milliseconds
-            override fun frame(index: Int): View = LetterView('Z')
+            override fun frame(index: Int): Widget = LetterWidget('Z')
         }
 
         val sample = AnimationPlayback(listOf(AnimationPlayback.Clip(animation, "plain"))).sample(ZERO)

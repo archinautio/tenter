@@ -1,12 +1,15 @@
 # Scrolling and panels
 
-## Scroll a single view
+## Scroll a single widget
 
-Keep a `ViewportState` for the lifetime of the scrollable area. For each frame,
-draw `Viewport(content, state)` into its destination canvas. To move down one row,
+`Viewport` is a `StatefulWidget<ViewportState>`. Keep a `ViewportState` for the lifetime
+of the scrollable area and render the viewport with it on every frame:
+`frame.renderStatefulWidget(Viewport(content), area, state)`. To move down one row,
 call `state.scrollBy(dx = 0, dy = 1)` and draw again. Negative deltas move up or left.
+`scrollingPanel(title, badge, content)` adds a block border and scrollbar thumbs around
+the same viewport and is rendered the same way.
 
-After drawing, `state.settled` describes the completed frame, including its scroll
+After rendering, `state.settled` describes the completed frame, including its scroll
 offset. It is initially null. Keep the state between frames; recreating it resets
 scrolling. A changed reveal target or either viewport dimension re-engages following;
 unchanged dimensions and targets preserve manual scrolling. Use `requestRecenter()` to center the content's current reveal target on
@@ -37,8 +40,8 @@ sets: a panel instance belongs to one set.
 
 ## Render and control panels
 
-The example creates a buffer and passes its canvas and current state into the set.
-This excerpt stores the completed layout for later inspection:
+`ExampleApp.render(frame)` runs inside `terminal.draw`. It passes the frame's canvas
+and the current state into the set, and stores the completed layout for later inspection:
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt:panel-render"
@@ -87,6 +90,7 @@ presentation for that state instead.
 ## Recover from a failed render
 
 If a panel fails to paint, the set keeps its previous completed layout and scroll
-observations, along with queued scrolling and recenter requests for retry. Discard
-the failed frame's canvas: its writes and any side effects in application callbacks
-are not rolled back. Published layout lists are immutable observations.
+observations, along with queued scrolling and recenter requests for retry. When the
+failure escapes `terminal.draw`, the terminal sends nothing and keeps the previous
+frame as its diff base. Side effects in application callbacks are not rolled back.
+Published layout lists are immutable observations.

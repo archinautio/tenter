@@ -15,10 +15,10 @@ import com.github.ajalt.mordant.rendering.AnsiLevel
  *
  * Every [ChromeRole] is required at construction. Domain-role completeness remains with the
  * application's loader, which knows the application's role set. The source map is copied, so
- * later mutation by a loader or caller cannot change a palette after a renderer has cached it.
+ * later mutation by a loader or caller cannot change a palette after a terminal has cached it.
  *
  * [AnsiLevel.NONE] is not an authoring tier and is rejected: it names a terminal that cannot show
- * color, not a set of color values. Author for the tier the colors use; [io.archinaut.tenter.screen.ScreenRenderer] drops
+ * color, not a set of color values. Author for the tier the colors use; [io.archinaut.tenter.terminal.Terminal] drops
  * every SGR tag on its own when the terminal reports NONE.
  */
 public class MapRolePalette(
@@ -33,7 +33,7 @@ public class MapRolePalette(
     init {
         require(level != AnsiLevel.NONE) {
             "Palette $name cannot be authored for AnsiLevel.NONE, which has no color values of " +
-                "its own. Author it for the tier the palette's colors use; ScreenRenderer " +
+                "its own. Author it for the tier the palette's colors use; the Terminal " +
                 "suppresses every SGR tag when the terminal itself reports NONE."
         }
         val missingChromeRoles = ChromeRole.entries.filterNot(colors.keys::contains)

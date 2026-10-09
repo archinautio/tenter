@@ -25,7 +25,7 @@ public interface RolePalette {
      * [role]'s semantic foreground. For [ChromeRole.DEFAULT] this is the default foreground — the
      * default role where [foreground] and [background] differ. Implementations may specialize other
      * backgrounds too. [FixedColorRole] is resolved by the
-     * renderer before this function is called, not by a palette implementation.
+     * terminal before this function is called, not by a palette implementation.
      */
     public fun foreground(role: ColorRole): PaletteColor
 

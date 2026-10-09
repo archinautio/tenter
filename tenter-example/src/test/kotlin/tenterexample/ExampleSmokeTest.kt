@@ -26,7 +26,7 @@ internal class ExampleSmokeTest {
     @Test
     fun `validated keymap movement and public settled hit test drive selection and toggle`() {
         val app = ExampleApp(ExampleLayoutMode.MAIN_AND_SIDES)
-        app.render(width = 80, height = 12)
+        headlessTerminal(width = 80, height = 12).draw(app::render)
 
         app.handleKey(KeyboardEvent("ArrowDown"))
         app.handleKey(KeyboardEvent(" "))
@@ -51,8 +51,8 @@ internal class ExampleSmokeTest {
         // Both apps coexist and render only because each one builds its own panel instances.
         val mainAndSides = ExampleApp(ExampleLayoutMode.MAIN_AND_SIDES)
         val uniform = ExampleApp(ExampleLayoutMode.UNIFORM)
-        mainAndSides.render(width = 80, height = 12)
-        uniform.render(width = 80, height = 12)
+        headlessTerminal(width = 80, height = 12).draw(mainAndSides::render)
+        headlessTerminal(width = 80, height = 12).draw(uniform::render)
 
         assertEquals(ExamplePanelId.ROWS, mainAndSides.panels.focused)
         assertEquals(ExamplePanelId.ROWS, uniform.panels.focused)

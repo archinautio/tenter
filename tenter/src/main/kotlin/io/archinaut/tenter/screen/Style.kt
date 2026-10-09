@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Alejandro Pérez García
+// SPDX-License-Identifier: Apache-2.0
+
+package io.archinaut.tenter.screen
+
+import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.palette.ColorRole
+
+/** Foreground and background roles plus text attributes for a [Cell]. */
+public data class Style(
+    val fg: ColorRole = ChromeRole.DEFAULT,
+    val bg: ColorRole = ChromeRole.DEFAULT,
+    val strikethrough: Boolean = false,
+) {
+    public companion object {
+        /** The all-defaults style; reused everywhere an unstyled cell is needed. */
+        public val DEFAULT: Style = Style()
+    }
+}

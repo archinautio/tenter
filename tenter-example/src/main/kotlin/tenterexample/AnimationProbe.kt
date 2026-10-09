@@ -3,10 +3,10 @@
 
 package tenterexample
 
-import io.archinaut.tenter.view.View
+import io.archinaut.tenter.widget.Widget
 
 internal data class AnimationProbe(
-    val firstFrame: View,
-    val secondFrame: View,
+    val firstFrame: Widget,
+    val secondFrame: Widget,
     val completedFrameCount: Int,
 )

@@ -4,7 +4,7 @@
 
 `SelectableRow` combines a label, optional check state, and selection highlighting.
 This excerpt from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
-is inside a `contentView` loop. `cursor` is its text cursor; `index`, `label`, and
+is inside a `contentWidget` loop. `cursor` is its text cursor; `index`, `label`, and
 `state` describe the row currently being drawn.
 
 ```kotlin
@@ -12,7 +12,7 @@ is inside a `contentView` loop. `cursor` is its text cursor; `index`, `label`, a
 ```
 
 Use `Checkbox` for a standalone checkbox, `Gauge` for a bounded value display,
-and `HelpView` for [keyboard hints](input.md#map-keys-to-application-actions).
+and `HelpWidget` for [keyboard hints](input.md#map-keys-to-application-actions).
 
 ## Choose glyphs
 
@@ -26,8 +26,8 @@ length when allocating widths.
 
 ## Apply colors
 
-Start with `DefaultRolePalette` in `terminal.withScreen(DefaultRolePalette)`.
-Use `Cell.Style(ChromeRole.ACCENT)` when writing highlighted text, for example as
+Start with `DefaultRolePalette` in `backend.withScreen(DefaultRolePalette)`.
+Use `Style(ChromeRole.ACCENT)` when writing highlighted text, for example as
 the second argument to `cursor.writeLine`. The default palette supplies the toolkit's
 `ChromeRole` colors using the terminal's ANSI-16 palette.
 
@@ -40,7 +40,7 @@ A simple customization is to start with
 `ChromeRole.entries.associateWith { DefaultRolePalette.foreground(it) }`, replace
 an entry such as `ChromeRole.ACCENT`, and supply that map with `AnsiLevel.ANSI16`
 and `DefaultRolePalette.defaultBackground`. Pass the new palette to `withScreen`.
-Keep the palette stable for that renderer's lifetime. `AnsiLevel.NONE` is a terminal
+Keep the palette stable for that terminal's lifetime. `AnsiLevel.NONE` is a terminal
 capability, not a palette authoring tier; do not use it to construct a map palette.
 
 If the terminal reports no color support, Tenter suppresses color escapes while

@@ -3,9 +3,8 @@
 
 package io.archinaut.tenter.terminal
 
-import com.github.ajalt.mordant.terminal.Terminal
+import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 import io.archinaut.tenter.palette.RolePalette
-import io.archinaut.tenter.screen.ScreenRenderer
 
 // Mordant exposes cursor control but not the alternate screen buffer. These are raw escapes,
 // gated by the same interactive check as Mordant's cursor implementation.
@@ -15,8 +14,8 @@ private const val EXIT_ALT_SCREEN: String = "\u001b[?1049l"
 /**
  * Runs [block] inside one alternate-screen and cursor scope.
  *
- * The [palette] is selected by the caller and is used only to construct the renderer. This
- * operation does not collect input, run an event loop, or make the mutable renderer safe to use
+ * The [palette] is selected by the caller and is used only to construct the [Terminal] handed to [block]. This
+ * operation does not collect input, run an event loop, or make the mutable terminal safe to use
  * from multiple threads. A caller may put a synchronous `runBlocking` application inside [block].
  * Input flows acquire and release raw mode separately when they are collected.
  *
@@ -25,17 +24,17 @@ private const val EXIT_ALT_SCREEN: String = "\u001b[?1049l"
  * fails as well, the original failure is rethrown and the cleanup failure is suppressed on it.
  * Noninteractive terminals do not receive alternate-screen or cursor escape sequences.
  */
-public fun <T> Terminal.withScreen(
+public fun <T> MordantTerminal.withScreen(
     palette: RolePalette,
-    block: (ScreenRenderer) -> T,
+    block: (Terminal) -> T,
 ): T {
     val lifecycle = ScreenLifecycle(this)
     var failure: Throwable? = null
     try {
         lifecycle.enter()
-        val renderer = ScreenRenderer(this, palette)
-        renderer.clear()
-        return block(renderer)
+        val terminal = Terminal(this, palette)
+        terminal.clear()
+        return block(terminal)
     } catch (thrown: Throwable) {
         failure = thrown
         throw thrown
@@ -53,7 +52,7 @@ public fun <T> Terminal.withScreen(
 }
 
 private class ScreenLifecycle(
-    private val terminal: Terminal,
+    private val terminal: MordantTerminal,
 ) {
     private var cursorHidden: Boolean = false
     private var alternateScreenEntered: Boolean = false

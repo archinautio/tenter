@@ -12,12 +12,11 @@ import io.archinaut.tenter.panel.Panel
 import io.archinaut.tenter.panel.PanelLayout
 import io.archinaut.tenter.panel.PanelSet
 import io.archinaut.tenter.panel.PanelState
-import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.screen.ScreenBuffer
-import io.archinaut.tenter.view.ContentView
-import io.archinaut.tenter.view.HelpView
-import io.archinaut.tenter.view.Stack
-import io.archinaut.tenter.view.contentView
+import io.archinaut.tenter.terminal.Frame
+import io.archinaut.tenter.widget.ContentWidget
+import io.archinaut.tenter.widget.HelpWidget
+import io.archinaut.tenter.widget.Stack
+import io.archinaut.tenter.widget.contentWidget
 
 internal enum class ExampleLayoutMode {
     MAIN_AND_SIDES,
@@ -36,17 +35,15 @@ internal class ExampleApp(
     internal var lastLayout: PanelLayout<ExamplePanelId>? = null
         private set
 
-    internal fun render(width: Int, height: Int): ScreenBuffer {
-        val buffer = ScreenBuffer(width.coerceAtLeast(1), height.coerceAtLeast(1))
+    internal fun render(frame: Frame) {
         // --8<-- [start:panel-render]
         lastLayout = panels.render(
-            canvas = Canvas.of(buffer),
+            canvas = frame.canvas(),
             inputs = state,
             visible = VISIBLE,
             reservedTop = 0,
         )
         // --8<-- [end:panel-render]
-        return buffer
     }
 
     internal fun handle(event: InputEvent) {
@@ -134,10 +131,10 @@ internal class ExampleApp(
         }
     }
 
-    private fun helpContent(input: ExampleState): ContentView = Stack(
+    private fun helpContent(input: ExampleState): ContentWidget = Stack(
         listOf(
-            HelpView(listOf(ExampleKeyMap.map.hints(ExampleContext.LIST))),
-            contentView { cursor ->
+            HelpWidget(listOf(ExampleKeyMap.map.hints(ExampleContext.LIST))),
+            contentWidget { cursor ->
                 cursor.newLine()
                 cursor.writeLine("Selected: row ${input.selectedRow}")
                 cursor.writeLine("Checked: ${input.checkedRows.size}")

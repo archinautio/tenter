@@ -5,8 +5,9 @@ package io.archinaut.tenter.animation
 
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
+import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
-import io.archinaut.tenter.view.View
+import io.archinaut.tenter.widget.Widget
 
 /**
  * A mutable grid of single-cell terminal glyphs with priority compositing and per-glyph styles.
@@ -21,8 +22,8 @@ import io.archinaut.tenter.view.View
 public class GlyphGrid(
     public val size: AnimationSize,
     private val priority: (Char) -> Int,
-    private val style: (Char) -> Cell.Style,
-) : View {
+    private val style: (Char) -> Style,
+) : Widget {
     public val width: Int = size.width
     public val height: Int = size.height
 
@@ -32,7 +33,7 @@ public class GlyphGrid(
     public fun get(x: Int, y: Int): Char = cells[y][x]
 
     /** The style supplied for the glyph at ([x], [y]). */
-    public fun styleAt(x: Int, y: Int): Cell.Style = style(get(x, y))
+    public fun styleAt(x: Int, y: Int): Style = style(get(x, y))
 
     /**
      * Writes [char] unless a strictly higher-priority glyph already occupies the cell. Equal
@@ -52,7 +53,7 @@ public class GlyphGrid(
     }
 
     /** Paints every cell, including styled spaces, into the clipped destination canvas. */
-    public override fun draw(canvas: Canvas) {
+    public override fun render(canvas: Canvas) {
         for (y in 0 until height) {
             for (x in 0 until width) {
                 canvas.set(x, y, Cell(get(x, y).toString(), styleAt(x, y)))

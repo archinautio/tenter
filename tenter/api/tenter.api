@@ -1,5 +1,5 @@
 public abstract interface class io/archinaut/tenter/animation/Animation {
-	public abstract fun frame (I)Lio/archinaut/tenter/view/View;
+	public abstract fun frame (I)Lio/archinaut/tenter/widget/Widget;
 	public abstract fun getFrameCount ()I
 	public abstract fun getFrameDuration-UwyO8pc ()J
 	public abstract fun getSize ()Lio/archinaut/tenter/animation/AnimationSize;
@@ -26,21 +26,6 @@ public final class io/archinaut/tenter/animation/AnimationPlayback$Clip {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/animation/AnimationPlayback$Frame {
-	public fun <init> (Ljava/lang/Object;Lio/archinaut/tenter/animation/AnimationSize;Lio/archinaut/tenter/view/View;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun component2 ()Lio/archinaut/tenter/animation/AnimationSize;
-	public final fun component3 ()Lio/archinaut/tenter/view/View;
-	public final fun copy (Ljava/lang/Object;Lio/archinaut/tenter/animation/AnimationSize;Lio/archinaut/tenter/view/View;)Lio/archinaut/tenter/animation/AnimationPlayback$Frame;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/animation/AnimationPlayback$Frame;Ljava/lang/Object;Lio/archinaut/tenter/animation/AnimationSize;Lio/archinaut/tenter/view/View;ILjava/lang/Object;)Lio/archinaut/tenter/animation/AnimationPlayback$Frame;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getContent ()Lio/archinaut/tenter/view/View;
-	public final fun getSize ()Lio/archinaut/tenter/animation/AnimationSize;
-	public final fun getValue ()Ljava/lang/Object;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/archinaut/tenter/animation/AnimationPlayback$Sample {
 	public synthetic fun <init> (Ljava/util/List;Lkotlin/time/Duration;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
@@ -50,6 +35,21 @@ public final class io/archinaut/tenter/animation/AnimationPlayback$Sample {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFrames ()Ljava/util/List;
 	public final fun getNextChangeIn-FghU774 ()Lkotlin/time/Duration;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/archinaut/tenter/animation/AnimationPlayback$VisibleFrame {
+	public fun <init> (Ljava/lang/Object;Lio/archinaut/tenter/animation/AnimationSize;Lio/archinaut/tenter/widget/Widget;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Lio/archinaut/tenter/animation/AnimationSize;
+	public final fun component3 ()Lio/archinaut/tenter/widget/Widget;
+	public final fun copy (Ljava/lang/Object;Lio/archinaut/tenter/animation/AnimationSize;Lio/archinaut/tenter/widget/Widget;)Lio/archinaut/tenter/animation/AnimationPlayback$VisibleFrame;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/animation/AnimationPlayback$VisibleFrame;Ljava/lang/Object;Lio/archinaut/tenter/animation/AnimationSize;Lio/archinaut/tenter/widget/Widget;ILjava/lang/Object;)Lio/archinaut/tenter/animation/AnimationPlayback$VisibleFrame;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Lio/archinaut/tenter/widget/Widget;
+	public final fun getSize ()Lio/archinaut/tenter/animation/AnimationSize;
+	public final fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -67,16 +67,16 @@ public final class io/archinaut/tenter/animation/AnimationSize {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/animation/GlyphGrid : io/archinaut/tenter/view/View {
+public final class io/archinaut/tenter/animation/GlyphGrid : io/archinaut/tenter/widget/Widget {
 	public fun <init> (Lio/archinaut/tenter/animation/AnimationSize;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
 	public final fun get (II)C
 	public final fun getHeight ()I
 	public final fun getSize ()Lio/archinaut/tenter/animation/AnimationSize;
 	public final fun getWidth ()I
 	public final fun put (IIC)V
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 	public final fun set (IIC)V
-	public final fun styleAt (II)Lio/archinaut/tenter/screen/Cell$Style;
+	public final fun styleAt (II)Lio/archinaut/tenter/screen/Style;
 }
 
 public final class io/archinaut/tenter/input/HintGroup {
@@ -353,12 +353,12 @@ public final class io/archinaut/tenter/panel/Panel$Companion {
 
 public final class io/archinaut/tenter/panel/Panel$Presentation {
 	public static final field Companion Lio/archinaut/tenter/panel/Panel$Presentation$Companion;
-	public final fun getContent ()Lio/archinaut/tenter/view/ContentView;
+	public final fun getContent ()Lio/archinaut/tenter/widget/ContentWidget;
 }
 
 public final class io/archinaut/tenter/panel/Panel$Presentation$Companion {
-	public final fun allocated (Lio/archinaut/tenter/view/ContentView;)Lio/archinaut/tenter/panel/Panel$Presentation;
-	public final fun fixedWidth (Lio/archinaut/tenter/view/ContentView;I)Lio/archinaut/tenter/panel/Panel$Presentation;
+	public final fun allocated (Lio/archinaut/tenter/widget/ContentWidget;)Lio/archinaut/tenter/panel/Panel$Presentation;
+	public final fun fixedWidth (Lio/archinaut/tenter/widget/ContentWidget;I)Lio/archinaut/tenter/panel/Panel$Presentation;
 }
 
 public final class io/archinaut/tenter/panel/PanelHit {
@@ -389,18 +389,18 @@ public final class io/archinaut/tenter/panel/PanelLayout$Companion {
 }
 
 public final class io/archinaut/tenter/panel/PanelLayout$Slot {
-	public fun <init> (Lio/archinaut/tenter/panel/PanelId;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/view/ScrollState;)V
+	public fun <init> (Lio/archinaut/tenter/panel/PanelId;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/widget/ScrollState;)V
 	public final fun component1 ()Lio/archinaut/tenter/panel/PanelId;
 	public final fun component2 ()Lio/archinaut/tenter/screen/Rect;
 	public final fun component3 ()Lio/archinaut/tenter/screen/Rect;
-	public final fun component4 ()Lio/archinaut/tenter/view/ScrollState;
-	public final fun copy (Lio/archinaut/tenter/panel/PanelId;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/view/ScrollState;)Lio/archinaut/tenter/panel/PanelLayout$Slot;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/panel/PanelLayout$Slot;Lio/archinaut/tenter/panel/PanelId;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/view/ScrollState;ILjava/lang/Object;)Lio/archinaut/tenter/panel/PanelLayout$Slot;
+	public final fun component4 ()Lio/archinaut/tenter/widget/ScrollState;
+	public final fun copy (Lio/archinaut/tenter/panel/PanelId;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/widget/ScrollState;)Lio/archinaut/tenter/panel/PanelLayout$Slot;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/panel/PanelLayout$Slot;Lio/archinaut/tenter/panel/PanelId;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/screen/Rect;Lio/archinaut/tenter/widget/ScrollState;ILjava/lang/Object;)Lio/archinaut/tenter/panel/PanelLayout$Slot;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getContent ()Lio/archinaut/tenter/screen/Rect;
 	public final fun getId ()Lio/archinaut/tenter/panel/PanelId;
 	public final fun getOuter ()Lio/archinaut/tenter/screen/Rect;
-	public final fun getScroll ()Lio/archinaut/tenter/view/ScrollState;
+	public final fun getScroll ()Lio/archinaut/tenter/widget/ScrollState;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -436,46 +436,56 @@ public final class io/archinaut/tenter/panel/PanelState : java/lang/Enum {
 	public static fun values ()[Lio/archinaut/tenter/panel/PanelState;
 }
 
-public final class io/archinaut/tenter/panel/VerticalTitleView : io/archinaut/tenter/view/ContentView {
+public final class io/archinaut/tenter/panel/VerticalTitleWidget : io/archinaut/tenter/widget/ContentWidget {
 	public fun <init> (Ljava/lang/String;)V
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
-	public fun layout (I)Lio/archinaut/tenter/view/ContentLayout;
+	public fun layout (I)Lio/archinaut/tenter/widget/ContentLayout;
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
+}
+
+public final class io/archinaut/tenter/screen/Buffer {
+	public fun <init> (II)V
+	public final fun get (II)Lio/archinaut/tenter/screen/Cell;
+	public final fun getHeight ()I
+	public final fun getWidth ()I
+	public final fun reset ()V
+	public final fun set (IILio/archinaut/tenter/screen/Cell;)V
 }
 
 public final class io/archinaut/tenter/screen/Canvas {
 	public static final field Companion Lio/archinaut/tenter/screen/Canvas$Companion;
 	public final fun blit (Lio/archinaut/tenter/screen/Canvas;IIIIII)V
 	public final fun get (II)Lio/archinaut/tenter/screen/Cell;
+	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
 	public final fun getHeight ()I
 	public final fun getWidth ()I
-	public final fun inset (Lio/archinaut/tenter/screen/Insets;)Lio/archinaut/tenter/screen/Canvas;
+	public final fun inner (Lio/archinaut/tenter/screen/Padding;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun markReveal (IIII)V
 	public final fun region (IIII)Lio/archinaut/tenter/screen/Canvas;
 	public final fun region (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun revealRect ()Lio/archinaut/tenter/screen/RevealRect;
 	public final fun set (IILio/archinaut/tenter/screen/Cell;)V
 	public final fun setFg (IILjava/lang/String;Lio/archinaut/tenter/palette/ColorRole;)V
-	public final fun writeString (IILjava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)V
-	public static synthetic fun writeString$default (Lio/archinaut/tenter/screen/Canvas;IILjava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;ILjava/lang/Object;)V
+	public final fun setString (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;)V
+	public static synthetic fun setString$default (Lio/archinaut/tenter/screen/Canvas;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
 }
 
 public final class io/archinaut/tenter/screen/Canvas$Companion {
-	public final fun of (Lio/archinaut/tenter/screen/ScreenBuffer;)Lio/archinaut/tenter/screen/Canvas;
+	public final fun of (Lio/archinaut/tenter/screen/Buffer;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun offscreen (II)Lio/archinaut/tenter/screen/Canvas;
 }
 
 public final class io/archinaut/tenter/screen/Cell {
 	public static final field Companion Lio/archinaut/tenter/screen/Cell$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)V
-	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lio/archinaut/tenter/screen/Cell$Style;
-	public final fun copy (Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)Lio/archinaut/tenter/screen/Cell;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Cell;Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Cell;
+	public final fun component2 ()Lio/archinaut/tenter/screen/Style;
+	public final fun copy (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/Cell;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Cell;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Cell;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getChar ()Ljava/lang/String;
-	public final fun getStyle ()Lio/archinaut/tenter/screen/Cell$Style;
+	public final fun getStyle ()Lio/archinaut/tenter/screen/Style;
+	public final fun getSymbol ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -484,30 +494,107 @@ public final class io/archinaut/tenter/screen/Cell$Companion {
 	public final fun getEMPTY ()Lio/archinaut/tenter/screen/Cell;
 }
 
-public final class io/archinaut/tenter/screen/Cell$Style {
-	public static final field Companion Lio/archinaut/tenter/screen/Cell$Style$Companion;
+public abstract interface class io/archinaut/tenter/screen/Constraint {
+}
+
+public final class io/archinaut/tenter/screen/Constraint$Fill : io/archinaut/tenter/screen/Constraint {
 	public fun <init> ()V
-	public fun <init> (Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Z)V
-	public synthetic fun <init> (Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lio/archinaut/tenter/palette/ColorRole;
-	public final fun component2 ()Lio/archinaut/tenter/palette/ColorRole;
-	public final fun component3 ()Z
-	public final fun copy (Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Z)Lio/archinaut/tenter/screen/Cell$Style;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Cell$Style;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ZILjava/lang/Object;)Lio/archinaut/tenter/screen/Cell$Style;
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun copy (I)Lio/archinaut/tenter/screen/Constraint$Fill;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Constraint$Fill;IILjava/lang/Object;)Lio/archinaut/tenter/screen/Constraint$Fill;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBg ()Lio/archinaut/tenter/palette/ColorRole;
-	public final fun getFg ()Lio/archinaut/tenter/palette/ColorRole;
-	public final fun getStrikethrough ()Z
+	public final fun getWeight ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/screen/Cell$Style$Companion {
-	public final fun getDEFAULT ()Lio/archinaut/tenter/screen/Cell$Style;
+public final class io/archinaut/tenter/screen/Constraint$Length : io/archinaut/tenter/screen/Constraint {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lio/archinaut/tenter/screen/Constraint$Length;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Constraint$Length;IILjava/lang/Object;)Lio/archinaut/tenter/screen/Constraint$Length;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLength ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/screen/Insets {
-	public static final field Companion Lio/archinaut/tenter/screen/Insets$Companion;
+public final class io/archinaut/tenter/screen/Constraint$Max : io/archinaut/tenter/screen/Constraint {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lio/archinaut/tenter/screen/Constraint$Max;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Constraint$Max;IILjava/lang/Object;)Lio/archinaut/tenter/screen/Constraint$Max;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMax ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/archinaut/tenter/screen/Constraint$Min : io/archinaut/tenter/screen/Constraint {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lio/archinaut/tenter/screen/Constraint$Min;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Constraint$Min;IILjava/lang/Object;)Lio/archinaut/tenter/screen/Constraint$Min;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMin ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/archinaut/tenter/screen/Constraint$Percentage : io/archinaut/tenter/screen/Constraint {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lio/archinaut/tenter/screen/Constraint$Percentage;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Constraint$Percentage;IILjava/lang/Object;)Lio/archinaut/tenter/screen/Constraint$Percentage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPercent ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/archinaut/tenter/screen/Constraint$Ratio : io/archinaut/tenter/screen/Constraint {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Lio/archinaut/tenter/screen/Constraint$Ratio;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Constraint$Ratio;IIILjava/lang/Object;)Lio/archinaut/tenter/screen/Constraint$Ratio;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDenominator ()I
+	public final fun getNumerator ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/archinaut/tenter/screen/Direction : java/lang/Enum {
+	public static final field HORIZONTAL Lio/archinaut/tenter/screen/Direction;
+	public static final field VERTICAL Lio/archinaut/tenter/screen/Direction;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/screen/Direction;
+	public static fun values ()[Lio/archinaut/tenter/screen/Direction;
+}
+
+public final class io/archinaut/tenter/screen/Layout {
+	public static final field Companion Lio/archinaut/tenter/screen/Layout$Companion;
+	public final fun getConstraints ()Ljava/util/List;
+	public final fun getDirection ()Lio/archinaut/tenter/screen/Direction;
+	public final fun getMargin ()Lio/archinaut/tenter/screen/Padding;
+	public final fun getSpacing ()I
+	public final fun margin (Lio/archinaut/tenter/screen/Padding;)Lio/archinaut/tenter/screen/Layout;
+	public final fun spacing (I)Lio/archinaut/tenter/screen/Layout;
+	public final fun split (Lio/archinaut/tenter/screen/Rect;)Ljava/util/List;
+}
+
+public final class io/archinaut/tenter/screen/Layout$Companion {
+	public final fun horizontal (Ljava/util/List;)Lio/archinaut/tenter/screen/Layout;
+	public final fun horizontal ([Lio/archinaut/tenter/screen/Constraint;)Lio/archinaut/tenter/screen/Layout;
+	public final fun vertical (Ljava/util/List;)Lio/archinaut/tenter/screen/Layout;
+	public final fun vertical ([Lio/archinaut/tenter/screen/Constraint;)Lio/archinaut/tenter/screen/Layout;
+}
+
+public final class io/archinaut/tenter/screen/Padding {
+	public static final field Companion Lio/archinaut/tenter/screen/Padding$Companion;
 	public fun <init> ()V
 	public fun <init> (IIII)V
 	public synthetic fun <init> (IIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -515,23 +602,25 @@ public final class io/archinaut/tenter/screen/Insets {
 	public final fun component2 ()I
 	public final fun component3 ()I
 	public final fun component4 ()I
-	public final fun copy (IIII)Lio/archinaut/tenter/screen/Insets;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Insets;IIIIILjava/lang/Object;)Lio/archinaut/tenter/screen/Insets;
+	public final fun copy (IIII)Lio/archinaut/tenter/screen/Padding;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Padding;IIIIILjava/lang/Object;)Lio/archinaut/tenter/screen/Padding;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBottom ()I
 	public final fun getLeft ()I
 	public final fun getRight ()I
 	public final fun getTop ()I
 	public fun hashCode ()I
-	public final fun horizontal ()Lio/archinaut/tenter/screen/Insets;
-	public final fun plus (Lio/archinaut/tenter/screen/Insets;)Lio/archinaut/tenter/screen/Insets;
+	public final fun horizontalEdges ()Lio/archinaut/tenter/screen/Padding;
+	public final fun plus (Lio/archinaut/tenter/screen/Padding;)Lio/archinaut/tenter/screen/Padding;
 	public fun toString ()Ljava/lang/String;
-	public final fun vertical ()Lio/archinaut/tenter/screen/Insets;
+	public final fun verticalEdges ()Lio/archinaut/tenter/screen/Padding;
 }
 
-public final class io/archinaut/tenter/screen/Insets$Companion {
-	public final fun all (I)Lio/archinaut/tenter/screen/Insets;
-	public final fun getNONE ()Lio/archinaut/tenter/screen/Insets;
+public final class io/archinaut/tenter/screen/Padding$Companion {
+	public final fun getZERO ()Lio/archinaut/tenter/screen/Padding;
+	public final fun horizontal (I)Lio/archinaut/tenter/screen/Padding;
+	public final fun uniform (I)Lio/archinaut/tenter/screen/Padding;
+	public final fun vertical (I)Lio/archinaut/tenter/screen/Padding;
 }
 
 public final class io/archinaut/tenter/screen/Point {
@@ -562,7 +651,7 @@ public final class io/archinaut/tenter/screen/Rect {
 	public final fun getX ()I
 	public final fun getY ()I
 	public fun hashCode ()I
-	public final fun inset (Lio/archinaut/tenter/screen/Insets;)Lio/archinaut/tenter/screen/Rect;
+	public final fun inner (Lio/archinaut/tenter/screen/Padding;)Lio/archinaut/tenter/screen/Rect;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -583,18 +672,26 @@ public final class io/archinaut/tenter/screen/RevealRect {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/screen/ScreenBuffer {
-	public fun <init> (II)V
-	public final fun get (II)Lio/archinaut/tenter/screen/Cell;
-	public final fun getHeight ()I
-	public final fun getWidth ()I
-	public final fun set (IILio/archinaut/tenter/screen/Cell;)V
+public final class io/archinaut/tenter/screen/Style {
+	public static final field Companion Lio/archinaut/tenter/screen/Style$Companion;
+	public fun <init> ()V
+	public fun <init> (Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Z)V
+	public synthetic fun <init> (Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/archinaut/tenter/palette/ColorRole;
+	public final fun component2 ()Lio/archinaut/tenter/palette/ColorRole;
+	public final fun component3 ()Z
+	public final fun copy (Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Z)Lio/archinaut/tenter/screen/Style;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ZILjava/lang/Object;)Lio/archinaut/tenter/screen/Style;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBg ()Lio/archinaut/tenter/palette/ColorRole;
+	public final fun getFg ()Lio/archinaut/tenter/palette/ColorRole;
+	public final fun getStrikethrough ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/screen/ScreenRenderer {
-	public fun <init> (Lcom/github/ajalt/mordant/terminal/Terminal;Lio/archinaut/tenter/palette/RolePalette;)V
-	public final fun clear ()V
-	public final fun render (Lio/archinaut/tenter/screen/ScreenBuffer;)V
+public final class io/archinaut/tenter/screen/Style$Companion {
+	public final fun getDEFAULT ()Lio/archinaut/tenter/screen/Style;
 }
 
 public final class io/archinaut/tenter/screen/StyledText {
@@ -615,25 +712,25 @@ public final class io/archinaut/tenter/screen/StyledText {
 public final class io/archinaut/tenter/screen/StyledText$Builder {
 	public final fun append (Lio/archinaut/tenter/screen/StyledText;)V
 	public final fun append (Ljava/lang/String;Lio/archinaut/tenter/palette/ColorRole;)V
-	public final fun append (Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)V
-	public static synthetic fun append$default (Lio/archinaut/tenter/screen/StyledText$Builder;Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;ILjava/lang/Object;)V
+	public final fun append (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)V
+	public static synthetic fun append$default (Lio/archinaut/tenter/screen/StyledText$Builder;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
 }
 
 public final class io/archinaut/tenter/screen/StyledText$Companion {
 	public final fun getEMPTY ()Lio/archinaut/tenter/screen/StyledText;
 	public final fun of (Ljava/lang/String;Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/screen/StyledText;
-	public final fun of (Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)Lio/archinaut/tenter/screen/StyledText;
-	public static synthetic fun of$default (Lio/archinaut/tenter/screen/StyledText$Companion;Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/StyledText;
+	public final fun of (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/StyledText;
+	public static synthetic fun of$default (Lio/archinaut/tenter/screen/StyledText$Companion;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/StyledText;
 }
 
 public final class io/archinaut/tenter/screen/StyledText$Span {
-	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)V
+	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lio/archinaut/tenter/screen/Cell$Style;
-	public final fun copy (Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)Lio/archinaut/tenter/screen/StyledText$Span;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/StyledText$Span;Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/StyledText$Span;
+	public final fun component2 ()Lio/archinaut/tenter/screen/Style;
+	public final fun copy (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/StyledText$Span;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/StyledText$Span;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/StyledText$Span;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getStyle ()Lio/archinaut/tenter/screen/Cell$Style;
+	public final fun getStyle ()Lio/archinaut/tenter/screen/Style;
 	public final fun getText ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -643,6 +740,30 @@ public final class io/archinaut/tenter/screen/StyledTextKt {
 	public static final fun joinStyled (Ljava/lang/Iterable;Ljava/lang/String;)Lio/archinaut/tenter/screen/StyledText;
 	public static synthetic fun joinStyled$default (Ljava/lang/Iterable;Ljava/lang/String;ILjava/lang/Object;)Lio/archinaut/tenter/screen/StyledText;
 	public static final fun styled (Lkotlin/jvm/functions/Function1;)Lio/archinaut/tenter/screen/StyledText;
+}
+
+public final class io/archinaut/tenter/terminal/CompletedFrame {
+	public final fun get (II)Lio/archinaut/tenter/screen/Cell;
+	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
+	public final fun getHeight ()I
+	public final fun getWidth ()I
+}
+
+public final class io/archinaut/tenter/terminal/Frame {
+	public final fun canvas (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Canvas;
+	public static synthetic fun canvas$default (Lio/archinaut/tenter/terminal/Frame;Lio/archinaut/tenter/screen/Rect;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Canvas;
+	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
+	public final fun getBuffer ()Lio/archinaut/tenter/screen/Buffer;
+	public final fun renderStatefulWidget (Lio/archinaut/tenter/widget/StatefulWidget;Lio/archinaut/tenter/screen/Rect;Ljava/lang/Object;)V
+	public final fun renderWidget (Lio/archinaut/tenter/widget/Widget;Lio/archinaut/tenter/screen/Rect;)V
+}
+
+public final class io/archinaut/tenter/terminal/Terminal {
+	public fun <init> (Lcom/github/ajalt/mordant/terminal/Terminal;Lio/archinaut/tenter/palette/RolePalette;)V
+	public final fun clear ()V
+	public final fun draw (Lkotlin/jvm/functions/Function1;)Lio/archinaut/tenter/terminal/CompletedFrame;
+	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
+	public final fun resize (II)V
 }
 
 public abstract interface class io/archinaut/tenter/terminal/TerminalEvent {
@@ -707,73 +828,76 @@ public final class io/archinaut/tenter/text/TextWrap {
 	public static synthetic fun wrapBy$default (Lio/archinaut/tenter/text/TextWrap;Ljava/lang/String;IILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/util/List;
 }
 
-public final class io/archinaut/tenter/view/Bordered : io/archinaut/tenter/view/View {
-	public static final field Companion Lio/archinaut/tenter/view/Bordered$Companion;
-	public fun <init> (Lio/archinaut/tenter/view/View;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Insets;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/view/View;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Insets;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
+public final class io/archinaut/tenter/widget/Block : io/archinaut/tenter/widget/Widget {
+	public static final field Companion Lio/archinaut/tenter/widget/Block$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun inner (Lio/archinaut/tenter/screen/Canvas;)Lio/archinaut/tenter/screen/Canvas;
+	public final fun inner (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Rect;
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
-public final class io/archinaut/tenter/view/Bordered$Companion {
-	public final fun getBORDER ()Lio/archinaut/tenter/screen/Insets;
-	public final fun prepared (Lio/archinaut/tenter/view/ContentView;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Insets;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/view/ContentView;
-	public static synthetic fun prepared$default (Lio/archinaut/tenter/view/Bordered$Companion;Lio/archinaut/tenter/view/ContentView;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Insets;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ILjava/lang/Object;)Lio/archinaut/tenter/view/ContentView;
+public final class io/archinaut/tenter/widget/Block$Companion {
+	public final fun getBORDER ()Lio/archinaut/tenter/screen/Padding;
+	public final fun prepared (Lio/archinaut/tenter/widget/ContentWidget;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/widget/ContentWidget;
+	public static synthetic fun prepared$default (Lio/archinaut/tenter/widget/Block$Companion;Lio/archinaut/tenter/widget/ContentWidget;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ILjava/lang/Object;)Lio/archinaut/tenter/widget/ContentWidget;
 }
 
-public final class io/archinaut/tenter/view/Columns : io/archinaut/tenter/view/ContentView {
+public final class io/archinaut/tenter/widget/Columns : io/archinaut/tenter/widget/ContentWidget {
 	public fun <init> (Ljava/util/List;I)V
 	public synthetic fun <init> (Ljava/util/List;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
-	public fun layout (I)Lio/archinaut/tenter/view/ContentLayout;
+	public fun layout (I)Lio/archinaut/tenter/widget/ContentLayout;
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
-public final class io/archinaut/tenter/view/Columns$Child {
-	public fun <init> (ILio/archinaut/tenter/view/ContentView;)V
+public final class io/archinaut/tenter/widget/Columns$Child {
+	public fun <init> (ILio/archinaut/tenter/widget/ContentWidget;)V
 	public final fun component1 ()I
-	public final fun component2 ()Lio/archinaut/tenter/view/ContentView;
-	public final fun copy (ILio/archinaut/tenter/view/ContentView;)Lio/archinaut/tenter/view/Columns$Child;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/view/Columns$Child;ILio/archinaut/tenter/view/ContentView;ILjava/lang/Object;)Lio/archinaut/tenter/view/Columns$Child;
+	public final fun component2 ()Lio/archinaut/tenter/widget/ContentWidget;
+	public final fun copy (ILio/archinaut/tenter/widget/ContentWidget;)Lio/archinaut/tenter/widget/Columns$Child;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/widget/Columns$Child;ILio/archinaut/tenter/widget/ContentWidget;ILjava/lang/Object;)Lio/archinaut/tenter/widget/Columns$Child;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getView ()Lio/archinaut/tenter/view/ContentView;
+	public final fun getContent ()Lio/archinaut/tenter/widget/ContentWidget;
 	public final fun getWidth ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/view/ContentFactoriesKt {
-	public static final fun contentLayout (IILio/archinaut/tenter/view/RevealPreference;Lkotlin/jvm/functions/Function1;)Lio/archinaut/tenter/view/ContentLayout;
-	public static synthetic fun contentLayout$default (IILio/archinaut/tenter/view/RevealPreference;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/archinaut/tenter/view/ContentLayout;
-	public static final fun contentView (Lkotlin/jvm/functions/Function1;)Lio/archinaut/tenter/view/ContentView;
-	public static final fun fixedContent (IILio/archinaut/tenter/view/View;)Lio/archinaut/tenter/view/ContentView;
+public final class io/archinaut/tenter/widget/ContentFactoriesKt {
+	public static final fun contentLayout (IILio/archinaut/tenter/widget/RevealPreference;Lkotlin/jvm/functions/Function1;)Lio/archinaut/tenter/widget/ContentLayout;
+	public static synthetic fun contentLayout$default (IILio/archinaut/tenter/widget/RevealPreference;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/archinaut/tenter/widget/ContentLayout;
+	public static final fun contentWidget (Lkotlin/jvm/functions/Function1;)Lio/archinaut/tenter/widget/ContentWidget;
+	public static final fun fixedContent (IILio/archinaut/tenter/widget/Widget;)Lio/archinaut/tenter/widget/ContentWidget;
 }
 
-public final class io/archinaut/tenter/view/ContentLayout : io/archinaut/tenter/view/View {
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
+public final class io/archinaut/tenter/widget/ContentLayout : io/archinaut/tenter/widget/Widget {
 	public final fun getHeight ()I
 	public final fun getWidth ()I
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
-public final class io/archinaut/tenter/view/ContentLayout$Builder {
-	public final fun place (IILio/archinaut/tenter/view/ContentLayout;)V
+public final class io/archinaut/tenter/widget/ContentLayout$Builder {
+	public final fun place (IILio/archinaut/tenter/widget/ContentLayout;)V
 	public final fun reveal (IIII)V
 }
 
-public abstract interface class io/archinaut/tenter/view/ContentView : io/archinaut/tenter/view/View {
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
-	public abstract fun layout (I)Lio/archinaut/tenter/view/ContentLayout;
+public abstract interface class io/archinaut/tenter/widget/ContentWidget : io/archinaut/tenter/widget/Widget {
+	public abstract fun layout (I)Lio/archinaut/tenter/widget/ContentLayout;
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
-public final class io/archinaut/tenter/view/ContentView$DefaultImpls {
-	public static fun draw (Lio/archinaut/tenter/view/ContentView;Lio/archinaut/tenter/screen/Canvas;)V
+public final class io/archinaut/tenter/widget/ContentWidget$DefaultImpls {
+	public static fun render (Lio/archinaut/tenter/widget/ContentWidget;Lio/archinaut/tenter/screen/Canvas;)V
 }
 
-public final class io/archinaut/tenter/view/FlashMessage {
+public final class io/archinaut/tenter/widget/FlashMessage {
 	public synthetic fun <init> (Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;JLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2-UwyO8pc ()J
-	public final fun copy-HG0u8IE (Ljava/lang/String;J)Lio/archinaut/tenter/view/FlashMessage;
-	public static synthetic fun copy-HG0u8IE$default (Lio/archinaut/tenter/view/FlashMessage;Ljava/lang/String;JILjava/lang/Object;)Lio/archinaut/tenter/view/FlashMessage;
+	public final fun copy-HG0u8IE (Ljava/lang/String;J)Lio/archinaut/tenter/widget/FlashMessage;
+	public static synthetic fun copy-HG0u8IE$default (Lio/archinaut/tenter/widget/FlashMessage;Ljava/lang/String;JILjava/lang/Object;)Lio/archinaut/tenter/widget/FlashMessage;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDuration-UwyO8pc ()J
 	public final fun getText ()Ljava/lang/String;
@@ -781,44 +905,44 @@ public final class io/archinaut/tenter/view/FlashMessage {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/view/HelpView : io/archinaut/tenter/view/ContentView {
-	public static final field Companion Lio/archinaut/tenter/view/HelpView$Companion;
+public final class io/archinaut/tenter/widget/HelpWidget : io/archinaut/tenter/widget/ContentWidget {
+	public static final field Companion Lio/archinaut/tenter/widget/HelpWidget$Companion;
 	public static final field TITLE Ljava/lang/String;
 	public fun <init> (Ljava/util/List;)V
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
-	public fun layout (I)Lio/archinaut/tenter/view/ContentLayout;
+	public fun layout (I)Lio/archinaut/tenter/widget/ContentLayout;
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
-public final class io/archinaut/tenter/view/HelpView$Companion {
+public final class io/archinaut/tenter/widget/HelpWidget$Companion {
 }
 
-public final class io/archinaut/tenter/view/Padded : io/archinaut/tenter/view/View {
-	public static final field Companion Lio/archinaut/tenter/view/Padded$Companion;
-	public fun <init> (Lio/archinaut/tenter/screen/Insets;Lio/archinaut/tenter/view/View;)V
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
+public final class io/archinaut/tenter/widget/Padded : io/archinaut/tenter/widget/Widget {
+	public static final field Companion Lio/archinaut/tenter/widget/Padded$Companion;
+	public fun <init> (Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/widget/Widget;)V
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
-public final class io/archinaut/tenter/view/Padded$Companion {
-	public final fun prepared (Lio/archinaut/tenter/screen/Insets;Lio/archinaut/tenter/view/ContentView;)Lio/archinaut/tenter/view/ContentView;
+public final class io/archinaut/tenter/widget/Padded$Companion {
+	public final fun prepared (Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/widget/ContentWidget;)Lio/archinaut/tenter/widget/ContentWidget;
 }
 
-public final class io/archinaut/tenter/view/RevealPreference : java/lang/Enum {
-	public static final field FIRST Lio/archinaut/tenter/view/RevealPreference;
-	public static final field LAST Lio/archinaut/tenter/view/RevealPreference;
+public final class io/archinaut/tenter/widget/RevealPreference : java/lang/Enum {
+	public static final field FIRST Lio/archinaut/tenter/widget/RevealPreference;
+	public static final field LAST Lio/archinaut/tenter/widget/RevealPreference;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/view/RevealPreference;
-	public static fun values ()[Lio/archinaut/tenter/view/RevealPreference;
+	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/widget/RevealPreference;
+	public static fun values ()[Lio/archinaut/tenter/widget/RevealPreference;
 }
 
-public final class io/archinaut/tenter/view/ScrollOffset {
-	public static final field Companion Lio/archinaut/tenter/view/ScrollOffset$Companion;
+public final class io/archinaut/tenter/widget/ScrollOffset {
+	public static final field Companion Lio/archinaut/tenter/widget/ScrollOffset$Companion;
 	public fun <init> ()V
 	public fun <init> (II)V
 	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2 ()I
-	public final fun copy (II)Lio/archinaut/tenter/view/ScrollOffset;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/view/ScrollOffset;IIILjava/lang/Object;)Lio/archinaut/tenter/view/ScrollOffset;
+	public final fun copy (II)Lio/archinaut/tenter/widget/ScrollOffset;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/widget/ScrollOffset;IIILjava/lang/Object;)Lio/archinaut/tenter/widget/ScrollOffset;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getX ()I
 	public final fun getY ()I
@@ -826,27 +950,27 @@ public final class io/archinaut/tenter/view/ScrollOffset {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/view/ScrollOffset$Companion {
-	public final fun getZERO ()Lio/archinaut/tenter/view/ScrollOffset;
+public final class io/archinaut/tenter/widget/ScrollOffset$Companion {
+	public final fun getZERO ()Lio/archinaut/tenter/widget/ScrollOffset;
 }
 
-public final class io/archinaut/tenter/view/ScrollState {
-	public fun <init> (Lio/archinaut/tenter/view/ScrollOffset;Lio/archinaut/tenter/view/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIII)V
-	public synthetic fun <init> (Lio/archinaut/tenter/view/ScrollOffset;Lio/archinaut/tenter/view/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lio/archinaut/tenter/view/ScrollOffset;
-	public final fun component2 ()Lio/archinaut/tenter/view/ScrollOffset;
+public final class io/archinaut/tenter/widget/ScrollState {
+	public fun <init> (Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIII)V
+	public synthetic fun <init> (Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/archinaut/tenter/widget/ScrollOffset;
+	public final fun component2 ()Lio/archinaut/tenter/widget/ScrollOffset;
 	public final fun component3 ()Lio/archinaut/tenter/screen/RevealRect;
 	public final fun component4 ()I
 	public final fun component5 ()I
 	public final fun component6 ()I
 	public final fun component7 ()I
-	public final fun copy (Lio/archinaut/tenter/view/ScrollOffset;Lio/archinaut/tenter/view/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIII)Lio/archinaut/tenter/view/ScrollState;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/view/ScrollState;Lio/archinaut/tenter/view/ScrollOffset;Lio/archinaut/tenter/view/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIIIILjava/lang/Object;)Lio/archinaut/tenter/view/ScrollState;
+	public final fun copy (Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIII)Lio/archinaut/tenter/widget/ScrollState;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/widget/ScrollState;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIIIILjava/lang/Object;)Lio/archinaut/tenter/widget/ScrollState;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getContentHeight ()I
 	public final fun getContentWidth ()I
-	public final fun getMaxOffset ()Lio/archinaut/tenter/view/ScrollOffset;
-	public final fun getOffset ()Lio/archinaut/tenter/view/ScrollOffset;
+	public final fun getMaxOffset ()Lio/archinaut/tenter/widget/ScrollOffset;
+	public final fun getOffset ()Lio/archinaut/tenter/widget/ScrollOffset;
 	public final fun getRevealed ()Lio/archinaut/tenter/screen/RevealRect;
 	public final fun getViewportHeight ()I
 	public final fun getViewportWidth ()I
@@ -854,97 +978,102 @@ public final class io/archinaut/tenter/view/ScrollState {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/view/ScrollingPanel : io/archinaut/tenter/view/View {
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
+public final class io/archinaut/tenter/widget/ScrollingPanel : io/archinaut/tenter/widget/StatefulWidget {
+	public fun render (Lio/archinaut/tenter/screen/Canvas;Lio/archinaut/tenter/widget/ViewportState;)V
+	public synthetic fun render (Lio/archinaut/tenter/screen/Canvas;Ljava/lang/Object;)V
 }
 
-public final class io/archinaut/tenter/view/ScrollingPanelKt {
-	public static final fun scrollingPanel (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/view/ContentView;Lio/archinaut/tenter/view/ViewportState;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/view/ScrollingPanel;
-	public static synthetic fun scrollingPanel$default (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/view/ContentView;Lio/archinaut/tenter/view/ViewportState;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ILjava/lang/Object;)Lio/archinaut/tenter/view/ScrollingPanel;
+public final class io/archinaut/tenter/widget/ScrollingPanelKt {
+	public static final fun scrollingPanel (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/ContentWidget;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/widget/ScrollingPanel;
+	public static synthetic fun scrollingPanel$default (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/ContentWidget;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ILjava/lang/Object;)Lio/archinaut/tenter/widget/ScrollingPanel;
 }
 
-public final class io/archinaut/tenter/view/Stack : io/archinaut/tenter/view/ContentView {
+public final class io/archinaut/tenter/widget/Stack : io/archinaut/tenter/widget/ContentWidget {
 	public fun <init> (Ljava/util/List;I)V
 	public synthetic fun <init> (Ljava/util/List;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
-	public fun layout (I)Lio/archinaut/tenter/view/ContentLayout;
+	public fun layout (I)Lio/archinaut/tenter/widget/ContentLayout;
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
-public final class io/archinaut/tenter/view/TextCursor {
+public abstract interface class io/archinaut/tenter/widget/StatefulWidget {
+	public abstract fun render (Lio/archinaut/tenter/screen/Canvas;Ljava/lang/Object;)V
+}
+
+public final class io/archinaut/tenter/widget/TextCursor {
 	public fun <init> (Lio/archinaut/tenter/screen/Canvas;)V
-	public final fun draw (Lio/archinaut/tenter/view/ContentView;)I
+	public final fun draw (Lio/archinaut/tenter/widget/ContentWidget;)I
 	public final fun getRow ()I
 	public final fun getWidth ()I
 	public final fun markReveal (I)V
-	public static synthetic fun markReveal$default (Lio/archinaut/tenter/view/TextCursor;IILjava/lang/Object;)V
+	public static synthetic fun markReveal$default (Lio/archinaut/tenter/widget/TextCursor;IILjava/lang/Object;)V
 	public final fun markRevealAt (II)V
-	public static synthetic fun markRevealAt$default (Lio/archinaut/tenter/view/TextCursor;IIILjava/lang/Object;)V
+	public static synthetic fun markRevealAt$default (Lio/archinaut/tenter/widget/TextCursor;IIILjava/lang/Object;)V
 	public final fun newLine ()V
-	public final fun write (IILjava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;Lio/archinaut/tenter/view/TextCursor$Align;)V
-	public final fun write (ILjava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)V
-	public static synthetic fun write$default (Lio/archinaut/tenter/view/TextCursor;IILjava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;Lio/archinaut/tenter/view/TextCursor$Align;ILjava/lang/Object;)V
-	public static synthetic fun write$default (Lio/archinaut/tenter/view/TextCursor;ILjava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;ILjava/lang/Object;)V
-	public final fun writeAt (IILjava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)V
-	public static synthetic fun writeAt$default (Lio/archinaut/tenter/view/TextCursor;IILjava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;ILjava/lang/Object;)V
+	public final fun write (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/widget/TextCursor$Align;)V
+	public final fun write (ILjava/lang/String;Lio/archinaut/tenter/screen/Style;)V
+	public static synthetic fun write$default (Lio/archinaut/tenter/widget/TextCursor;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/widget/TextCursor$Align;ILjava/lang/Object;)V
+	public static synthetic fun write$default (Lio/archinaut/tenter/widget/TextCursor;ILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
+	public final fun writeAt (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;)V
+	public static synthetic fun writeAt$default (Lio/archinaut/tenter/widget/TextCursor;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
 	public final fun writeHeader (Ljava/lang/String;)V
 	public final fun writeLine (Lio/archinaut/tenter/screen/StyledText;)I
-	public final fun writeLine (Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;)I
-	public static synthetic fun writeLine$default (Lio/archinaut/tenter/view/TextCursor;Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;ILjava/lang/Object;)I
-	public final fun writeRow (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;Lio/archinaut/tenter/screen/Cell$Style;)I
-	public static synthetic fun writeRow$default (Lio/archinaut/tenter/view/TextCursor;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Cell$Style;Lio/archinaut/tenter/screen/Cell$Style;ILjava/lang/Object;)I
+	public final fun writeLine (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)I
+	public static synthetic fun writeLine$default (Lio/archinaut/tenter/widget/TextCursor;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)I
+	public final fun writeRow (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;)I
+	public static synthetic fun writeRow$default (Lio/archinaut/tenter/widget/TextCursor;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)I
 }
 
-public final class io/archinaut/tenter/view/TextCursor$Align : java/lang/Enum {
-	public static final field LEFT Lio/archinaut/tenter/view/TextCursor$Align;
-	public static final field RIGHT Lio/archinaut/tenter/view/TextCursor$Align;
+public final class io/archinaut/tenter/widget/TextCursor$Align : java/lang/Enum {
+	public static final field LEFT Lio/archinaut/tenter/widget/TextCursor$Align;
+	public static final field RIGHT Lio/archinaut/tenter/widget/TextCursor$Align;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/view/TextCursor$Align;
-	public static fun values ()[Lio/archinaut/tenter/view/TextCursor$Align;
+	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/widget/TextCursor$Align;
+	public static fun values ()[Lio/archinaut/tenter/widget/TextCursor$Align;
 }
 
-public abstract interface class io/archinaut/tenter/view/View {
-	public abstract fun draw (Lio/archinaut/tenter/screen/Canvas;)V
+public final class io/archinaut/tenter/widget/Viewport : io/archinaut/tenter/widget/StatefulWidget {
+	public fun <init> (Lio/archinaut/tenter/widget/ContentWidget;)V
+	public fun render (Lio/archinaut/tenter/screen/Canvas;Lio/archinaut/tenter/widget/ViewportState;)V
+	public synthetic fun render (Lio/archinaut/tenter/screen/Canvas;Ljava/lang/Object;)V
 }
 
-public final class io/archinaut/tenter/view/Viewport : io/archinaut/tenter/view/View {
-	public fun <init> (Lio/archinaut/tenter/view/ContentView;Lio/archinaut/tenter/view/ViewportState;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/view/ContentView;Lio/archinaut/tenter/view/ViewportState;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun draw (Lio/archinaut/tenter/screen/Canvas;)V
-}
-
-public final class io/archinaut/tenter/view/ViewportState {
+public final class io/archinaut/tenter/widget/ViewportState {
 	public fun <init> ()V
-	public fun <init> (Lio/archinaut/tenter/view/ScrollOffset;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/view/ScrollOffset;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getSettled ()Lio/archinaut/tenter/view/ScrollState;
+	public fun <init> (Lio/archinaut/tenter/widget/ScrollOffset;)V
+	public synthetic fun <init> (Lio/archinaut/tenter/widget/ScrollOffset;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getSettled ()Lio/archinaut/tenter/widget/ScrollState;
 	public final fun requestRecenter ()V
 	public final fun scrollBy (II)V
 }
 
-public final class io/archinaut/tenter/widget/CheckState : java/lang/Enum {
-	public static final field CHECKED Lio/archinaut/tenter/widget/CheckState;
-	public static final field INDETERMINATE Lio/archinaut/tenter/widget/CheckState;
-	public static final field UNCHECKED Lio/archinaut/tenter/widget/CheckState;
+public abstract interface class io/archinaut/tenter/widget/Widget {
+	public abstract fun render (Lio/archinaut/tenter/screen/Canvas;)V
+}
+
+public final class io/archinaut/tenter/widget/fragment/CheckState : java/lang/Enum {
+	public static final field CHECKED Lio/archinaut/tenter/widget/fragment/CheckState;
+	public static final field INDETERMINATE Lio/archinaut/tenter/widget/fragment/CheckState;
+	public static final field UNCHECKED Lio/archinaut/tenter/widget/fragment/CheckState;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/widget/CheckState;
-	public static fun values ()[Lio/archinaut/tenter/widget/CheckState;
+	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/widget/fragment/CheckState;
+	public static fun values ()[Lio/archinaut/tenter/widget/fragment/CheckState;
 }
 
-public final class io/archinaut/tenter/widget/Checkbox {
-	public static final field INSTANCE Lio/archinaut/tenter/widget/Checkbox;
-	public final fun draw (Lio/archinaut/tenter/view/TextCursor;IILio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;)V
-	public static synthetic fun draw$default (Lio/archinaut/tenter/widget/Checkbox;Lio/archinaut/tenter/view/TextCursor;IILio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILjava/lang/Object;)V
-	public final fun intrinsicColor (Lio/archinaut/tenter/widget/CheckState;)Lio/archinaut/tenter/palette/ColorRole;
+public final class io/archinaut/tenter/widget/fragment/Checkbox {
+	public static final field INSTANCE Lio/archinaut/tenter/widget/fragment/Checkbox;
+	public final fun draw (Lio/archinaut/tenter/widget/TextCursor;IILio/archinaut/tenter/widget/fragment/CheckState;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;)V
+	public static synthetic fun draw$default (Lio/archinaut/tenter/widget/fragment/Checkbox;Lio/archinaut/tenter/widget/TextCursor;IILio/archinaut/tenter/widget/fragment/CheckState;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;ILjava/lang/Object;)V
+	public final fun intrinsicColor (Lio/archinaut/tenter/widget/fragment/CheckState;)Lio/archinaut/tenter/palette/ColorRole;
 }
 
-public final class io/archinaut/tenter/widget/CheckboxGlyphs {
-	public static final field Companion Lio/archinaut/tenter/widget/CheckboxGlyphs$Companion;
+public final class io/archinaut/tenter/widget/fragment/CheckboxGlyphs {
+	public static final field Companion Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/archinaut/tenter/widget/CheckboxGlyphs;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/widget/CheckboxGlyphs;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/archinaut/tenter/widget/CheckboxGlyphs;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChecked ()Ljava/lang/String;
 	public final fun getIndeterminate ()Ljava/lang/String;
@@ -953,39 +1082,39 @@ public final class io/archinaut/tenter/widget/CheckboxGlyphs {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/widget/CheckboxGlyphs$Companion {
-	public final fun getASCII ()Lio/archinaut/tenter/widget/CheckboxGlyphs;
-	public final fun getDEFAULT ()Lio/archinaut/tenter/widget/CheckboxGlyphs;
-	public final fun getNERD_FONT ()Lio/archinaut/tenter/widget/CheckboxGlyphs;
+public final class io/archinaut/tenter/widget/fragment/CheckboxGlyphs$Companion {
+	public final fun getASCII ()Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;
+	public final fun getDEFAULT ()Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;
+	public final fun getNERD_FONT ()Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;
 }
 
-public final class io/archinaut/tenter/widget/CheckboxKt {
-	public static final fun checkboxIcon (Lio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/widget/CheckboxGlyphs;)Ljava/lang/String;
-	public static synthetic fun checkboxIcon$default (Lio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILjava/lang/Object;)Ljava/lang/String;
+public final class io/archinaut/tenter/widget/fragment/CheckboxKt {
+	public static final fun checkboxIcon (Lio/archinaut/tenter/widget/fragment/CheckState;Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;)Ljava/lang/String;
+	public static synthetic fun checkboxIcon$default (Lio/archinaut/tenter/widget/fragment/CheckState;Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;ILjava/lang/Object;)Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/widget/Gauge {
+public final class io/archinaut/tenter/widget/fragment/Gauge {
 	public fun <init> (IILjava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (IILjava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun draw (Lio/archinaut/tenter/view/TextCursor;II)V
+	public final fun draw (Lio/archinaut/tenter/widget/TextCursor;II)V
 }
 
-public final class io/archinaut/tenter/widget/PipTrack {
+public final class io/archinaut/tenter/widget/fragment/PipTrack {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;II)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun draw (Lio/archinaut/tenter/view/TextCursor;IIIILio/archinaut/tenter/screen/Cell$Style;Lio/archinaut/tenter/screen/Cell$Style;)I
-	public final fun drawAdvancing (Lio/archinaut/tenter/view/TextCursor;IIILio/archinaut/tenter/screen/Cell$Style;Lio/archinaut/tenter/screen/Cell$Style;)V
+	public final fun draw (Lio/archinaut/tenter/widget/TextCursor;IIIILio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;)I
+	public final fun drawAdvancing (Lio/archinaut/tenter/widget/TextCursor;IIILio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;)V
 	public final fun rows (I)I
 }
 
-public final class io/archinaut/tenter/widget/SelectableRow {
-	public static final field INSTANCE Lio/archinaut/tenter/widget/SelectableRow;
-	public final fun draw (Lio/archinaut/tenter/view/TextCursor;Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;)V
-	public static synthetic fun draw$default (Lio/archinaut/tenter/widget/SelectableRow;Lio/archinaut/tenter/view/TextCursor;Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILjava/lang/Object;)V
+public final class io/archinaut/tenter/widget/fragment/SelectableRow {
+	public static final field INSTANCE Lio/archinaut/tenter/widget/fragment/SelectableRow;
+	public final fun draw (Lio/archinaut/tenter/widget/TextCursor;Ljava/lang/String;Lio/archinaut/tenter/widget/fragment/CheckState;ZLjava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;)V
+	public static synthetic fun draw$default (Lio/archinaut/tenter/widget/fragment/SelectableRow;Lio/archinaut/tenter/widget/TextCursor;Ljava/lang/String;Lio/archinaut/tenter/widget/fragment/CheckState;ZLjava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/fragment/CheckboxGlyphs;ILjava/lang/Object;)V
 }
 
-public final class io/archinaut/tenter/widget/ValueRow {
-	public static final field INSTANCE Lio/archinaut/tenter/widget/ValueRow;
-	public final fun draw (Lio/archinaut/tenter/view/TextCursor;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;)V
+public final class io/archinaut/tenter/widget/fragment/ValueRow {
+	public static final field INSTANCE Lio/archinaut/tenter/widget/fragment/ValueRow;
+	public final fun draw (Lio/archinaut/tenter/widget/TextCursor;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;)V
 }
 

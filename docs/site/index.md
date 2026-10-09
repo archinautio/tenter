@@ -50,8 +50,8 @@ The dependency above resolves from your machine's Maven Local repository.
 
 ### The main loop
 
-Save the following as `src/main/kotlin/Main.kt`. This is a complete program: it paints
-a greeting and waits for `q`. The code is included from the compiled
+Save the following as `src/main/kotlin/Main.kt`. This is a complete program: it draws
+one frame with a greeting and waits for `q`. The code is included from the compiled
 [hello example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/hello/HelloMain.kt),
 with its example package declaration omitted (use whichever package you want).
 
@@ -71,6 +71,24 @@ build/install/hello-tenter/bin/hello-tenter
 On Windows, use `gradlew.bat` and the generated `hello-tenter.bat` launcher.
 See [input and lifecycle](input.md) for managing terminal cleanup and your application
 event loop.
+
+## Core concepts
+
+Tenter follows the shape of [Ratatui](https://ratatui.rs/concepts/). If you know
+Ratatui, the names map directly:
+
+| Tenter | Ratatui | Role |
+| --- | --- | --- |
+| `Terminal` | `Terminal` | Owns the screen buffers and sends only what changed on each `draw`. Wraps a Mordant terminal as its backend. |
+| `Frame` | `Frame` | One frame inside `terminal.draw { frame -> }`: its `area` and `renderWidget` / `renderStatefulWidget`. |
+| `Widget`, `StatefulWidget` | `Widget`, `StatefulWidget` | Something that renders into an area, optionally with caller-owned state. |
+| `Canvas` | `Rect` + `Buffer` | The area a widget renders into: clipped, with local coordinates. |
+| `Buffer`, `Cell`, `Style` | `Buffer`, `Cell`, `Style` | The grid of styled cells. |
+| `Layout`, `Constraint` | `Layout`, `Constraint` | Split a `Rect` into smaller rectangles. |
+| `Block`, `Padding` | `Block`, `Padding` | A border with a title, and the space inside it. |
+
+Tenter adds prepared content (`ContentWidget`) for text that measures itself,
+scrolling viewports, and managed panels on top of these concepts.
 
 ## Continue with:
 

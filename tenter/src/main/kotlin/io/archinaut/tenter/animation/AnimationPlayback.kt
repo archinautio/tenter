@@ -5,12 +5,12 @@ package io.archinaut.tenter.animation
 
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
-import io.archinaut.tenter.view.View
+import io.archinaut.tenter.widget.Widget
 
 /**
  * Samples a finite collection of animations against elapsed monotonic time.
  *
- * Playback owns the timeline only. It does not own a clock, a renderer, or the application data
+ * Playback owns the timeline only. It does not own a clock, a terminal, or the application data
  * carried by each [Clip]. Sampling is pure: a caller may sample the same elapsed time repeatedly,
  * or sample times out of order. The input list and each animation's metadata are copied at
  * construction, so later mutation cannot change the timeline or its original ordering. A clip is
@@ -29,10 +29,10 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
     )
 
     /** A visible animation frame and its application-owned value. */
-    public data class Frame<T>(
+    public data class VisibleFrame<T>(
         public val value: T,
         public val size: AnimationSize,
-        public val content: View,
+        public val content: Widget,
     )
 
     /**
@@ -44,7 +44,7 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
      * delay represents a gap before a future clip starts.
      */
     public data class Sample<T>(
-        public val frames: List<Frame<T>>,
+        public val frames: List<VisibleFrame<T>>,
         public val nextChangeIn: Duration?,
     )
 
@@ -57,7 +57,7 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
             "elapsed must be finite and non-negative, was $elapsed"
         }
 
-        val frames = ArrayList<Frame<T>>()
+        val frames = ArrayList<VisibleFrame<T>>()
         var nextChange: Duration? = null
 
         timelines.forEach { timeline ->
@@ -68,7 +68,7 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
 
                 elapsed < timeline.endAt -> {
                     val frameIndex = timeline.frameIndexAt(elapsed)
-                    frames += Frame(
+                    frames += VisibleFrame(
                         value = timeline.value,
                         size = timeline.size,
                         content = timeline.animation.frame(frameIndex),

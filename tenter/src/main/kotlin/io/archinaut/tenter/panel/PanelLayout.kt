@@ -5,8 +5,8 @@ package io.archinaut.tenter.panel
 
 import java.util.Collections
 import io.archinaut.tenter.screen.Rect
-import io.archinaut.tenter.view.Bordered
-import io.archinaut.tenter.view.ScrollState
+import io.archinaut.tenter.widget.Block
+import io.archinaut.tenter.widget.ScrollState
 
 /**
  * The content rect and every placed panel's immutable geometry from one completed frame.
@@ -27,7 +27,7 @@ public class PanelLayout<K : PanelId> private constructor(
         public val id: K,
         /** The complete panel rectangle, including its border. */
         public val outer: Rect,
-        /** The rectangle painted by the scrolling viewport inside the border and gutters. */
+        /** The rectangle painted by the scrolling viewport inside the border and padding. */
         public val content: Rect,
         /** The settled viewport observation, or null when this slot had no drawable frame. */
         public val scroll: ScrollState?,
@@ -177,7 +177,7 @@ public class PanelLayout<K : PanelId> private constructor(
             return Slot(
                 id = id,
                 outer = outer,
-                content = outer.inset(Bordered.VIEWPORT_INSET),
+                content = outer.inner(Block.VIEWPORT_INSET),
                 scroll = null,
             )
         }

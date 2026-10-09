@@ -7,21 +7,24 @@ import io.archinaut.tenter.palette.ColorRole
 import io.archinaut.tenter.text.textClusters
 
 /**
- * A rectangular, clipped, origin-translated region of a [ScreenBuffer]. All coordinates
+ * A rectangular, clipped, origin-translated region of a [Buffer]. All coordinates
  * passed to its methods are LOCAL: `(0, 0)` is this region's own top-left corner. Writes
- * outside `0 until width` / `0 until height` are silently dropped, so a view drawing on a
+ * outside `0 until width` / `0 until height` are silently dropped, so a widget rendering into a
  * [Canvas] cannot touch a sibling's cells — even by mistake.
  *
- * [inset] and [region] derive smaller canvases by rectangle intersection, so nesting can only
+ * [inner] and [region] derive smaller canvases by rectangle intersection, so nesting can only
  * ever narrow: a child can't widen its way back out to a wider rect than it started with.
  */
 public class Canvas private constructor(
-    private val buffer: ScreenBuffer,
+    private val buffer: Buffer,
     private val originX: Int,
     private val originY: Int,
     public val width: Int,
     public val height: Int,
 ) {
+
+    /** This canvas in its own local coordinates: always `Rect(0, 0, width, height)`. Split it with [Layout]. */
+    public val area: Rect get() = Rect(0, 0, width, height)
 
     /** The intersection of the requested rectangle with this canvas. */
     public fun region(x: Int, y: Int, width: Int, height: Int): Canvas {
@@ -42,12 +45,12 @@ public class Canvas private constructor(
      */
     public fun region(rect: Rect): Canvas = region(rect.x, rect.y, rect.width, rect.height)
 
-    /** The region left after removing [insets] from each edge, clamped to never go negative. */
-    public fun inset(insets: Insets): Canvas = region(
-        insets.left,
-        insets.top,
-        width - insets.left - insets.right,
-        height - insets.top - insets.bottom,
+    /** The region left after removing [padding] from each edge, clamped to never go negative. */
+    public fun inner(padding: Padding): Canvas = region(
+        padding.left,
+        padding.top,
+        width - padding.left - padding.right,
+        height - padding.top - padding.bottom,
     )
 
     /** @throws IndexOutOfBoundsException if ([x], [y]) is outside this canvas. */
@@ -64,14 +67,14 @@ public class Canvas private constructor(
         buffer.writeCell(originX + x, originY + y, cell, originX, originY, originX + width, originY + height)
     }
 
-    /** Writes [char] in [fg], preserving whatever background is already painted at ([x], [y]). */
-    public fun setFg(x: Int, y: Int, char: String, fg: ColorRole) {
+    /** Writes [symbol] in [fg], preserving whatever background is already painted at ([x], [y]). */
+    public fun setFg(x: Int, y: Int, symbol: String, fg: ColorRole) {
         if (x < 0 || x >= width || y < 0 || y >= height) return
         val bg = buffer.get(originX + x, originY + y).style.bg
         buffer.writeCell(
             originX + x,
             originY + y,
-            Cell(char, Cell.Style(fg, bg)),
+            Cell(symbol, Style(fg, bg)),
             originX,
             originY,
             originX + width,
@@ -79,11 +82,11 @@ public class Canvas private constructor(
         )
     }
 
-    public fun writeString(
+    public fun setString(
         x: Int,
         y: Int,
         text: String,
-        style: Cell.Style = Cell.Style.DEFAULT,
+        style: Style = Style.DEFAULT,
     ) {
         var column = x
         for (cluster in textClusters(text)) {
@@ -103,8 +106,8 @@ public class Canvas private constructor(
 
     /**
      * Marks the rect content most wants visible — e.g. a selection cursor, a highlighted row.
-     * Stored on the backing [ScreenBuffer] in absolute coords (translated through this canvas's
-     * origin, like [set]), so it survives [region]/[inset] nesting and is readable from any
+     * Stored on the backing [Buffer] in absolute coords (translated through this canvas's
+     * origin, like [set]), so it survives [region]/[inner] nesting and is readable from any
      * canvas over the same buffer via [revealRect]. A scrolling container (see `Viewport`) reads
      * it back to auto-follow. Clips like [set]: a rect (partly) outside this canvas is clamped,
      * and no-ops if left empty. At most one reveal rect exists per buffer — a later call
@@ -210,9 +213,9 @@ public class Canvas private constructor(
 
     public companion object {
         /** A canvas over the whole of [buffer]. */
-        public fun of(buffer: ScreenBuffer): Canvas = Canvas(buffer, 0, 0, buffer.width, buffer.height)
+        public fun of(buffer: Buffer): Canvas = Canvas(buffer, 0, 0, buffer.width, buffer.height)
 
         /** A detached canvas over its own backing buffer — for measuring or scrolling content off-screen. */
-        public fun offscreen(width: Int, height: Int): Canvas = of(ScreenBuffer(width, height))
+        public fun offscreen(width: Int, height: Int): Canvas = of(Buffer(width, height))
     }
 }

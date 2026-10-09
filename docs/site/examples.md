@@ -60,7 +60,7 @@ Check the [glyph choices](styling.md#choose-glyphs) and
 
 ## Content does not follow selection or resizing
 
-Review [viewport state and reveal following](panels.md#scroll-a-single-view) and
+Review [viewport state and reveal following](panels.md#scroll-a-single-widget) and
 [resize handling](input.md#collect-events-and-repaint). `SelectableRow` marks its
 selected row for reveal; custom selectable content must mark its own target.
 

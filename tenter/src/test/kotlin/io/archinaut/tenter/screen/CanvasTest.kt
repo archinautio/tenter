@@ -14,7 +14,7 @@ internal class CanvasTest {
     @Test
     fun `get and set within bounds`() {
         val canvas = Canvas.offscreen(5, 5)
-        val cell = Cell("A", Cell.Style(ChromeRole.DANGER, ChromeRole.INFO))
+        val cell = Cell("A", Style(ChromeRole.DANGER, ChromeRole.INFO))
 
         canvas.set(2, 3, cell)
 
@@ -44,94 +44,94 @@ internal class CanvasTest {
     }
 
     @Test
-    fun `writeString places characters horizontally`() {
+    fun `setString places characters horizontally`() {
         val canvas = Canvas.offscreen(10, 1)
 
-        canvas.writeString(2, 0, "Hi", Cell.Style(ChromeRole.SUCCESS, ChromeRole.TEXT_MUTED))
+        canvas.setString(2, 0, "Hi", Style(ChromeRole.SUCCESS, ChromeRole.TEXT_MUTED))
 
-        assertEquals(Cell("H", Cell.Style(ChromeRole.SUCCESS, ChromeRole.TEXT_MUTED)), canvas.get(2, 0))
-        assertEquals(Cell("i", Cell.Style(ChromeRole.SUCCESS, ChromeRole.TEXT_MUTED)), canvas.get(3, 0))
+        assertEquals(Cell("H", Style(ChromeRole.SUCCESS, ChromeRole.TEXT_MUTED)), canvas.get(2, 0))
+        assertEquals(Cell("i", Style(ChromeRole.SUCCESS, ChromeRole.TEXT_MUTED)), canvas.get(3, 0))
         assertEquals(Cell(), canvas.get(4, 0))
     }
 
     @Test
-    fun `writeString truncates at canvas edge, not the underlying buffer edge`() {
-        val buffer = ScreenBuffer(20, 1)
+    fun `setString truncates at canvas edge, not the underlying buffer edge`() {
+        val buffer = Buffer(20, 1)
         val canvas = Canvas.of(buffer).region(3, 0, 5, 1)
 
-        canvas.writeString(0, 0, "Hello world")
+        canvas.setString(0, 0, "Hello world")
 
-        assertEquals("Hello", (0 until 5).joinToString("") { canvas.get(it, 0).char })
+        assertEquals("Hello", (0 until 5).joinToString("") { canvas.get(it, 0).symbol })
         // the sixth character must not have leaked past the canvas into buffer column 8
         assertEquals(Cell(), buffer.get(8, 0))
     }
 
     @Test
-    fun `writeString at a negative x drops leading cells and lands the tail at column 0`() {
+    fun `setString at a negative x drops leading cells and lands the tail at column 0`() {
         val canvas = Canvas.offscreen(5, 1)
 
-        canvas.writeString(-2, 0, "ABCDE")
+        canvas.setString(-2, 0, "ABCDE")
 
-        assertEquals("C", canvas.get(0, 0).char)
-        assertEquals("D", canvas.get(1, 0).char)
-        assertEquals("E", canvas.get(2, 0).char)
+        assertEquals("C", canvas.get(0, 0).symbol)
+        assertEquals("D", canvas.get(1, 0).symbol)
+        assertEquals("E", canvas.get(2, 0).symbol)
     }
 
     @Test
-    fun `writeString uses default colors when not specified`() {
+    fun `setString uses default colors when not specified`() {
         val canvas = Canvas.offscreen(5, 1)
 
-        canvas.writeString(0, 0, "AB")
+        canvas.setString(0, 0, "AB")
 
-        assertEquals(Cell("A", Cell.Style(ChromeRole.DEFAULT, ChromeRole.DEFAULT)), canvas.get(0, 0))
+        assertEquals(Cell("A", Style(ChromeRole.DEFAULT, ChromeRole.DEFAULT)), canvas.get(0, 0))
     }
 
     @Test
-    fun `writeString puts a non-BMP nerd-font icon in a single cell`() {
+    fun `setString puts a non-BMP nerd-font icon in a single cell`() {
         val canvas = Canvas.offscreen(10, 1)
         val die = String(Character.toChars(0xF01CA)) // nf-md-dice_1, 2 UTF-16 chars
 
-        canvas.writeString(2, 0, "A" + die + "B")
+        canvas.setString(2, 0, "A" + die + "B")
 
-        assertEquals("A", canvas.get(2, 0).char)
-        assertEquals(die, canvas.get(3, 0).char)
-        assertEquals(2, canvas.get(3, 0).char.length) // surrogate pair preserved as one cell
-        assertEquals("B", canvas.get(4, 0).char)
-        assertEquals(" ", canvas.get(5, 0).char)
+        assertEquals("A", canvas.get(2, 0).symbol)
+        assertEquals(die, canvas.get(3, 0).symbol)
+        assertEquals(2, canvas.get(3, 0).symbol.length) // surrogate pair preserved as one cell
+        assertEquals("B", canvas.get(4, 0).symbol)
+        assertEquals(" ", canvas.get(5, 0).symbol)
     }
 
     @Test
-    fun `writeString reserves two cells for an East-Asian wide codepoint`() {
+    fun `setString reserves two cells for an East-Asian wide codepoint`() {
         val canvas = Canvas.offscreen(10, 1)
 
-        canvas.writeString(0, 0, "中A")
+        canvas.setString(0, 0, "中A")
 
-        assertEquals("中", canvas.get(0, 0).char)
-        assertEquals("", canvas.get(1, 0).char) // filler reserves the second visual cell
-        assertEquals("A", canvas.get(2, 0).char)
+        assertEquals("中", canvas.get(0, 0).symbol)
+        assertEquals("", canvas.get(1, 0).symbol) // filler reserves the second visual cell
+        assertEquals("A", canvas.get(2, 0).symbol)
     }
 
     @Test
-    fun `writeString preserves zero-width combining marks in their cluster`() {
+    fun `setString preserves zero-width combining marks in their cluster`() {
         val canvas = Canvas.offscreen(5, 1)
 
         // 'e' + combining acute (U+0301) + 'x'
-        canvas.writeString(0, 0, "e\u0301x")
+        canvas.setString(0, 0, "e\u0301x")
 
-        assertEquals("e\u0301", canvas.get(0, 0).char)
-        assertEquals("x", canvas.get(1, 0).char)
-        assertEquals(" ", canvas.get(2, 0).char)
+        assertEquals("e\u0301", canvas.get(0, 0).symbol)
+        assertEquals("x", canvas.get(1, 0).symbol)
+        assertEquals(" ", canvas.get(2, 0).symbol)
     }
 
     @Test
-    fun `writeString replaces isolated surrogates and skips terminal controls`() {
+    fun `setString replaces isolated surrogates and skips terminal controls`() {
         val canvas = Canvas.offscreen(5, 1)
 
-        canvas.writeString(0, 0, "\uD800\u001BA")
+        canvas.setString(0, 0, "\uD800\u001BA")
 
-        assertEquals("�", canvas.get(0, 0).char)
-        assertEquals("A", canvas.get(1, 0).char)
-        assertEquals(" ", canvas.get(2, 0).char)
+        assertEquals("�", canvas.get(0, 0).symbol)
+        assertEquals("A", canvas.get(1, 0).symbol)
+        assertEquals(" ", canvas.get(2, 0).symbol)
     }
 
     @Test
@@ -144,7 +144,7 @@ internal class CanvasTest {
 
     @Test
     fun `region derives a canvas at a local offset`() {
-        val buffer = ScreenBuffer(15, 8)
+        val buffer = Buffer(15, 8)
         val canvas = Canvas.of(buffer).region(2, 1, 10, 5)
 
         canvas.set(0, 0, Cell("X"))
@@ -164,7 +164,7 @@ internal class CanvasTest {
 
     @Test
     fun `region intersects a rectangle that starts outside the parent`() {
-        val buffer = ScreenBuffer(10, 1)
+        val buffer = Buffer(10, 1)
         val child = Canvas.of(buffer).region(-2, 0, 5, 1)
 
         assertEquals(3, child.width)
@@ -187,26 +187,26 @@ internal class CanvasTest {
     fun `inset composes across nesting and clamps to zero rather than negative`() {
         val canvas = Canvas.offscreen(10, 10)
 
-        val once = canvas.inset(Insets(2, 2, 2, 2))
+        val once = canvas.inner(Padding(2, 2, 2, 2))
         assertEquals(6, once.width)
         assertEquals(6, once.height)
 
-        val twice = once.inset(Insets(2, 2, 2, 2))
+        val twice = once.inner(Padding(2, 2, 2, 2))
         assertEquals(2, twice.width)
         assertEquals(2, twice.height)
 
-        val overInset = twice.inset(Insets.all(5))
+        val overInset = twice.inner(Padding.uniform(5))
         assertEquals(0, overInset.width)
         assertEquals(0, overInset.height)
     }
 
     @Test
     fun `a canvas cannot write past its own edge into a sibling region`() {
-        val buffer = ScreenBuffer(10, 1)
+        val buffer = Buffer(10, 1)
         val left = Canvas.of(buffer).region(0, 0, 5, 1)
         val right = Canvas.of(buffer).region(5, 0, 5, 1)
 
-        left.writeString(0, 0, "AAAAAAAAAA") // ten chars into a five-wide canvas
+        left.setString(0, 0, "AAAAAAAAAA") // ten chars into a five-wide canvas
 
         assertEquals(Cell(), right.get(0, 0))
         assertEquals(Cell(), buffer.get(5, 0))
@@ -215,11 +215,11 @@ internal class CanvasTest {
     @Test
     fun `setFg preserves the existing background`() {
         val canvas = Canvas.offscreen(5, 1)
-        canvas.set(0, 0, Cell(style = Cell.Style(ChromeRole.DEFAULT, ChromeRole.INFO)))
+        canvas.set(0, 0, Cell(style = Style(ChromeRole.DEFAULT, ChromeRole.INFO)))
 
         canvas.setFg(0, 0, "X", ChromeRole.DANGER)
 
-        assertEquals(Cell("X", Cell.Style(ChromeRole.DANGER, ChromeRole.INFO)), canvas.get(0, 0))
+        assertEquals(Cell("X", Style(ChromeRole.DANGER, ChromeRole.INFO)), canvas.get(0, 0))
     }
 
     @Test
@@ -234,12 +234,12 @@ internal class CanvasTest {
 
     @Test
     fun `a wide glyph at the child edge paints a blank instead of a half glyph`() {
-        val buffer = ScreenBuffer(4, 1)
+        val buffer = Buffer(4, 1)
         val child = Canvas.of(buffer).region(1, 0, 1, 1)
 
-        child.writeString(0, 0, "中", Cell.Style(fg = ChromeRole.ACCENT))
+        child.setString(0, 0, "中", Style(fg = ChromeRole.ACCENT))
 
-        assertEquals(Cell(" ", Cell.Style(fg = ChromeRole.ACCENT)), buffer.get(1, 0))
+        assertEquals(Cell(" ", Style(fg = ChromeRole.ACCENT)), buffer.get(1, 0))
         assertEquals(Cell(), buffer.get(2, 0))
     }
 
@@ -247,16 +247,16 @@ internal class CanvasTest {
     fun `a wide glyph clipped on the left paints only a blank surviving slot`() {
         val canvas = Canvas.offscreen(3, 1)
 
-        canvas.writeString(-1, 0, "中", Cell.Style(fg = ChromeRole.ACCENT))
+        canvas.setString(-1, 0, "中", Style(fg = ChromeRole.ACCENT))
 
-        assertEquals(Cell(" ", Cell.Style(fg = ChromeRole.ACCENT)), canvas.get(0, 0))
+        assertEquals(Cell(" ", Style(fg = ChromeRole.ACCENT)), canvas.get(0, 0))
         assertEquals(Cell(), canvas.get(1, 0))
     }
 
     @Test
     fun `replacing either half of a wide glyph removes the complete glyph`() {
         val canvas = Canvas.offscreen(4, 1)
-        canvas.writeString(0, 0, "中A")
+        canvas.setString(0, 0, "中A")
 
         canvas.set(1, 0, Cell("X"))
 
@@ -268,44 +268,44 @@ internal class CanvasTest {
     @Test
     fun `blit copies cell char fg and bg from source to destination`() {
         val src = Canvas.offscreen(5, 5)
-        src.set(1, 2, Cell("X", Cell.Style(ChromeRole.DANGER, ChromeRole.INFO)))
+        src.set(1, 2, Cell("X", Style(ChromeRole.DANGER, ChromeRole.INFO)))
         val dest = Canvas.offscreen(10, 10)
 
         dest.blit(src, 1, 2, 3, 4, 1, 1)
 
-        assertEquals(Cell("X", Cell.Style(ChromeRole.DANGER, ChromeRole.INFO)), dest.get(3, 4))
+        assertEquals(Cell("X", Style(ChromeRole.DANGER, ChromeRole.INFO)), dest.get(3, 4))
     }
 
     @Test
     fun `blit clips at destination right and bottom edges`() {
         val src = Canvas.offscreen(5, 5)
-        src.set(0, 0, Cell("A", Cell.Style(ChromeRole.SUCCESS)))
-        src.set(1, 0, Cell("B", Cell.Style(ChromeRole.SUCCESS)))
-        src.set(2, 0, Cell("C", Cell.Style(ChromeRole.SUCCESS)))
+        src.set(0, 0, Cell("A", Style(ChromeRole.SUCCESS)))
+        src.set(1, 0, Cell("B", Style(ChromeRole.SUCCESS)))
+        src.set(2, 0, Cell("C", Style(ChromeRole.SUCCESS)))
         val dest = Canvas.offscreen(4, 4)
 
         dest.blit(src, 0, 0, 3, 0, 3, 1)
 
-        assertEquals(Cell("A", Cell.Style(ChromeRole.SUCCESS)), dest.get(3, 0))
+        assertEquals(Cell("A", Style(ChromeRole.SUCCESS)), dest.get(3, 0))
         assertEquals(Cell(), dest.get(2, 0))
     }
 
     @Test
     fun `blit skips source rows and cols beyond source bounds`() {
         val src = Canvas.offscreen(2, 2)
-        src.set(0, 0, Cell("Z", Cell.Style(ChromeRole.ACCENT)))
+        src.set(0, 0, Cell("Z", Style(ChromeRole.ACCENT)))
         val dest = Canvas.offscreen(10, 10)
 
         dest.blit(src, 0, 0, 0, 0, 5, 5)
 
-        assertEquals(Cell("Z", Cell.Style(ChromeRole.ACCENT)), dest.get(0, 0))
+        assertEquals(Cell("Z", Style(ChromeRole.ACCENT)), dest.get(0, 0))
         assertEquals(Cell(), dest.get(2, 0))
         assertEquals(Cell(), dest.get(0, 2))
     }
 
     @Test
     fun `blit into a sub-region never writes past that region's own edge`() {
-        val buffer = ScreenBuffer(10, 1)
+        val buffer = Buffer(10, 1)
         val src = Canvas.offscreen(5, 1)
         src.set(0, 0, Cell("A"))
         src.set(1, 0, Cell("B"))
@@ -320,7 +320,7 @@ internal class CanvasTest {
     @Test
     fun `blit never copies only half of a wide glyph`() {
         val source = Canvas.offscreen(3, 1)
-        source.writeString(0, 0, "中")
+        source.setString(0, 0, "中")
         val destination = Canvas.offscreen(3, 1)
 
         destination.blit(source, 0, 0, 0, 0, 1, 1)
@@ -332,17 +332,17 @@ internal class CanvasTest {
     @Test
     fun `overlapping horizontal and vertical blits use their original source`() {
         val horizontal = Canvas.offscreen(4, 1)
-        horizontal.writeString(0, 0, "ABCD")
+        horizontal.setString(0, 0, "ABCD")
         horizontal.blit(horizontal, 0, 0, 1, 0, 3, 1)
 
         val vertical = Canvas.offscreen(3, 3)
-        vertical.writeString(0, 0, "ABC")
-        vertical.writeString(0, 1, "DEF")
+        vertical.setString(0, 0, "ABC")
+        vertical.setString(0, 1, "DEF")
         vertical.blit(vertical, 0, 0, 0, 1, 3, 2)
 
-        assertEquals("AABC", (0 until 4).joinToString("") { horizontal.get(it, 0).char })
-        assertEquals("ABC", (0 until 3).joinToString("") { vertical.get(it, 1).char })
-        assertEquals("DEF", (0 until 3).joinToString("") { vertical.get(it, 2).char })
+        assertEquals("AABC", (0 until 4).joinToString("") { horizontal.get(it, 0).symbol })
+        assertEquals("ABC", (0 until 3).joinToString("") { vertical.get(it, 1).symbol })
+        assertEquals("DEF", (0 until 3).joinToString("") { vertical.get(it, 2).symbol })
     }
 
     @Test
@@ -350,11 +350,11 @@ internal class CanvasTest {
         // Distinct Canvas objects, one backing buffer: the shifted copy would read cells this same
         // blit has already overwritten unless overlap is detected by buffer, not by canvas identity.
         val canvas = Canvas.offscreen(6, 1)
-        canvas.writeString(0, 0, "ABCDEF")
+        canvas.setString(0, 0, "ABCDEF")
 
         canvas.region(1, 0, 5, 1).blit(canvas.region(0, 0, 5, 1), 0, 0, 0, 0, 5, 1)
 
-        assertEquals("AABCDE", (0 until 6).joinToString("") { canvas.get(it, 0).char })
+        assertEquals("AABCDE", (0 until 6).joinToString("") { canvas.get(it, 0).symbol })
     }
 
 }

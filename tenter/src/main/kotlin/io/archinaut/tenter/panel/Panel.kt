@@ -5,9 +5,9 @@ package io.archinaut.tenter.panel
 
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.view.ContentView
-import io.archinaut.tenter.view.ViewportState
-import io.archinaut.tenter.view.scrollingPanel
+import io.archinaut.tenter.widget.ContentWidget
+import io.archinaut.tenter.widget.ViewportState
+import io.archinaut.tenter.widget.scrollingPanel
 
 /**
  * One stateful panel declaration. A panel owns its current state, restore state, attachment, and
@@ -28,7 +28,7 @@ public class Panel<K : PanelId, I>(
 ) {
     /** Prepared content and its sizing preference for one rendered state. */
     public class Presentation private constructor(
-        public val content: ContentView,
+        public val content: ContentWidget,
         private val preferredWidth: Int?,
     ) {
         internal fun requiredWidth(): Int = requireNotNull(preferredWidth) {
@@ -37,14 +37,14 @@ public class Panel<K : PanelId, I>(
 
         public companion object {
             /** Uses the space assigned to a main, proportional, or maximized panel. */
-            public fun allocated(content: ContentView): Presentation = Presentation(content, null)
+            public fun allocated(content: ContentWidget): Presentation = Presentation(content, null)
 
             /**
              * Preferred outer width for a side, minimized, or configured fixed-width panel.
              * Clipped to available space. Main, proportional, and maximized slots always use
              * their allocated width, allowing a declaration to be reused across layout modes.
              */
-            public fun fixedWidth(content: ContentView, width: Int): Presentation {
+            public fun fixedWidth(content: ContentWidget, width: Int): Presentation {
                 require(width > 0) { "Panel presentation width must be positive: $width" }
                 return Presentation(content, width)
             }
@@ -116,11 +116,10 @@ public class Panel<K : PanelId, I>(
             title = title,
             badge = badge,
             content = presentation.content,
-            state = candidate,
             borderColor = role,
             titleColor = role,
         )
-        scrollingPanel.draw(canvas)
+        scrollingPanel.render(canvas, candidate)
         return candidate
     }
 
