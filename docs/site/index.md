@@ -4,7 +4,7 @@ Tenter is a Kotlin/JVM toolkit for building terminal applications with text, wid
 scrolling panels, keyboard and mouse input, and animation. It builds on Mordant.
 
 !!! note "Development documentation"
-    These guides follow `main`, currently `0.1.0-SNAPSHOT`. The API is pre-1.0 and may
+    These guides follow `main`, currently `0.2.0-SNAPSHOT`. The API is pre-2.0 and may
     change. Pin the version and review API changes before upgrading. Installation
     currently requires building the library locally.
 
@@ -39,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.archinaut:tenter:0.1.0-SNAPSHOT")
+    implementation("io.archinaut:tenter:0.2.0-SNAPSHOT")
 }
 
 kotlin { jvmToolchain(25) }
