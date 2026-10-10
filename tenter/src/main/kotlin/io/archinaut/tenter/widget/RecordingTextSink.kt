@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.screen.RevealRect
+import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 
 internal class RecordingTextSink(override val width: Int) : TextSink {
@@ -13,8 +13,8 @@ internal class RecordingTextSink(override val width: Int) : TextSink {
         instructions += ContentLayout.Instruction.Text(column, row, text, style)
     }
 
-    override fun reveal(x: Int, y: Int, width: Int, height: Int) {
-        instructions += ContentLayout.Instruction.Reveal(RevealRect(x, y, width, height))
+    override fun reveal(rect: Rect) {
+        instructions += ContentLayout.Instruction.Reveal(rect)
     }
 
     override fun place(layout: ContentLayout, x: Int, y: Int) {

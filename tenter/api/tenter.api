@@ -459,10 +459,9 @@ public final class io/archinaut/tenter/screen/Canvas {
 	public final fun getHeight ()I
 	public final fun getWidth ()I
 	public final fun inner (Lio/archinaut/tenter/screen/Padding;)Lio/archinaut/tenter/screen/Canvas;
-	public final fun markReveal (IIII)V
-	public final fun region (IIII)Lio/archinaut/tenter/screen/Canvas;
+	public final fun markReveal (Lio/archinaut/tenter/screen/Rect;)V
 	public final fun region (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Canvas;
-	public final fun revealRect ()Lio/archinaut/tenter/screen/RevealRect;
+	public final fun revealRect ()Lio/archinaut/tenter/screen/Rect;
 	public final fun set (IILio/archinaut/tenter/screen/Cell;)V
 	public final fun setFg (IILjava/lang/String;Lio/archinaut/tenter/palette/ColorRole;)V
 	public final fun setString (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;)V
@@ -611,6 +610,7 @@ public final class io/archinaut/tenter/screen/Padding {
 	public final fun getTop ()I
 	public fun hashCode ()I
 	public final fun horizontalEdges ()Lio/archinaut/tenter/screen/Padding;
+	public final fun isZero ()Z
 	public final fun plus (Lio/archinaut/tenter/screen/Padding;)Lio/archinaut/tenter/screen/Padding;
 	public fun toString ()Ljava/lang/String;
 	public final fun verticalEdges ()Lio/archinaut/tenter/screen/Padding;
@@ -638,6 +638,7 @@ public final class io/archinaut/tenter/screen/Point {
 
 public final class io/archinaut/tenter/screen/Rect {
 	public fun <init> (IIII)V
+	public final fun clipTo (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Rect;
 	public final fun component1 ()I
 	public final fun component2 ()I
 	public final fun component3 ()I
@@ -652,23 +653,8 @@ public final class io/archinaut/tenter/screen/Rect {
 	public final fun getY ()I
 	public fun hashCode ()I
 	public final fun inner (Lio/archinaut/tenter/screen/Padding;)Lio/archinaut/tenter/screen/Rect;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/screen/RevealRect {
-	public fun <init> (IIII)V
-	public final fun component1 ()I
-	public final fun component2 ()I
-	public final fun component3 ()I
-	public final fun component4 ()I
-	public final fun copy (IIII)Lio/archinaut/tenter/screen/RevealRect;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/RevealRect;IIIIILjava/lang/Object;)Lio/archinaut/tenter/screen/RevealRect;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getHeight ()I
-	public final fun getWidth ()I
-	public final fun getX ()I
-	public final fun getY ()I
-	public fun hashCode ()I
+	public final fun isEmpty ()Z
+	public final fun offset (II)Lio/archinaut/tenter/screen/Rect;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -879,7 +865,7 @@ public final class io/archinaut/tenter/widget/ContentLayout : io/archinaut/tente
 
 public final class io/archinaut/tenter/widget/ContentLayout$Builder {
 	public final fun place (IILio/archinaut/tenter/widget/ContentLayout;)V
-	public final fun reveal (IIII)V
+	public final fun reveal (Lio/archinaut/tenter/screen/Rect;)V
 }
 
 public abstract interface class io/archinaut/tenter/widget/ContentWidget : io/archinaut/tenter/widget/Widget {
@@ -955,23 +941,23 @@ public final class io/archinaut/tenter/widget/ScrollOffset$Companion {
 }
 
 public final class io/archinaut/tenter/widget/ScrollState {
-	public fun <init> (Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIII)V
-	public synthetic fun <init> (Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/Rect;IIII)V
+	public synthetic fun <init> (Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/Rect;IIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lio/archinaut/tenter/widget/ScrollOffset;
 	public final fun component2 ()Lio/archinaut/tenter/widget/ScrollOffset;
-	public final fun component3 ()Lio/archinaut/tenter/screen/RevealRect;
+	public final fun component3 ()Lio/archinaut/tenter/screen/Rect;
 	public final fun component4 ()I
 	public final fun component5 ()I
 	public final fun component6 ()I
 	public final fun component7 ()I
-	public final fun copy (Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIII)Lio/archinaut/tenter/widget/ScrollState;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/widget/ScrollState;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/RevealRect;IIIIILjava/lang/Object;)Lio/archinaut/tenter/widget/ScrollState;
+	public final fun copy (Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/Rect;IIII)Lio/archinaut/tenter/widget/ScrollState;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/widget/ScrollState;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/widget/ScrollOffset;Lio/archinaut/tenter/screen/Rect;IIIIILjava/lang/Object;)Lio/archinaut/tenter/widget/ScrollState;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getContentHeight ()I
 	public final fun getContentWidth ()I
 	public final fun getMaxOffset ()Lio/archinaut/tenter/widget/ScrollOffset;
 	public final fun getOffset ()Lio/archinaut/tenter/widget/ScrollOffset;
-	public final fun getRevealed ()Lio/archinaut/tenter/screen/RevealRect;
+	public final fun getRevealed ()Lio/archinaut/tenter/screen/Rect;
 	public final fun getViewportHeight ()I
 	public final fun getViewportWidth ()I
 	public fun hashCode ()I

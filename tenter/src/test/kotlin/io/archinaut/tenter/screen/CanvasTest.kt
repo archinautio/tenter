@@ -57,7 +57,7 @@ internal class CanvasTest {
     @Test
     fun `setString truncates at canvas edge, not the underlying buffer edge`() {
         val buffer = Buffer(20, 1)
-        val canvas = Canvas.of(buffer).region(3, 0, 5, 1)
+        val canvas = Canvas.of(buffer).region(Rect(3, 0, 5, 1))
 
         canvas.setString(0, 0, "Hello world")
 
@@ -145,7 +145,7 @@ internal class CanvasTest {
     @Test
     fun `region derives a canvas at a local offset`() {
         val buffer = Buffer(15, 8)
-        val canvas = Canvas.of(buffer).region(2, 1, 10, 5)
+        val canvas = Canvas.of(buffer).region(Rect(2, 1, 10, 5))
 
         canvas.set(0, 0, Cell("X"))
 
@@ -156,7 +156,7 @@ internal class CanvasTest {
     fun `region clamps to the parent rather than escaping it`() {
         val canvas = Canvas.offscreen(10, 10)
 
-        val child = canvas.region(8, 8, 100, 100)
+        val child = canvas.region(Rect(8, 8, 100, 100))
 
         assertEquals(2, child.width)
         assertEquals(2, child.height)
@@ -165,7 +165,7 @@ internal class CanvasTest {
     @Test
     fun `region intersects a rectangle that starts outside the parent`() {
         val buffer = Buffer(10, 1)
-        val child = Canvas.of(buffer).region(-2, 0, 5, 1)
+        val child = Canvas.of(buffer).region(Rect(-2, 0, 5, 1))
 
         assertEquals(3, child.width)
         child.set(2, 0, Cell("X"))
@@ -178,9 +178,9 @@ internal class CanvasTest {
     fun `reveal intersection does not retain hidden columns`() {
         val canvas = Canvas.offscreen(10, 1)
 
-        canvas.markReveal(-2, 0, 5, 1)
+        canvas.markReveal(Rect(-2, 0, 5, 1))
 
-        assertEquals(RevealRect(0, 0, 3, 1), canvas.revealRect())
+        assertEquals(Rect(0, 0, 3, 1), canvas.revealRect())
     }
 
     @Test
@@ -203,8 +203,8 @@ internal class CanvasTest {
     @Test
     fun `a canvas cannot write past its own edge into a sibling region`() {
         val buffer = Buffer(10, 1)
-        val left = Canvas.of(buffer).region(0, 0, 5, 1)
-        val right = Canvas.of(buffer).region(5, 0, 5, 1)
+        val left = Canvas.of(buffer).region(Rect(0, 0, 5, 1))
+        val right = Canvas.of(buffer).region(Rect(5, 0, 5, 1))
 
         left.setString(0, 0, "AAAAAAAAAA") // ten chars into a five-wide canvas
 
@@ -235,7 +235,7 @@ internal class CanvasTest {
     @Test
     fun `a wide glyph at the child edge paints a blank instead of a half glyph`() {
         val buffer = Buffer(4, 1)
-        val child = Canvas.of(buffer).region(1, 0, 1, 1)
+        val child = Canvas.of(buffer).region(Rect(1, 0, 1, 1))
 
         child.setString(0, 0, "中", Style(fg = ChromeRole.ACCENT))
 
@@ -310,7 +310,7 @@ internal class CanvasTest {
         src.set(0, 0, Cell("A"))
         src.set(1, 0, Cell("B"))
         src.set(2, 0, Cell("C"))
-        val dest = Canvas.of(buffer).region(0, 0, 2, 1) // narrower than the 3-cell blit
+        val dest = Canvas.of(buffer).region(Rect(0, 0, 2, 1)) // narrower than the 3-cell blit
 
         dest.blit(src, 0, 0, 0, 0, 3, 1)
 
@@ -352,7 +352,7 @@ internal class CanvasTest {
         val canvas = Canvas.offscreen(6, 1)
         canvas.setString(0, 0, "ABCDEF")
 
-        canvas.region(1, 0, 5, 1).blit(canvas.region(0, 0, 5, 1), 0, 0, 0, 0, 5, 1)
+        canvas.region(Rect(1, 0, 5, 1)).blit(canvas.region(Rect(0, 0, 5, 1)), 0, 0, 0, 0, 5, 1)
 
         assertEquals("AABCDE", (0 until 6).joinToString("") { canvas.get(it, 0).symbol })
     }

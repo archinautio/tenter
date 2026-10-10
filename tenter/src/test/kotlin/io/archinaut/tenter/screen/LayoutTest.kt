@@ -106,7 +106,7 @@ internal class LayoutTest {
 
     @Test
     fun `split follows a canvas area in local coordinates`() {
-        val canvas = Canvas.offscreen(10, 4).region(3, 1, 6, 2)
+        val canvas = Canvas.offscreen(10, 4).region(Rect(3, 1, 6, 2))
 
         val (left, right) = Layout.horizontal(Length(2), Fill(1)).split(canvas.area)
 

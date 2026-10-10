@@ -3,6 +3,9 @@
 
 package io.archinaut.tenter.widget
 
+import io.archinaut.tenter.screen.Rect
+
+
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -18,7 +21,7 @@ internal class PreparedCompositionTest {
     fun `width-only resize follows a fixed reveal and unchanged dimensions retain manual scroll`() {
         val state = ViewportState()
         val viewport = Viewport(fixedContent(30, 1, object : Widget {
-            override fun render(canvas: Canvas) { canvas.markReveal(15, 0, 1, 1) }
+            override fun render(canvas: Canvas) { canvas.markReveal(Rect(15, 0, 1, 1)) }
         }))
         viewport.render(Canvas.offscreen(20, 2), state)
 
@@ -217,11 +220,11 @@ internal class PreparedCompositionTest {
     @Test
     fun `prepared and fixed reveal targets follow composition order`() {
         val prepared = contentLayout(10, 1) {
-            reveal(0, 0, 10, 1)
+            reveal(Rect(0, 0, 10, 1))
         }
         val fixed = fixedContent(10, 1, object : Widget {
             override fun render(canvas: Canvas) {
-                canvas.markReveal(0, 0, 10, 1)
+                canvas.markReveal(Rect(0, 0, 10, 1))
             }
         }).layout(10)
         val fixedLast = object : ContentWidget {
@@ -254,8 +257,8 @@ internal class PreparedCompositionTest {
                 height = 20,
                 revealPreference = RevealPreference.FIRST,
             ) {
-                reveal(0, 2, availableWidth, 1)
-                reveal(0, 15, availableWidth, 1)
+                reveal(Rect(0, 2, availableWidth, 1))
+                reveal(Rect(0, 15, availableWidth, 1))
             }
         }
         val state = ViewportState()

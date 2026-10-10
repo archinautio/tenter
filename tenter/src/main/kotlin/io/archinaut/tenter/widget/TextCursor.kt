@@ -5,6 +5,7 @@ package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
+import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.screen.StyledText
@@ -126,12 +127,12 @@ public class TextCursor private constructor(
 
     /** Marks the current row (full width) as the content the enclosing viewport should keep visible. */
     public fun markReveal(height: Int = 1) {
-        sink.reveal(0, row, width, height)
+        sink.reveal(Rect(0, row, width, height))
     }
 
     /** Marks [atRow] (full width), rather than the current row, as the content to keep visible. */
     public fun markRevealAt(atRow: Int, height: Int = 1) {
-        sink.reveal(0, atRow, width, height)
+        sink.reveal(Rect(0, atRow, width, height))
     }
 
     /** Overlays [text] onto an already-written [atRow] at [column] — for repainting part of a finished row. */

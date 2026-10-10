@@ -9,22 +9,22 @@ import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.screen.styled
-import io.archinaut.tenter.screen.RevealRect
+import io.archinaut.tenter.screen.Rect
 
 internal class TextCursorTest {
 
     @Test
     fun `immediate and prepared child insertion retain the last nonempty visible reveal`() {
         val cases = listOf(
-            fixedContent(4, 1, EmptyWidget) to RevealRect(0, 0, 4, 1),
-            fixedContent(0, 0, EmptyWidget) to RevealRect(0, 0, 4, 1),
-            contentWidget { it.writeLine("child"); it.markRevealAt(0) } to RevealRect(0, 1, 4, 1),
+            fixedContent(4, 1, EmptyWidget) to Rect(0, 0, 4, 1),
+            fixedContent(0, 0, EmptyWidget) to Rect(0, 0, 4, 1),
+            contentWidget { it.writeLine("child"); it.markRevealAt(0) } to Rect(0, 1, 4, 1),
             fixedContent(4, 1, object : Widget {
-                override fun render(canvas: Canvas) { canvas.markReveal(-2, 0, 3, 1) }
-            }) to RevealRect(0, 1, 1, 1),
+                override fun render(canvas: Canvas) { canvas.markReveal(Rect(-2, 0, 3, 1)) }
+            }) to Rect(0, 1, 1, 1),
             fixedContent(4, 1, object : Widget {
-                override fun render(canvas: Canvas) { canvas.markReveal(8, 0, 1, 1) }
-            }) to RevealRect(0, 0, 4, 1),
+                override fun render(canvas: Canvas) { canvas.markReveal(Rect(8, 0, 1, 1)) }
+            }) to Rect(0, 0, 4, 1),
         )
         for ((child, expected) in cases) {
             val instructions: (TextCursor) -> Unit = { cursor ->
@@ -52,7 +52,7 @@ internal class TextCursorTest {
 
         cursor.draw(contentWidget { it.writeLine("child"); it.markRevealAt(0) })
 
-        assertEquals(RevealRect(0, 0, 4, 1), canvas.revealRect())
+        assertEquals(Rect(0, 0, 4, 1), canvas.revealRect())
     }
 
     @Test

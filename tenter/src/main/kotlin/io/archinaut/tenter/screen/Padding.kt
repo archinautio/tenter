@@ -30,6 +30,9 @@ public data class Padding(
     /** This padding with the left and right edges dropped. */
     public fun verticalEdges(): Padding = Padding(top = top, bottom = bottom)
 
+    /** True when all edges are zero. */
+    public fun isZero(): Boolean = this === ZERO || (left or top or right or bottom) == 0
+
     public companion object {
         public val ZERO: Padding = Padding()
 

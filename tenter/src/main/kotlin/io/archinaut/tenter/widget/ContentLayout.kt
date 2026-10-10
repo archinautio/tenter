@@ -4,7 +4,7 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.screen.RevealRect
+import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 
 /**
@@ -39,10 +39,8 @@ public class ContentLayout internal constructor(
         }
 
         /** Requests visibility of a layout-local rectangle. Empty rectangles are ignored. */
-        public fun reveal(x: Int, y: Int, width: Int, height: Int) {
-            require(width >= 0) { "reveal width must not be negative: $width" }
-            require(height >= 0) { "reveal height must not be negative: $height" }
-            instructions += Instruction.Reveal(RevealRect(x, y, width, height))
+        public fun reveal(rect: Rect) {
+            instructions += Instruction.Reveal(rect)
         }
 
         internal fun snapshot(): List<Instruction> = instructions.toList()
@@ -51,13 +49,13 @@ public class ContentLayout internal constructor(
     override fun render(canvas: Canvas) {
         canvas.clearReveal()
         val reveal = paint(canvas)
-        reveal?.let { canvas.markReveal(it.x, it.y, it.width, it.height) }
+        reveal?.let(canvas::markReveal)
     }
 
     /** Paints once and returns the final request in this layout's local coordinates. */
-    internal fun paint(canvas: Canvas): RevealRect? {
+    internal fun paint(canvas: Canvas): Rect? {
         canvas.clearReveal()
-        val requests = mutableListOf<RevealRect>()
+        val requests = mutableListOf<Rect>()
         for (instruction in instructions) {
             when (instruction) {
                 is Instruction.Text -> canvas.setString(
@@ -127,46 +125,26 @@ public class ContentLayout internal constructor(
             val style: Style,
         ) : Instruction
 
-        data class Reveal(val rect: RevealRect) : Instruction
+        data class Reveal(val rect: Rect) : Instruction
 
         data class Child(val x: Int, val y: Int, val content: ContentLayout) : Instruction
 
         data class Raw(val widget: Widget) : Instruction
     }
 
-    private fun clip(rect: RevealRect, boundWidth: Int, boundHeight: Int): RevealRect? {
-        return translateAndClip(rect, 0, 0, boundWidth, boundHeight, boundWidth, boundHeight)
-    }
+    private fun clip(rect: Rect, boundWidth: Int, boundHeight: Int): Rect? =
+        rect.clipTo(Rect(0, 0, boundWidth, boundHeight)).takeUnless { it.isEmpty }
 
     private fun translateAndClip(
-        rect: RevealRect,
+        rect: Rect,
         x: Int,
         y: Int,
         childWidth: Int,
         childHeight: Int,
         boundWidth: Int,
         boundHeight: Int,
-    ): RevealRect? {
-        val left = maxOf(rect.x.toLong(), 0L)
-        val top = maxOf(rect.y.toLong(), 0L)
-        val right = minOf(rect.x.toLong() + rect.width.toLong(), childWidth.toLong())
-        val bottom = minOf(rect.y.toLong() + rect.height.toLong(), childHeight.toLong())
-        if (left >= right || top >= bottom) return null
-
-        val translatedLeft = left + x.toLong()
-        val translatedTop = top + y.toLong()
-        val translatedRight = right + x.toLong()
-        val translatedBottom = bottom + y.toLong()
-        val clippedLeft = translatedLeft.coerceIn(0L, boundWidth.toLong())
-        val clippedTop = translatedTop.coerceIn(0L, boundHeight.toLong())
-        val clippedRight = translatedRight.coerceIn(clippedLeft, boundWidth.toLong())
-        val clippedBottom = translatedBottom.coerceIn(clippedTop, boundHeight.toLong())
-        if (clippedLeft >= clippedRight || clippedTop >= clippedBottom) return null
-        return RevealRect(
-            clippedLeft.toInt(),
-            clippedTop.toInt(),
-            (clippedRight - clippedLeft).toInt(),
-            (clippedBottom - clippedTop).toInt(),
-        )
+    ): Rect? {
+        val visible = clip(rect, childWidth, childHeight) ?: return null
+        return clip(visible.offset(x, y), boundWidth, boundHeight)
     }
 }

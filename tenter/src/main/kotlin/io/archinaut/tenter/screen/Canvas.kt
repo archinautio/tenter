@@ -12,74 +12,50 @@ import io.archinaut.tenter.text.textClusters
  * outside `0 until width` / `0 until height` are silently dropped, so a widget rendering into a
  * [Canvas] cannot touch a sibling's cells — even by mistake.
  *
- * [inner] and [region] derive smaller canvases by rectangle intersection, so nesting can only
+ * [inner] and [region] derive smaller canvases by [Rect.clipTo], so nesting can only
  * ever narrow: a child can't widen its way back out to a wider rect than it started with.
  */
 public class Canvas private constructor(
     private val buffer: Buffer,
-    private val originX: Int,
-    private val originY: Int,
-    public val width: Int,
-    public val height: Int,
+    /** This canvas's rectangle in [buffer]'s absolute coordinates. */
+    private val bounds: Rect,
 ) {
 
-    /** This canvas in its own local coordinates: always `Rect(0, 0, width, height)`. Split it with [Layout]. */
-    public val area: Rect get() = Rect(0, 0, width, height)
+    public val width: Int get() = bounds.width
 
-    /** The intersection of the requested rectangle with this canvas. */
-    public fun region(x: Int, y: Int, width: Int, height: Int): Canvas {
-        val horizontal = intersection(x, width, this.width)
-        val vertical = intersection(y, height, this.height)
-        return Canvas(
-            buffer,
-            originX + horizontal.first,
-            originY + vertical.first,
-            horizontal.second - horizontal.first,
-            vertical.second - vertical.first,
-        )
-    }
+    public val height: Int get() = bounds.height
+
+    /** This canvas in its own local coordinates: always `Rect(0, 0, width, height)`. Split it with [Layout]. */
+    public val area: Rect = Rect(0, 0, bounds.width, bounds.height)
 
     /**
-     * The intersection of [rect] with this canvas — for the rectangles a completed frame
-     * publishes (see [io.archinaut.tenter.panel.PanelLayout]), so a caller never unpacks one into four ints.
+     * The intersection of [rect] with this canvas — e.g. a [Layout] split of [area], or a rectangle a
+     * completed frame publishes (see [io.archinaut.tenter.panel.PanelLayout]).
      */
-    public fun region(rect: Rect): Canvas = region(rect.x, rect.y, rect.width, rect.height)
+    public fun region(rect: Rect): Canvas = Canvas(buffer, rect.clipTo(area).toAbsolute())
 
     /** The region left after removing [padding] from each edge, clamped to never go negative. */
-    public fun inner(padding: Padding): Canvas = region(
-        padding.left,
-        padding.top,
-        width - padding.left - padding.right,
-        height - padding.top - padding.bottom,
-    )
+    public fun inner(padding: Padding): Canvas = Canvas(buffer, area.inner(padding).toAbsolute())
 
     /** @throws IndexOutOfBoundsException if ([x], [y]) is outside this canvas. */
     public fun get(x: Int, y: Int): Cell {
-        if (x < 0 || x >= width || y < 0 || y >= height) {
+        if (!area.contains(x, y)) {
             throw IndexOutOfBoundsException("($x, $y) out of bounds for ${width}x$height canvas")
         }
-        return buffer.get(originX + x, originY + y)
+        return buffer.get(bounds.x + x, bounds.y + y)
     }
 
     /** No-op if ([x], [y]) is outside this canvas. */
     public fun set(x: Int, y: Int, cell: Cell) {
-        if (x < 0 || x >= width || y < 0 || y >= height) return
-        buffer.writeCell(originX + x, originY + y, cell, originX, originY, originX + width, originY + height)
+        if (!area.contains(x, y)) return
+        buffer.writeCell(bounds.x + x, bounds.y + y, cell, bounds)
     }
 
     /** Writes [symbol] in [fg], preserving whatever background is already painted at ([x], [y]). */
     public fun setFg(x: Int, y: Int, symbol: String, fg: ColorRole) {
-        if (x < 0 || x >= width || y < 0 || y >= height) return
-        val bg = buffer.get(originX + x, originY + y).style.bg
-        buffer.writeCell(
-            originX + x,
-            originY + y,
-            Cell(symbol, Style(fg, bg)),
-            originX,
-            originY,
-            originX + width,
-            originY + height,
-        )
+        if (!area.contains(x, y)) return
+        val bg = buffer.get(bounds.x + x, bounds.y + y).style.bg
+        buffer.writeCell(bounds.x + x, bounds.y + y, Cell(symbol, Style(fg, bg)), bounds)
     }
 
     public fun setString(
@@ -91,15 +67,7 @@ public class Canvas private constructor(
         var column = x
         for (cluster in textClusters(text)) {
             if (cluster.width == 0) continue
-            buffer.writeCell(
-                originX + column,
-                originY + y,
-                Cell(cluster.drawableText, style),
-                originX,
-                originY,
-                originX + width,
-                originY + height,
-            )
+            buffer.writeCell(bounds.x + column, bounds.y + y, Cell(cluster.drawableText, style), bounds)
             column += cluster.width
         }
     }
@@ -113,23 +81,14 @@ public class Canvas private constructor(
      * and no-ops if left empty. At most one reveal rect exists per buffer — a later call
      * overwrites an earlier one.
      */
-    public fun markReveal(x: Int, y: Int, width: Int, height: Int) {
-        val horizontal = intersection(x, width, this.width)
-        val vertical = intersection(y, height, this.height)
-        if (horizontal.first == horizontal.second || vertical.first == vertical.second) return
-        buffer.reveal = RevealRect(
-            originX + horizontal.first,
-            originY + vertical.first,
-            horizontal.second - horizontal.first,
-            vertical.second - vertical.first,
-        )
+    public fun markReveal(rect: Rect) {
+        val visible = rect.clipTo(area)
+        if (visible.isEmpty) return
+        buffer.reveal = visible.toAbsolute()
     }
 
     /** The rect last marked via [markReveal], translated into THIS canvas's local coords, or `null` if none. */
-    public fun revealRect(): RevealRect? {
-        val reveal = buffer.reveal ?: return null
-        return RevealRect(reveal.x - originX, reveal.y - originY, reveal.width, reveal.height)
-    }
+    public fun revealRect(): Rect? = buffer.reveal?.offset(-bounds.x, -bounds.y)
 
     /** Clears the reveal request in this canvas's backing frame. Used by prepared frame scopes. */
     internal fun clearReveal() {
@@ -156,31 +115,25 @@ public class Canvas private constructor(
         // buffers cannot overlap, and every prepared-content blit streams from its own offscreen
         // buffer — so the copy would otherwise cost a full duplicate of the content on every frame.
         val source = if (src.buffer === buffer) src.buffer.snapshotCells() else src.buffer.cellRows()
-        val clipLeft = originX + destX + startCol.toInt()
-        val clipTop = originY + destY + startRow.toInt()
-        val clipRight = originX + destX + endCol.toInt()
-        val clipBottom = originY + destY + endRow.toInt()
+        val clip = Rect(
+            bounds.x + destX + startCol.toInt(),
+            bounds.y + destY + startRow.toInt(),
+            (endCol - startCol).toInt(),
+            (endRow - startRow).toInt(),
+        )
         for (row in startRow until endRow) {
             var column = startCol
             while (column < endCol) {
-                val sourceX = src.originX + srcX + column.toInt()
-                val sourceY = src.originY + srcY + row.toInt()
+                val sourceX = src.bounds.x + srcX + column.toInt()
+                val sourceY = src.bounds.y + srcY + row.toInt()
                 val stored = source[sourceY][sourceX]
                 val completeWide = !stored.continuation && stored.width == 2 &&
-                    column + 1 < endCol && sourceX + 1 < src.originX + src.width &&
+                    column + 1 < endCol && sourceX + 1 < src.bounds.x + src.width &&
                     source[sourceY][sourceX + 1].continuation
-                val destinationX = originX + destX + column.toInt()
-                val destinationY = originY + destY + row.toInt()
+                val destinationX = bounds.x + destX + column.toInt()
+                val destinationY = bounds.y + destY + row.toInt()
                 if (completeWide) {
-                    buffer.writeCell(
-                        destinationX,
-                        destinationY,
-                        stored.cell,
-                        clipLeft,
-                        clipTop,
-                        clipRight,
-                        clipBottom,
-                    )
+                    buffer.writeCell(destinationX, destinationY, stored.cell, clip)
                     column += 2
                 } else {
                     val cell = if (stored.continuation || stored.width == 2) {
@@ -188,32 +141,18 @@ public class Canvas private constructor(
                     } else {
                         stored.cell
                     }
-                    buffer.writeCell(
-                        destinationX,
-                        destinationY,
-                        cell,
-                        clipLeft,
-                        clipTop,
-                        clipRight,
-                        clipBottom,
-                    )
+                    buffer.writeCell(destinationX, destinationY, cell, clip)
                     column++
                 }
             }
         }
     }
 
-    private fun intersection(start: Int, length: Int, limit: Int): Pair<Int, Int> {
-        val requestedStart = start.toLong()
-        val requestedEnd = requestedStart + length.toLong()
-        val left = requestedStart.coerceIn(0L, limit.toLong())
-        val right = requestedEnd.coerceIn(left, limit.toLong())
-        return left.toInt() to right.toInt()
-    }
+    private fun Rect.toAbsolute(): Rect = offset(bounds.x, bounds.y)
 
     public companion object {
         /** A canvas over the whole of [buffer]. */
-        public fun of(buffer: Buffer): Canvas = Canvas(buffer, 0, 0, buffer.width, buffer.height)
+        public fun of(buffer: Buffer): Canvas = Canvas(buffer, Rect(0, 0, buffer.width, buffer.height))
 
         /** A detached canvas over its own backing buffer — for measuring or scrolling content off-screen. */
         public fun offscreen(width: Int, height: Int): Canvas = of(Buffer(width, height))

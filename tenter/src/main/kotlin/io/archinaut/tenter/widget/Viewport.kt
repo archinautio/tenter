@@ -4,7 +4,7 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.screen.RevealRect
+import io.archinaut.tenter.screen.Rect
 
 /** A 2D scroll offset, in characters. */
 public data class ScrollOffset(
@@ -24,7 +24,7 @@ public data class ScrollOffset(
 public data class ScrollState(
     public val offset: ScrollOffset,
     public val maxOffset: ScrollOffset,
-    public val revealed: RevealRect? = null,
+    public val revealed: Rect? = null,
     public val viewportWidth: Int = 0,
     public val viewportHeight: Int = 0,
     public val contentWidth: Int = 0,
@@ -78,7 +78,7 @@ public class ViewportState(initialOffset: ScrollOffset = ScrollOffset.ZERO) {
 
     internal fun requestedOffset(): ScrollOffset = carried.requestedOffset
 
-    internal fun shouldFollow(reveal: RevealRect?, viewportWidth: Int, viewportHeight: Int): Boolean {
+    internal fun shouldFollow(reveal: Rect?, viewportWidth: Int, viewportHeight: Int): Boolean {
         if (reveal == null) return false
         val previous = carried.settled ?: return true
         return reveal != previous.revealed ||

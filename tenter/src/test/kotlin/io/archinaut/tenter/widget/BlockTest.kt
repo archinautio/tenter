@@ -174,7 +174,7 @@ internal class BlockTest {
     fun `content rendered at offset position within parent buffer`() {
         val block = Block()
         val buffer = Buffer(40, 20)
-        val canvas = Canvas.of(buffer).region(5, 3, 20, 10)
+        val canvas = Canvas.of(buffer).region(Rect(5, 3, 20, 10))
 
         block.render(canvas)
         block.inner(canvas).setString(0, 0, "X")

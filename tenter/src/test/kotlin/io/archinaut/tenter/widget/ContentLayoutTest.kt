@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.palette.ChromeRole
-import io.archinaut.tenter.screen.RevealRect
+import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Style
 
@@ -100,14 +100,14 @@ internal class ContentLayoutTest {
         lateinit var builder: ContentLayout.Builder
         val layout = contentLayout(8, 1) {
             builder = this
-            reveal(0, 0, 1, 1)
+            reveal(Rect(0, 0, 1, 1))
         }
-        builder.reveal(7, 0, 1, 1)
+        builder.reveal(Rect(7, 0, 1, 1))
         val canvas = Canvas.offscreen(8, 1)
 
         layout.render(canvas)
 
-        assertEquals(RevealRect(0, 0, 1, 1), canvas.revealRect())
+        assertEquals(Rect(0, 0, 1, 1), canvas.revealRect())
     }
 
     @Test
@@ -138,7 +138,7 @@ internal class ContentLayoutTest {
         val child = object : ContentWidget {
             override fun layout(availableWidth: Int): ContentLayout {
                 prepareCount++
-                return contentLayout(availableWidth, 1) { reveal(0, 0, 1, 1) }
+                return contentLayout(availableWidth, 1) { reveal(Rect(0, 0, 1, 1)) }
             }
         }
         val parent = contentWidget { cursor -> cursor.draw(child) }
@@ -171,7 +171,7 @@ internal class ContentLayoutTest {
     @Test
     fun `custom layout places child and clips translated reveal to both rectangles`() {
         val child = contentLayout(5, 4) {
-            reveal(x = -2, y = 1, width = 6, height = 3)
+            reveal(Rect(x = -2, y = 1, width = 6, height = 3))
             place(x = 0, y = 0, content = contentWidget { it.writeLine("child") }.layout(5))
         }
         val parent = contentLayout(4, 3) {
@@ -182,19 +182,19 @@ internal class ContentLayoutTest {
 
         parent.render(canvas)
 
-        assertEquals(RevealRect(0, 2, 3, 1), canvas.revealRect())
+        assertEquals(Rect(0, 2, 3, 1), canvas.revealRect())
         assertEquals("hild", buffer.line(1, width = 4))
     }
 
     @Test
     fun `last and first preferences resolve prepared and raw requests in declaration order`() {
-        val prepared = contentLayout(4, 2) { reveal(0, 0, 4, 1) }
+        val prepared = contentLayout(4, 2) { reveal(Rect(0, 0, 4, 1)) }
         val raw = fixedContent(
             width = 4,
             height = 2,
             widget = object : Widget {
                 override fun render(canvas: Canvas) {
-                    canvas.markReveal(0, 1, 4, 1)
+                    canvas.markReveal(Rect(0, 1, 4, 1))
                 }
             },
         ).layout(4)
@@ -213,8 +213,8 @@ internal class ContentLayoutTest {
         last.render(lastCanvas)
         first.render(firstCanvas)
 
-        assertEquals(RevealRect(0, 1, 4, 1), lastCanvas.revealRect())
-        assertEquals(RevealRect(0, 0, 4, 1), firstCanvas.revealRect())
+        assertEquals(Rect(0, 1, 4, 1), lastCanvas.revealRect())
+        assertEquals(Rect(0, 0, 4, 1), firstCanvas.revealRect())
 
         val reverseLast = contentLayout(4, 2, RevealPreference.LAST) {
             place(0, 0, raw)
@@ -229,28 +229,28 @@ internal class ContentLayoutTest {
         reverseLast.render(reverseLastCanvas)
         reverseFirst.render(reverseFirstCanvas)
 
-        assertEquals(RevealRect(0, 0, 4, 1), reverseLastCanvas.revealRect())
-        assertEquals(RevealRect(0, 1, 4, 1), reverseFirstCanvas.revealRect())
+        assertEquals(Rect(0, 0, 4, 1), reverseLastCanvas.revealRect())
+        assertEquals(Rect(0, 1, 4, 1), reverseFirstCanvas.revealRect())
     }
 
     @Test
     fun `nested preference resolves inside the child before parent composition`() {
         val child = contentLayout(4, 3, RevealPreference.FIRST) {
-            reveal(0, 0, 4, 1)
-            reveal(0, 2, 4, 1)
+            reveal(Rect(0, 0, 4, 1))
+            reveal(Rect(0, 2, 4, 1))
         }
         val parent = contentLayout(4, 3) { place(0, 0, child) }
         val canvas = Canvas.offscreen(4, 3)
 
         parent.render(canvas)
 
-        assertEquals(RevealRect(0, 0, 4, 1), canvas.revealRect())
+        assertEquals(Rect(0, 0, 4, 1), canvas.revealRect())
     }
 
     @Test
     fun `first preference falls back when the first child has no target`() {
         val noTarget = contentLayout(4, 1) { }
-        val target = contentLayout(4, 1) { reveal(0, 0, 4, 1) }
+        val target = contentLayout(4, 1) { reveal(Rect(0, 0, 4, 1)) }
         val parent = contentLayout(4, 1, RevealPreference.FIRST) {
             place(0, 0, noTarget)
             place(0, 0, target)
@@ -259,14 +259,14 @@ internal class ContentLayoutTest {
 
         parent.render(canvas)
 
-        assertEquals(RevealRect(0, 0, 4, 1), canvas.revealRect())
+        assertEquals(Rect(0, 0, 4, 1), canvas.revealRect())
     }
 
     @Test
     fun `painting a layout with no request clears a stale canvas reveal`() {
         val buffer = Buffer(4, 2)
         val canvas = Canvas.of(buffer)
-        val revealing = contentLayout(4, 2) { reveal(0, 1, 4, 1) }
+        val revealing = contentLayout(4, 2) { reveal(Rect(0, 1, 4, 1)) }
         val quiet = contentLayout(4, 2) { }
 
         revealing.render(canvas)
@@ -284,7 +284,7 @@ internal class ContentLayoutTest {
             widget = object : Widget {
                 override fun render(canvas: Canvas) {
                     canvas.set(0, 0, Cell("X", Style(fg = ChromeRole.SUCCESS)))
-                    canvas.markReveal(0, 0, 1, 1)
+                    canvas.markReveal(Rect(0, 0, 1, 1))
                 }
             },
         )
@@ -293,6 +293,6 @@ internal class ContentLayoutTest {
         content.render(canvas)
 
         assertEquals("X", canvas.get(0, 0).symbol)
-        assertEquals(RevealRect(0, 0, 1, 1), canvas.revealRect())
+        assertEquals(Rect(0, 0, 1, 1), canvas.revealRect())
     }
 }

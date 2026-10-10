@@ -4,6 +4,7 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Canvas
+import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 
 internal class CanvasTextSink(private val canvas: Canvas) : TextSink {
@@ -13,8 +14,8 @@ internal class CanvasTextSink(private val canvas: Canvas) : TextSink {
         canvas.setString(column, row, text, style)
     }
 
-    override fun reveal(x: Int, y: Int, width: Int, height: Int) {
-        canvas.markReveal(x, y, width, height)
+    override fun reveal(rect: Rect) {
+        canvas.markReveal(rect)
     }
 
     override fun place(layout: ContentLayout, x: Int, y: Int) {
@@ -23,7 +24,7 @@ internal class CanvasTextSink(private val canvas: Canvas) : TextSink {
         layout.render(stream)
         canvas.blit(stream, 0, 0, x, y, layout.width, layout.height)
         stream.revealRect()?.let { reveal ->
-            canvas.markReveal(x + reveal.x, y + reveal.y, reveal.width, reveal.height)
+            canvas.markReveal(reveal.offset(x, y))
         }
     }
 

@@ -17,8 +17,11 @@ public class Buffer(
         cells = Array(height) { Array(width) { EMPTY_STORED } }
     }
 
+    // Declared after `init` so its size checks report before Rect's own.
+    private val area: Rect = Rect(0, 0, width, height)
+
     /** The reveal rect last marked via [Canvas.markReveal], in this buffer's own absolute coords. */
-    internal var reveal: RevealRect? = null
+    internal var reveal: Rect? = null
 
     /** Blanks every cell to [Cell.EMPTY] and drops any reveal request, so the buffer can be redrawn from scratch. */
     public fun reset() {
@@ -27,42 +30,41 @@ public class Buffer(
     }
 
     public fun get(x: Int, y: Int): Cell {
-        if (x < 0 || x >= width || y < 0 || y >= height) {
+        if (!area.contains(x, y)) {
             throw IndexOutOfBoundsException("($x, $y) out of bounds for ${width}x$height buffer")
         }
         return cells[y][x].asPublicCell()
     }
 
     public fun set(x: Int, y: Int, cell: Cell) {
-        if (x < 0 || x >= width || y < 0 || y >= height) return
-        writeCell(x, y, cell, 0, 0, width, height)
+        if (!area.contains(x, y)) return
+        writeCell(x, y, cell, area)
     }
 
     internal fun writeCell(
         x: Int,
         y: Int,
         cell: Cell,
-        clipLeft: Int,
-        clipTop: Int,
-        clipRight: Int,
-        clipBottom: Int,
+        clip: Rect,
     ) {
         val glyph = cell.toStoredGlyph()
-        if (y !in clipTop until clipBottom) return
+        val clipLeft = clip.x
+        val clipRight = clip.x + clip.width
+        if (y !in clip.y until clip.y + clip.height) return
         if (glyph.width == 2 && x < clipLeft && x + 1 >= clipLeft) {
-            writeBlank(clipLeft, y, glyph.cell.style, clipLeft, clipTop, clipRight, clipBottom)
+            writeBlank(clipLeft, y, glyph.cell.style, clip)
             return
         }
         if (x !in clipLeft until clipRight) return
 
         if (glyph.width == 2 && x + 1 >= clipRight) {
-            writeBlank(x, y, glyph.cell.style, clipLeft, clipTop, clipRight, clipBottom)
+            writeBlank(x, y, glyph.cell.style, clip)
             return
         }
 
         val targetEnd = x + glyph.width
         if (targetEnd > clipRight || targetEnd > width) return
-        if (!canReplace(x, y, targetEnd, clipLeft, clipTop, clipRight, clipBottom)) return
+        if (!canReplace(x, y, targetEnd, clip)) return
 
         clearGlyphAt(x, y)
         if (glyph.width == 2) clearGlyphAt(x + 1, y)
@@ -97,12 +99,11 @@ public class Buffer(
         x: Int,
         y: Int,
         targetEnd: Int,
-        clipLeft: Int,
-        clipTop: Int,
-        clipRight: Int,
-        clipBottom: Int,
+        clip: Rect,
     ): Boolean {
-        if (y !in clipTop until clipBottom) return false
+        if (y !in clip.y until clip.y + clip.height) return false
+        val clipLeft = clip.x
+        val clipRight = clip.x + clip.width
         // `targetEnd - x` is 1 or 2, and the two columns of a wide glyph share one lead, so this
         // walks at most two distinct leads — worth doing without allocating a list per cell write.
         var column = x
@@ -132,12 +133,9 @@ public class Buffer(
         x: Int,
         y: Int,
         style: Style,
-        clipLeft: Int,
-        clipTop: Int,
-        clipRight: Int,
-        clipBottom: Int,
+        clip: Rect,
     ) {
-        if (!canReplace(x, y, x + 1, clipLeft, clipTop, clipRight, clipBottom)) return
+        if (!canReplace(x, y, x + 1, clip)) return
         clearGlyphAt(x, y)
         cells[y][x] = StoredCell(Cell(" ", style), width = 1, continuation = false)
     }
