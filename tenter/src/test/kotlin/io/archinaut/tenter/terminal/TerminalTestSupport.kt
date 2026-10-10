@@ -10,6 +10,6 @@ import io.archinaut.tenter.screen.Canvas
 internal fun Terminal.renderBuffer(buffer: Buffer): CompletedFrame {
     resize(buffer.width, buffer.height)
     return draw { frame ->
-        Canvas.of(frame.buffer).blit(Canvas.of(buffer), 0, 0, 0, 0, buffer.width, buffer.height)
+        frame.canvas().blit(Canvas.of(buffer))
     }
 }

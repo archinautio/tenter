@@ -453,7 +453,8 @@ public final class io/archinaut/tenter/screen/Buffer {
 
 public final class io/archinaut/tenter/screen/Canvas {
 	public static final field Companion Lio/archinaut/tenter/screen/Canvas$Companion;
-	public final fun blit (Lio/archinaut/tenter/screen/Canvas;IIIIII)V
+	public final fun blit (Lio/archinaut/tenter/screen/Canvas;II)V
+	public static synthetic fun blit$default (Lio/archinaut/tenter/screen/Canvas;Lio/archinaut/tenter/screen/Canvas;IIILjava/lang/Object;)V
 	public final fun get (II)Lio/archinaut/tenter/screen/Cell;
 	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
 	public final fun getHeight ()I
@@ -739,7 +740,6 @@ public final class io/archinaut/tenter/terminal/Frame {
 	public final fun canvas (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Canvas;
 	public static synthetic fun canvas$default (Lio/archinaut/tenter/terminal/Frame;Lio/archinaut/tenter/screen/Rect;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
-	public final fun getBuffer ()Lio/archinaut/tenter/screen/Buffer;
 	public final fun renderStatefulWidget (Lio/archinaut/tenter/widget/StatefulWidget;Lio/archinaut/tenter/screen/Rect;Ljava/lang/Object;)V
 	public final fun renderWidget (Lio/archinaut/tenter/widget/Widget;Lio/archinaut/tenter/screen/Rect;)V
 }

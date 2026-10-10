@@ -70,15 +70,7 @@ public class ContentLayout internal constructor(
                     if (child.width > 0 && child.height > 0) {
                         val source = Canvas.offscreen(child.width, child.height)
                         val childReveal = child.paint(source)
-                        canvas.blit(
-                            source,
-                            0,
-                            0,
-                            instruction.x,
-                            instruction.y,
-                            child.width,
-                            child.height,
-                        )
+                        canvas.blit(source, instruction.x, instruction.y)
                         childReveal?.let {
                             translateAndClip(
                                 it,
@@ -96,7 +88,7 @@ public class ContentLayout internal constructor(
                     if (width > 0 && height > 0) {
                         val source = Canvas.offscreen(width, height)
                         instruction.widget.render(source)
-                        canvas.blit(source, 0, 0, 0, 0, width, height)
+                        canvas.blit(source)
                         source.revealRect()?.let { clip(it, width, height)?.let(requests::add) }
                     }
                 }

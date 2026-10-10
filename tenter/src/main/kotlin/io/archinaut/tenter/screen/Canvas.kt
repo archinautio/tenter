@@ -96,18 +96,17 @@ public class Canvas private constructor(
     }
 
     /**
-     * Copies a [width]x[height] block from [src] at ([srcX], [srcY]) to this canvas at
-     * ([destX], [destY]). Clipping is computed entirely in LOCAL coordinates against both
-     * canvases' own bounds, then translated to the buffer once — so a blit can never read
-     * or write past either canvas's edge, regardless of where each canvas sits in the
-     * shared buffer.
+     * Copies the whole of [src] to this canvas at ([destX], [destY]). To copy only part of a
+     * canvas, narrow it first with [region]. Clipping is computed entirely in LOCAL coordinates
+     * against both canvases' own bounds, then translated to the buffer once — so a blit can never
+     * read or write past either canvas's edge, regardless of where each canvas sits in the shared
+     * buffer.
      */
-    public fun blit(src: Canvas, srcX: Int, srcY: Int, destX: Int, destY: Int, width: Int, height: Int) {
-        if (width <= 0 || height <= 0) return
-        val startCol = maxOf(0L, -srcX.toLong(), -destX.toLong())
-        val endCol = minOf(width.toLong(), src.width.toLong() - srcX, this.width.toLong() - destX)
-        val startRow = maxOf(0L, -srcY.toLong(), -destY.toLong())
-        val endRow = minOf(height.toLong(), src.height.toLong() - srcY, this.height.toLong() - destY)
+    public fun blit(src: Canvas, destX: Int = 0, destY: Int = 0) {
+        val startCol = maxOf(0, -destX)
+        val endCol = minOf(src.width, this.width - destX)
+        val startRow = maxOf(0, -destY)
+        val endRow = minOf(src.height, this.height - destY)
         if (startCol >= endCol || startRow >= endRow) return
 
         // Reading through a snapshot is what makes an overlapping blit within ONE buffer copy
@@ -116,22 +115,22 @@ public class Canvas private constructor(
         // buffer — so the copy would otherwise cost a full duplicate of the content on every frame.
         val source = if (src.buffer === buffer) src.buffer.snapshotCells() else src.buffer.cellRows()
         val clip = Rect(
-            bounds.x + destX + startCol.toInt(),
-            bounds.y + destY + startRow.toInt(),
-            (endCol - startCol).toInt(),
-            (endRow - startRow).toInt(),
+            bounds.x + destX + startCol,
+            bounds.y + destY + startRow,
+            (endCol - startCol),
+            (endRow - startRow),
         )
         for (row in startRow until endRow) {
             var column = startCol
             while (column < endCol) {
-                val sourceX = src.bounds.x + srcX + column.toInt()
-                val sourceY = src.bounds.y + srcY + row.toInt()
+                val sourceX = src.bounds.x + column
+                val sourceY = src.bounds.y + row
                 val stored = source[sourceY][sourceX]
                 val completeWide = !stored.continuation && stored.width == 2 &&
                     column + 1 < endCol && sourceX + 1 < src.bounds.x + src.width &&
                     source[sourceY][sourceX + 1].continuation
-                val destinationX = bounds.x + destX + column.toInt()
-                val destinationY = bounds.y + destY + row.toInt()
+                val destinationX = bounds.x + destX + column
+                val destinationY = bounds.y + destY + row
                 if (completeWide) {
                     buffer.writeCell(destinationX, destinationY, stored.cell, clip)
                     column += 2

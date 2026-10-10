@@ -271,7 +271,7 @@ internal class CanvasTest {
         src.set(1, 2, Cell("X", Style(ChromeRole.DANGER, ChromeRole.INFO)))
         val dest = Canvas.offscreen(10, 10)
 
-        dest.blit(src, 1, 2, 3, 4, 1, 1)
+        dest.blit(src.region(Rect(1, 2, 1, 1)), 3, 4)
 
         assertEquals(Cell("X", Style(ChromeRole.DANGER, ChromeRole.INFO)), dest.get(3, 4))
     }
@@ -284,19 +284,19 @@ internal class CanvasTest {
         src.set(2, 0, Cell("C", Style(ChromeRole.SUCCESS)))
         val dest = Canvas.offscreen(4, 4)
 
-        dest.blit(src, 0, 0, 3, 0, 3, 1)
+        dest.blit(src.region(Rect(0, 0, 3, 1)), 3, 0)
 
         assertEquals(Cell("A", Style(ChromeRole.SUCCESS)), dest.get(3, 0))
         assertEquals(Cell(), dest.get(2, 0))
     }
 
     @Test
-    fun `blit skips source rows and cols beyond source bounds`() {
+    fun `blit of a source region larger than its canvas copies only the canvas`() {
         val src = Canvas.offscreen(2, 2)
         src.set(0, 0, Cell("Z", Style(ChromeRole.ACCENT)))
         val dest = Canvas.offscreen(10, 10)
 
-        dest.blit(src, 0, 0, 0, 0, 5, 5)
+        dest.blit(src.region(Rect(0, 0, 5, 5)))
 
         assertEquals(Cell("Z", Style(ChromeRole.ACCENT)), dest.get(0, 0))
         assertEquals(Cell(), dest.get(2, 0))
@@ -312,7 +312,7 @@ internal class CanvasTest {
         src.set(2, 0, Cell("C"))
         val dest = Canvas.of(buffer).region(Rect(0, 0, 2, 1)) // narrower than the 3-cell blit
 
-        dest.blit(src, 0, 0, 0, 0, 3, 1)
+        dest.blit(src.region(Rect(0, 0, 3, 1)))
 
         assertEquals(Cell(), buffer.get(2, 0), "must not leak past the 2-wide dest canvas")
     }
@@ -323,7 +323,7 @@ internal class CanvasTest {
         source.setString(0, 0, "中")
         val destination = Canvas.offscreen(3, 1)
 
-        destination.blit(source, 0, 0, 0, 0, 1, 1)
+        destination.blit(source.region(Rect(0, 0, 1, 1)))
 
         assertEquals(Cell(), destination.get(0, 0))
         assertEquals(Cell(), destination.get(1, 0))
@@ -333,12 +333,12 @@ internal class CanvasTest {
     fun `overlapping horizontal and vertical blits use their original source`() {
         val horizontal = Canvas.offscreen(4, 1)
         horizontal.setString(0, 0, "ABCD")
-        horizontal.blit(horizontal, 0, 0, 1, 0, 3, 1)
+        horizontal.blit(horizontal.region(Rect(0, 0, 3, 1)), 1, 0)
 
         val vertical = Canvas.offscreen(3, 3)
         vertical.setString(0, 0, "ABC")
         vertical.setString(0, 1, "DEF")
-        vertical.blit(vertical, 0, 0, 0, 1, 3, 2)
+        vertical.blit(vertical.region(Rect(0, 0, 3, 2)), 0, 1)
 
         assertEquals("AABC", (0 until 4).joinToString("") { horizontal.get(it, 0).symbol })
         assertEquals("ABC", (0 until 3).joinToString("") { vertical.get(it, 1).symbol })
@@ -352,7 +352,7 @@ internal class CanvasTest {
         val canvas = Canvas.offscreen(6, 1)
         canvas.setString(0, 0, "ABCDEF")
 
-        canvas.region(Rect(1, 0, 5, 1)).blit(canvas.region(Rect(0, 0, 5, 1)), 0, 0, 0, 0, 5, 1)
+        canvas.region(Rect(1, 0, 5, 1)).blit(canvas.region(Rect(0, 0, 5, 1)))
 
         assertEquals("AABCDE", (0 until 6).joinToString("") { canvas.get(it, 0).symbol })
     }

@@ -17,9 +17,9 @@ import io.archinaut.tenter.widget.Widget
  * intersection of that rectangle with the frame, so it cannot paint outside its own area.
  */
 public class Frame internal constructor(
-    /** The buffer being drawn, for direct cell access. Prefer [renderWidget]. */
-    public val buffer: Buffer,
+    private val buffer: Buffer
 ) {
+
     /** The full drawable area of this frame. Split it with [io.archinaut.tenter.screen.Layout]. */
     public val area: Rect get() = Rect(0, 0, buffer.width, buffer.height)
 

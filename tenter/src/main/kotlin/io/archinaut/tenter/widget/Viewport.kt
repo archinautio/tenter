@@ -142,7 +142,7 @@ public class Viewport(
             recenter = recenter,
         )
 
-        canvas.blit(stream, offsetX, offsetY, 0, 0, canvas.width, canvas.height)
+        canvas.blit(stream.region(Rect(offsetX, offsetY, canvas.width, canvas.height)))
         viewportState.settle(
             ScrollState(
                 offset = ScrollOffset(offsetX, offsetY),
