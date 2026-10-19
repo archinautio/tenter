@@ -4,50 +4,32 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.palette.ChromeRole
-import io.archinaut.tenter.palette.ColorRole
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
 
 /**
- * A proportional `[███░░░]suffix` bar for [value], with the value right-aligned under the last
- * filled cell on the row below — two rows in all. [colorFor] selects the styling for [value].
+ * One row showing [ratio] of a whole, in the manner of Ratatui's `LineGauge`: an optional [label],
+ * then a bar across the rest of the width whose filled part is [filledStyle] and remainder
+ * [unfilledStyle]. The caller chooses the styles, for example to color a nearly full gauge.
  */
 public class Gauge(
-    private val value: Int,
-    private val maxValue: Int,
-    private val barWidth: Int,
-    private val suffix: String = maxValue.toString(),
-    private val colorFor: (value: Int) -> ColorRole = { value -> defaultColor(value, maxValue) },
+    private val ratio: Double,
+    private val label: String = "",
+    private val filledStyle: Style = Style(ChromeRole.INFO),
+    private val unfilledStyle: Style = Style(ChromeRole.TEXT_MUTED),
 ) : MeasurableWidget {
+
     init {
-        require(barWidth >= 0) { "barWidth must not be negative, was $barWidth" }
-        require(maxValue >= 0) { "maxValue must not be negative, was $maxValue" }
+        require(ratio in 0.0..1.0) { "gauge ratio must be within 0..1, was $ratio" }
     }
 
     override fun write(cursor: TextCursor) {
-        // maxValue <= 0 guard prevents division by zero. When maxValue == 0 the bar is all empty.
-        // The bar is proportionally scaled: a fixed barWidth-cell bar spans the whole 0–maxValue
-        // range (each block ≈ maxValue/barWidth units). The max sits inline after "]".
-        val filled = if (maxValue <= 0) 0 else {
-            (value.toLong() * barWidth / maxValue).coerceIn(0L, barWidth.toLong()).toInt()
-        }
-        val bar = "█".repeat(filled) + "░".repeat(barWidth - filled)
-        val style = Style(colorFor(value))
-        cursor.write(0, "[$bar]$suffix", style)
+        val barStart = if (label.isEmpty()) 0 else CellWidth.of(label) + 1
+        val barWidth = (cursor.width - barStart).coerceAtLeast(0)
+        val filled = (ratio * barWidth).toInt().coerceIn(0, barWidth)
+        if (label.isNotEmpty()) cursor.write(0, label)
+        cursor.write(barStart, "█".repeat(filled), filledStyle)
+        cursor.write(barStart + filled, "░".repeat(barWidth - filled), unfilledStyle)
         cursor.newLine()
-        val valueStr = value.toString()
-        // First bar cell is at column 1 (the "[" prefix). Anchor on the last filled cell,
-        // or the first cell when empty, then right-align the number to it.
-        val anchorCol = filled.coerceAtLeast(1)
-        cursor.write(anchorCol - CellWidth.of(valueStr) + 1, valueStr, style)
-        cursor.newLine()
-    }
-
-    private companion object {
-        fun defaultColor(value: Int, maxValue: Int): ChromeRole = when {
-            value.toDouble() >= maxValue * 0.7 -> ChromeRole.DANGER
-            value.toDouble() >= maxValue * 0.3 -> ChromeRole.WARNING
-            else -> ChromeRole.INFO
-        }
     }
 }

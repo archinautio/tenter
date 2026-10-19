@@ -43,7 +43,7 @@ public data class CheckboxGlyphs(
 }
 
 /** The single-cell glyph for [state] using [glyphs]. */
-public fun checkboxIcon(
+internal fun checkboxIcon(
     state: CheckState,
     glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
 ): String = when (state) {

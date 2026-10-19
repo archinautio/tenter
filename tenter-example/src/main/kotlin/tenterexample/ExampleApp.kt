@@ -6,8 +6,6 @@ package tenterexample
 import com.github.ajalt.mordant.input.InputEvent
 import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.input.MouseEvent
-import io.archinaut.tenter.input.MouseInput
-import io.archinaut.tenter.input.ScrollAction
 import io.archinaut.tenter.widget.panel.Panel
 import io.archinaut.tenter.widget.panel.Panels
 import io.archinaut.tenter.widget.panel.PanelSet
@@ -47,7 +45,7 @@ internal class ExampleApp(
     }
 
     internal fun handleKey(event: KeyboardEvent) {
-        when (val action = ExampleKeyMap.map.resolve(listOf(ExampleContext.LIST), event)) {
+        when (ExampleKeyMap.map.resolve(listOf(ExampleContext.LIST), event)) {
             ExampleAction.MOVE_UP -> moveSelection(-1)
             ExampleAction.MOVE_DOWN -> moveSelection(1)
             ExampleAction.TOGGLE -> toggleSelected()
@@ -57,8 +55,8 @@ internal class ExampleApp(
                 panels.cycleFocusedMode(1)
             }
             ExampleAction.QUIT -> running = false
-            is ScrollAction.Lines -> panels.scroll(panels.focused, 0, action.delta)
-            is ScrollAction.Pages -> panels.page(panels.focused, action.delta)
+            ExampleAction.PAGE_UP -> panels.page(panels.focused, -1)
+            ExampleAction.PAGE_DOWN -> panels.page(panels.focused, 1)
             null -> Unit
         }
     }
@@ -66,7 +64,11 @@ internal class ExampleApp(
     internal fun handleMouse(event: MouseEvent) {
         // --8<-- [start:mouse]
         val hit = panels.hitTest(event.x, event.y)
-        val scrollDelta = MouseInput.scrollDelta(event)
+        val scrollDelta = when {
+            event.wheelUp -> -WHEEL_STEP
+            event.wheelDown -> WHEEL_STEP
+            else -> null
+        }
         if (scrollDelta != null) {
             hit?.let { panels.scroll(it.id, 0, scrollDelta) }
             return
@@ -132,6 +134,7 @@ internal class ExampleApp(
 
     private companion object {
         private const val HELP_WIDTH: Int = 36
+        private const val WHEEL_STEP: Int = 2
         private val VISIBLE: Set<ExamplePanelId> = setOf(ExamplePanelId.ROWS, ExamplePanelId.HELP)
 
         private fun Set<Int>.toggle(value: Int): Set<Int> = if (value in this) this - value else this + value

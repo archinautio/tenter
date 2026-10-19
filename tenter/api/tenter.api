@@ -84,33 +84,19 @@ public final class io/archinaut/tenter/input/HintGroup {
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract interface class io/archinaut/tenter/input/InputAction {
-	public abstract fun getId ()Ljava/lang/String;
-}
-
 public final class io/archinaut/tenter/input/KeyBinding {
-	public fun <init> (Lcom/github/ajalt/mordant/input/KeyboardEvent;Lio/archinaut/tenter/input/InputAction;Ljava/lang/String;)V
+	public fun <init> (Lcom/github/ajalt/mordant/input/KeyboardEvent;Ljava/lang/Object;Ljava/lang/String;)V
 	public final fun component1 ()Lcom/github/ajalt/mordant/input/KeyboardEvent;
-	public final fun component2 ()Lio/archinaut/tenter/input/InputAction;
+	public final fun component2 ()Ljava/lang/Object;
 	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Lcom/github/ajalt/mordant/input/KeyboardEvent;Lio/archinaut/tenter/input/InputAction;Ljava/lang/String;)Lio/archinaut/tenter/input/KeyBinding;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/input/KeyBinding;Lcom/github/ajalt/mordant/input/KeyboardEvent;Lio/archinaut/tenter/input/InputAction;Ljava/lang/String;ILjava/lang/Object;)Lio/archinaut/tenter/input/KeyBinding;
+	public final fun copy (Lcom/github/ajalt/mordant/input/KeyboardEvent;Ljava/lang/Object;Ljava/lang/String;)Lio/archinaut/tenter/input/KeyBinding;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/input/KeyBinding;Lcom/github/ajalt/mordant/input/KeyboardEvent;Ljava/lang/Object;Ljava/lang/String;ILjava/lang/Object;)Lio/archinaut/tenter/input/KeyBinding;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAction ()Lio/archinaut/tenter/input/InputAction;
+	public final fun getAction ()Ljava/lang/Object;
 	public final fun getChord ()Lcom/github/ajalt/mordant/input/KeyboardEvent;
 	public final fun getHintGroup ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/input/KeyGlyph {
-	public static final field ALT Ljava/lang/String;
-	public static final field CTRL Ljava/lang/String;
-	public static final field ENTER Ljava/lang/String;
-	public static final field ESC Ljava/lang/String;
-	public static final field INSTANCE Lio/archinaut/tenter/input/KeyGlyph;
-	public static final field SPACE Ljava/lang/String;
-	public static final field TAB Ljava/lang/String;
 }
 
 public final class io/archinaut/tenter/input/KeyHint {
@@ -144,11 +130,9 @@ public final class io/archinaut/tenter/input/KeyLayer {
 
 public final class io/archinaut/tenter/input/KeyMap {
 	public fun <init> (Ljava/util/Map;)V
-	public final fun chordsFor (Lio/archinaut/tenter/input/InputAction;)Ljava/util/List;
-	public final fun getContexts ()Ljava/util/Set;
+	public final fun chordsFor (Ljava/lang/Object;)Ljava/util/List;
 	public final fun hints (Ljava/lang/Object;)Lio/archinaut/tenter/input/KeySection;
-	public final fun layer (Ljava/lang/Object;)Lio/archinaut/tenter/input/KeyLayer;
-	public final fun resolve (Ljava/util/List;Lcom/github/ajalt/mordant/input/KeyboardEvent;)Lio/archinaut/tenter/input/InputAction;
+	public final fun resolve (Ljava/util/List;Lcom/github/ajalt/mordant/input/KeyboardEvent;)Ljava/lang/Object;
 }
 
 public final class io/archinaut/tenter/input/KeySection {
@@ -160,73 +144,6 @@ public final class io/archinaut/tenter/input/KeySection {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getHints ()Ljava/util/List;
 	public final fun getTitle ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/input/MouseInput {
-	public static final field INSTANCE Lio/archinaut/tenter/input/MouseInput;
-	public static final field SCROLL_STEP I
-	public final fun scrollDelta (Lcom/github/ajalt/mordant/input/MouseEvent;I)Ljava/lang/Integer;
-	public static synthetic fun scrollDelta$default (Lio/archinaut/tenter/input/MouseInput;Lcom/github/ajalt/mordant/input/MouseEvent;IILjava/lang/Object;)Ljava/lang/Integer;
-}
-
-public abstract interface class io/archinaut/tenter/input/PanAction : io/archinaut/tenter/input/InputAction {
-}
-
-public final class io/archinaut/tenter/input/PanAction$Direction : java/lang/Enum {
-	public static final field DOWN Lio/archinaut/tenter/input/PanAction$Direction;
-	public static final field LEFT Lio/archinaut/tenter/input/PanAction$Direction;
-	public static final field RIGHT Lio/archinaut/tenter/input/PanAction$Direction;
-	public static final field UP Lio/archinaut/tenter/input/PanAction$Direction;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/input/PanAction$Direction;
-	public static fun values ()[Lio/archinaut/tenter/input/PanAction$Direction;
-}
-
-public final class io/archinaut/tenter/input/PanAction$Pan : io/archinaut/tenter/input/PanAction {
-	public fun <init> (Lio/archinaut/tenter/input/PanAction$Direction;)V
-	public final fun component1 ()Lio/archinaut/tenter/input/PanAction$Direction;
-	public final fun copy (Lio/archinaut/tenter/input/PanAction$Direction;)Lio/archinaut/tenter/input/PanAction$Pan;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/input/PanAction$Pan;Lio/archinaut/tenter/input/PanAction$Direction;ILjava/lang/Object;)Lio/archinaut/tenter/input/PanAction$Pan;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDirection ()Lio/archinaut/tenter/input/PanAction$Direction;
-	public fun getId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/input/PanAction$Recenter : io/archinaut/tenter/input/PanAction {
-	public static final field INSTANCE Lio/archinaut/tenter/input/PanAction$Recenter;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class io/archinaut/tenter/input/ScrollAction : io/archinaut/tenter/input/InputAction {
-}
-
-public final class io/archinaut/tenter/input/ScrollAction$Lines : io/archinaut/tenter/input/ScrollAction {
-	public fun <init> (I)V
-	public final fun component1 ()I
-	public final fun copy (I)Lio/archinaut/tenter/input/ScrollAction$Lines;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/input/ScrollAction$Lines;IILjava/lang/Object;)Lio/archinaut/tenter/input/ScrollAction$Lines;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDelta ()I
-	public fun getId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/input/ScrollAction$Pages : io/archinaut/tenter/input/ScrollAction {
-	public fun <init> (I)V
-	public final fun component1 ()I
-	public final fun copy (I)Lio/archinaut/tenter/input/ScrollAction$Pages;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/input/ScrollAction$Pages;IILjava/lang/Object;)Lio/archinaut/tenter/input/ScrollAction$Pages;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDelta ()I
-	public fun getId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -633,10 +550,6 @@ public final class io/archinaut/tenter/terminal/TerminalEvent$Input : io/archina
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/terminal/TerminalEvent$Quit : io/archinaut/tenter/terminal/TerminalEvent {
-	public static final field INSTANCE Lio/archinaut/tenter/terminal/TerminalEvent$Quit;
-}
-
 public final class io/archinaut/tenter/terminal/TerminalEvent$Resized : io/archinaut/tenter/terminal/TerminalEvent {
 	public fun <init> (Lio/archinaut/tenter/screen/Size;)V
 	public final fun component1 ()Lio/archinaut/tenter/screen/Size;
@@ -649,10 +562,8 @@ public final class io/archinaut/tenter/terminal/TerminalEvent$Resized : io/archi
 }
 
 public final class io/archinaut/tenter/terminal/TerminalEventKt {
-	public static final fun inputEvents (Lcom/github/ajalt/mordant/terminal/Terminal;Lcom/github/ajalt/mordant/input/MouseTracking;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/flow/Flow;
-	public static final fun resizeEvents-HG0u8IE (Lcom/github/ajalt/mordant/terminal/Terminal;J)Lkotlinx/coroutines/flow/Flow;
-	public static synthetic fun resizeEvents-HG0u8IE$default (Lcom/github/ajalt/mordant/terminal/Terminal;JILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
-	public static final fun terminalEvents (Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/flow/Flow;
+	public static final fun events (Lcom/github/ajalt/mordant/terminal/Terminal;Lcom/github/ajalt/mordant/input/MouseTracking;)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun events$default (Lcom/github/ajalt/mordant/terminal/Terminal;Lcom/github/ajalt/mordant/input/MouseTracking;ILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class io/archinaut/tenter/terminal/TerminalScreenKt {
@@ -746,11 +657,6 @@ public final class io/archinaut/tenter/widget/CheckboxGlyphs$Companion {
 	public final fun getNERD_FONT ()Lio/archinaut/tenter/widget/CheckboxGlyphs;
 }
 
-public final class io/archinaut/tenter/widget/CheckboxKt {
-	public static final fun checkboxIcon (Lio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/widget/CheckboxGlyphs;)Ljava/lang/String;
-	public static synthetic fun checkboxIcon$default (Lio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILjava/lang/Object;)Ljava/lang/String;
-}
-
 public final class io/archinaut/tenter/widget/Column {
 	public fun <init> (ILio/archinaut/tenter/widget/MeasurableWidget;)V
 	public final fun component1 ()I
@@ -788,21 +694,16 @@ public final class io/archinaut/tenter/widget/FlashMessage : io/archinaut/tenter
 }
 
 public final class io/archinaut/tenter/widget/Gauge : io/archinaut/tenter/widget/MeasurableWidget {
-	public fun <init> (IIILjava/lang/String;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (IIILjava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (DLjava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;)V
+	public synthetic fun <init> (DLjava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 	public fun write (Lio/archinaut/tenter/widget/TextCursor;)V
 }
 
 public final class io/archinaut/tenter/widget/KeyHelp : io/archinaut/tenter/widget/MeasurableWidget {
-	public static final field Companion Lio/archinaut/tenter/widget/KeyHelp$Companion;
-	public static final field TITLE Ljava/lang/String;
 	public fun <init> (Ljava/util/List;)V
 	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 	public fun write (Lio/archinaut/tenter/widget/TextCursor;)V
-}
-
-public final class io/archinaut/tenter/widget/KeyHelp$Companion {
 }
 
 public abstract interface class io/archinaut/tenter/widget/MeasurableWidget : io/archinaut/tenter/widget/Widget {
@@ -828,13 +729,6 @@ public final class io/archinaut/tenter/widget/Paragraph : io/archinaut/tenter/wi
 	public fun write (Lio/archinaut/tenter/widget/TextCursor;)V
 }
 
-public final class io/archinaut/tenter/widget/PipTrack : io/archinaut/tenter/widget/MeasurableWidget {
-	public fun <init> (IILjava/lang/String;Ljava/lang/String;ILio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;I)V
-	public synthetic fun <init> (IILjava/lang/String;Ljava/lang/String;ILio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
-	public fun write (Lio/archinaut/tenter/widget/TextCursor;)V
-}
-
 public final class io/archinaut/tenter/widget/ScrollState {
 	public fun <init> (Lio/archinaut/tenter/screen/Point;Lio/archinaut/tenter/screen/Point;Lio/archinaut/tenter/screen/Size;Lio/archinaut/tenter/screen/Size;Lio/archinaut/tenter/screen/Rect;)V
 	public synthetic fun <init> (Lio/archinaut/tenter/screen/Point;Lio/archinaut/tenter/screen/Point;Lio/archinaut/tenter/screen/Size;Lio/archinaut/tenter/screen/Size;Lio/archinaut/tenter/screen/Rect;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -856,8 +750,8 @@ public final class io/archinaut/tenter/widget/ScrollState {
 }
 
 public final class io/archinaut/tenter/widget/SelectableRow : io/archinaut/tenter/widget/MeasurableWidget {
-	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;)V
-	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 	public fun write (Lio/archinaut/tenter/widget/TextCursor;)V
 }
@@ -885,13 +779,6 @@ public final class io/archinaut/tenter/widget/TextCursor {
 	public static synthetic fun writeLine$default (Lio/archinaut/tenter/widget/TextCursor;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)I
 	public final fun writeRow (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;)I
 	public static synthetic fun writeRow$default (Lio/archinaut/tenter/widget/TextCursor;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)I
-}
-
-public final class io/archinaut/tenter/widget/ValueRow : io/archinaut/tenter/widget/MeasurableWidget {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/palette/ColorRole;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/palette/ColorRole;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
-	public fun write (Lio/archinaut/tenter/widget/TextCursor;)V
 }
 
 public final class io/archinaut/tenter/widget/VerticalText : io/archinaut/tenter/widget/MeasurableWidget {

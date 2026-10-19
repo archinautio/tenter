@@ -8,7 +8,7 @@ Public API signatures are tracked by `tenter/api/tenter.api`.
 
 `tenter/src/test/kotlin/io/archinaut/tenter/ArchitectureTest.kt` enforces the dependency boundaries below, prevents BattleTech imports, and keeps managed `Panel` mutations behind `PanelSet`.
 
-The packages have distinct jobs: `palette` owns semantic colors; `text` owns display-cell metrics; `screen` owns buffers, cells, styles, canvas painting, and `Layout`/`Constraint` rectangle splitting; `widget` owns the `Widget`, `MeasurableWidget`, and `StatefulWidget` contracts, the internal recorded layouts behind measurable widgets, and every widget (blocks, viewports, rows, gauges), with stateful panel composition (the `Panels` widget over its `PanelSet` state) in `widget.panel`; `animation` owns finite frame descriptions and elapsed-time playback; `input` owns key maps and pointer helpers; `terminal` owns the double-buffered `Terminal`, its per-draw `Frame`, diff rendering, terminal event flows, and screen lifecycle.
+The packages have distinct jobs: `palette` owns semantic colors; `text` owns display-cell metrics; `screen` owns buffers, cells, styles, canvas painting, and `Layout`/`Constraint` rectangle splitting; `widget` owns the `Widget`, `MeasurableWidget`, and `StatefulWidget` contracts, the internal recorded layouts behind measurable widgets, and every widget (blocks, viewports, rows, gauges), with stateful panel composition (the `Panels` widget over its `PanelSet` state) in `widget.panel`; `animation` owns finite frame descriptions and elapsed-time playback; `input` owns key maps and their help hints; `terminal` owns the double-buffered `Terminal`, its per-draw `Frame`, diff rendering, terminal event flows, and screen lifecycle.
 
 The rendering model follows Ratatui: `Terminal.draw` hands a `Frame` to the caller, widgets render into a `Canvas` clipped to their `Rect`, and the terminal diffs the drawn `Buffer` against the previous one.
 
@@ -35,7 +35,7 @@ corresponding implementation; do not maintain a second description here:
 ## Implementation invariants
 
 - Tenter adds primitives to Mordant rather than wrapping it. Preserve direct Mordant
-  types in `TerminalEvent.Input`, `MouseInput.scrollDelta`, `terminalEvents`, and `KeyBinding`.
+  types in `TerminalEvent.Input` and `KeyBinding`, and take a Mordant terminal in `events`.
 - `KeyMap` copies context, layer, and group collections, and `PanelSet` copies its panel
   lists. Do not expose mutable declaration collections.
 - A panel's content builder runs once per rendered frame; widths come from the panel
@@ -54,9 +54,10 @@ corresponding implementation; do not maintain a second description here:
   is eager; terminal color suppression must not alter glyphs or layout.
 - Screen entry changes the alternate screen and cursor only for interactive terminals.
   Restore them on normal exit, entry failure, block failure, and cleanup failure.
-  Suppress cleanup exceptions onto an existing failure. Input cancellation uses bounded polling.
-- `MouseInput.scrollDelta` recognizes Mordant's explicit wheel flags and requires a
-  positive step. Platform compatibility fallbacks belong to the application.
+  Suppress cleanup exceptions onto an existing failure. Input cancellation uses bounded polling,
+  so stopping event collection for any reason releases raw mode promptly.
+- Input vocabulary (actions, quit keys, wheel steps, key glyphs) belongs to the application;
+  the key map is generic over the application's action type.
 
 Internal chrome spacing is not a public API. Preserve the supported boundaries
 instead of introducing a public transaction manager, application event-loop abstraction,

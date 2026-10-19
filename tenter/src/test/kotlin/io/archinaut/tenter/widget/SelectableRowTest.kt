@@ -30,7 +30,6 @@ internal class SelectableRowTest {
                 checkState = CheckState.INDETERMINATE,
                 selected = false,
                 right = "58%",
-                subLines = listOf("+2 range"),
                 textColor = ChromeRole.DISABLED,
                 checkboxColor = ChromeRole.DISABLED,
             ),
@@ -40,8 +39,8 @@ internal class SelectableRowTest {
         assertEquals("AC/20", rowText(buffer, 4, 5))
         assertEquals(ChromeRole.DISABLED, buffer.get(4, 0).style.fg)
         assertEquals(ChromeRole.DISABLED, buffer.get(2, 0).style.fg)
-        assertEquals("+2 range", rowText(buffer, 4, 8, row = 1))
-        assertEquals(2, rows)
+        assertEquals("58%", rowText(buffer, 29, 3))
+        assertEquals(1, rows)
     }
 
     @Test

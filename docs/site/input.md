@@ -8,15 +8,16 @@ Create a Mordant `Terminal` as the backend and enter
 Update application state and repaint there as well.
 
 `withScreen` restores the screen and cursor when its block returns or throws.
-Keep only one input reader active per terminal. Input collection manages raw mode;
-cancelling collection releases it. Input and resize flows start producing events
-when collected. Avoid abrupt process termination inside the screen scope, which
+Keep only one event collection active per terminal. Collecting `backend.events()`
+manages raw mode, and stopping collection releases it before collection returns. The
+flow starts producing events when collected. Avoid abrupt process termination inside the screen scope, which
 bypasses normal cleanup.
 
 ## Collect events and repaint
 
+`backend.events()` delivers keyboard and mouse input and terminal resizes as one flow.
 The compiled [interactive example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt)
-merges keyboard/mouse input with resize events. This excerpt runs inside
+collects it. This excerpt runs inside
 `runInteractive`, after creating `app` and drawing the initial frame. `backend` is the
 Mordant terminal, and `terminal` is the Tenter `Terminal` that `withScreen` provides.
 
@@ -25,8 +26,8 @@ Mordant terminal, and `terminal` is the Tenter `Terminal` that `withScreen` prov
 ```
 
 `TerminalEvent.Input` carries a Mordant input event. `Resized` supplies the new `Size` in cells.
-The quit predicate turns `q` into `TerminalEvent.Quit`, ending collection and allowing
-the terminal scope to close. `terminal.draw` follows the backend's current size, so
+To quit, stop collecting: the example's quit key sets `app.running` to false, and
+`takeWhile` ends collection, which lets the terminal scope close. `terminal.draw` follows the backend's current size, so
 drawing again after a resize is enough; `frame.area` already has the new dimensions.
 
 ## Map keys to application actions
@@ -46,7 +47,8 @@ returned action in your application. A null result means no binding matched.
 Keys match the Mordant event exactly, including modifiers. Use unique exact bindings
 and nonblank hint ids. Group references must exist, sectionless credits must be
 unambiguous, and a group with no bindings must be explicitly `bindingless`. Keep
-action identity and `InputAction.id` stable after constructing the map. If the
+action identity stable after constructing the map. Actions are your own type, typically
+an enum, so `when` over `resolve`'s result is exhaustive. If the
 application has several contexts, it chooses their precedence.
 See the [key-map source](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleKeyMap.kt)
 and [action handling](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt).

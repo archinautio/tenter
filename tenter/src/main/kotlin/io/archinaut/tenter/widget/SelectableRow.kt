@@ -9,8 +9,8 @@ import io.archinaut.tenter.screen.Style
 
 /**
  * One cursor-highlightable row: a selection marker, a checkbox, [label], and optionally a
- * right-aligned [right] value with [subLines] below it (see [ValueRow]). A [selected] row is
- * highlighted and requests visibility, so an enclosing [Viewport] follows it.
+ * right-aligned [right] value. A [selected] row is highlighted and requests visibility, so an
+ * enclosing [Viewport] follows it.
  * [checkboxColor] overrides the intrinsic checkbox color when the row is not selected.
  * [glyphs] selects the immutable checkbox glyph set without changing row colors.
  */
@@ -19,7 +19,6 @@ public class SelectableRow(
     private val checkState: CheckState,
     private val selected: Boolean,
     private val right: String? = null,
-    private val subLines: List<String> = emptyList(),
     private val textColor: ColorRole = ChromeRole.TEXT_PRIMARY,
     private val checkboxColor: ColorRole? = null,
     private val glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
@@ -34,7 +33,7 @@ public class SelectableRow(
         if (right == null) {
             cursor.writeLine(left, Style(color))
         } else {
-            cursor.draw(ValueRow(left, right, color, subLines))
+            cursor.writeRow(left, right, Style(color))
         }
 
         val resolvedCheckboxColor = when {

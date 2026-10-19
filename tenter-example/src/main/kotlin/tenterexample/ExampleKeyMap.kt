@@ -8,10 +8,9 @@ import io.archinaut.tenter.input.HintGroup
 import io.archinaut.tenter.input.KeyBinding
 import io.archinaut.tenter.input.KeyLayer
 import io.archinaut.tenter.input.KeyMap
-import io.archinaut.tenter.input.ScrollAction
 
 internal object ExampleKeyMap {
-    internal val map: KeyMap<ExampleContext> = KeyMap(
+    internal val map: KeyMap<ExampleContext, ExampleAction> = KeyMap(
         mapOf(
             ExampleContext.LIST to KeyLayer(
                 title = "LIST",
@@ -21,8 +20,8 @@ internal object ExampleKeyMap {
                     KeyBinding(KeyboardEvent(" "), ExampleAction.TOGGLE, "toggle"),
                     KeyBinding(KeyboardEvent("h"), ExampleAction.FOCUS_HELP, "panels"),
                     KeyBinding(KeyboardEvent("m"), ExampleAction.CYCLE_PANEL, "panels"),
-                    KeyBinding(KeyboardEvent("PageUp"), ScrollAction.Pages(-1), "scroll"),
-                    KeyBinding(KeyboardEvent("PageDown"), ScrollAction.Pages(1), "scroll"),
+                    KeyBinding(KeyboardEvent("PageUp"), ExampleAction.PAGE_UP, "scroll"),
+                    KeyBinding(KeyboardEvent("PageDown"), ExampleAction.PAGE_DOWN, "scroll"),
                     KeyBinding(KeyboardEvent("q"), ExampleAction.QUIT, "quit"),
                 ),
                 hintGroups = listOf(

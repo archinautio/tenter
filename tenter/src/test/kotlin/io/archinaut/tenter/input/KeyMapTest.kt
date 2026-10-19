@@ -15,7 +15,7 @@ internal class KeyMapTest {
 
     private enum class Ctx { FIRST, SECOND, THIRD }
 
-    private data class TestAction(override val id: String) : InputAction
+    private data class TestAction(val id: String)
 
     private val actionA = TestAction("a")
     private val actionB = TestAction("b")
@@ -53,7 +53,7 @@ internal class KeyMapTest {
         fun `falls through to a later layer when the earlier layer has no binding for the chord`() {
             val map = KeyMap(
                 mapOf(
-                    Ctx.FIRST to KeyLayer(title = "FIRST", bindings = emptyList()),
+                    Ctx.FIRST to KeyLayer<TestAction>(title = "FIRST", bindings = emptyList()),
                     Ctx.SECOND to titledLayer("SECOND", listOf(KeyBinding(KeyboardEvent("x"), actionB, "group"))),
                 ),
             )
@@ -63,7 +63,7 @@ internal class KeyMapTest {
 
         @Test
         fun `unknown chord resolves to null`() {
-            val map = KeyMap(mapOf(Ctx.FIRST to KeyLayer(title = "FIRST", bindings = emptyList())))
+            val map = KeyMap(mapOf(Ctx.FIRST to KeyLayer<TestAction>(title = "FIRST", bindings = emptyList())))
 
             assertNull(map.resolve(listOf(Ctx.FIRST), KeyboardEvent("z")))
         }
@@ -129,7 +129,7 @@ internal class KeyMapTest {
 
         @Test
         fun `a null-titled layer throws when asked for hints`() {
-            val map = KeyMap(mapOf(Ctx.FIRST to KeyLayer(title = null, bindings = emptyList())))
+            val map = KeyMap(mapOf(Ctx.FIRST to KeyLayer<TestAction>(title = null, bindings = emptyList())))
 
             assertThrows(IllegalArgumentException::class.java) { map.hints(Ctx.FIRST) }
         }
@@ -286,8 +286,8 @@ internal class KeyMapTest {
         fun `copies source maps and lists and does not expose mutable captured collections`() {
             val sourceBindings = mutableListOf(KeyBinding(KeyboardEvent("x"), actionA, "group"))
             val sourceHints = mutableListOf(HintGroup("group", "x", "action"))
-            val source = linkedMapOf<Ctx, KeyLayer>(
-                Ctx.FIRST to KeyLayer("FIRST", sourceBindings, sourceHints),
+            val source = linkedMapOf<Ctx, KeyLayer<TestAction>>(
+                Ctx.FIRST to KeyLayer<TestAction>("FIRST", sourceBindings, sourceHints),
             )
             val map = KeyMap(source)
 
@@ -295,28 +295,20 @@ internal class KeyMapTest {
             sourceBindings.clear()
             sourceHints.clear()
 
-            assertEquals(setOf(Ctx.FIRST), map.contexts)
             assertEquals(actionA, map.resolve(listOf(Ctx.FIRST), KeyboardEvent("x")))
             assertEquals(listOf(KeyHint("x", "action")), map.hints(Ctx.FIRST).hints)
-            assertThrows(UnsupportedOperationException::class.java) {
-                (map.layer(Ctx.FIRST).bindings as MutableList).clear()
-            }
-            assertThrows(UnsupportedOperationException::class.java) {
-                (map.contexts as MutableSet).clear()
-            }
         }
 
         @Test
         fun `allows an empty keymap and rejects unknown contexts as argument errors`() {
-            val map = KeyMap<Ctx>(emptyMap())
+            val map = KeyMap<Ctx, TestAction>(emptyMap())
 
-            assertTrue(map.contexts.isEmpty())
             assertNull(map.resolve(emptyList(), KeyboardEvent("x")))
             assertThrows(IllegalArgumentException::class.java) {
                 map.resolve(listOf(Ctx.FIRST), KeyboardEvent("x"))
             }
             assertThrows(IllegalArgumentException::class.java) {
-                map.layer(Ctx.FIRST)
+                map.hints(Ctx.FIRST)
             }
         }
     }
@@ -343,9 +335,9 @@ internal class KeyMapTest {
 
     private fun titledLayer(
         title: String,
-        bindings: List<KeyBinding>,
+        bindings: List<KeyBinding<TestAction>>,
         hintGroups: List<HintGroup> = listOf(HintGroup("group", "x", "test")),
-    ): KeyLayer = KeyLayer(title = title, bindings = bindings, hintGroups = hintGroups)
+    ): KeyLayer<TestAction> = KeyLayer(title = title, bindings = bindings, hintGroups = hintGroups)
 
     private fun assertInvalid(message: String, block: () -> Unit): Unit {
         val error = assertThrows(IllegalArgumentException::class.java, block)

@@ -4,10 +4,9 @@
 package tenterexample
 
 import com.github.ajalt.mordant.input.MouseEvent
-import com.github.ajalt.mordant.input.MouseTracking
 import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.terminal.TerminalRecorder
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.runBlocking
 import io.archinaut.tenter.palette.DefaultRolePalette
@@ -17,8 +16,7 @@ import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.terminal.CompletedFrame
 import io.archinaut.tenter.terminal.Terminal
 import io.archinaut.tenter.terminal.TerminalEvent
-import io.archinaut.tenter.terminal.inputEvents
-import io.archinaut.tenter.terminal.resizeEvents
+import io.archinaut.tenter.terminal.events
 import io.archinaut.tenter.terminal.withScreen
 import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.Widget
@@ -125,16 +123,12 @@ private fun runInteractive(backend: MordantTerminal, terminal: Terminal) {
 
     // --8<-- [start:input-loop]
     runBlocking {
-        merge(
-            backend.inputEvents(MouseTracking.Normal) { event ->
-                ExampleKeyMap.map.resolve(listOf(ExampleContext.LIST), event) == ExampleAction.QUIT
-            },
-            backend.resizeEvents(),
-        ).takeWhile { it !is TerminalEvent.Quit }.collect { event ->
+        backend.events()
             // A Resized event needs no handling: the next draw follows the backend's new size.
-            if (event is TerminalEvent.Input) app.handle(event.event)
-            if (app.running) terminal.draw(app::render)
-        }
+            .onEach { event -> if (event is TerminalEvent.Input) app.handle(event.event) }
+            // The quit key sets running to false; stopping collection releases the terminal.
+            .takeWhile { app.running }
+            .collect { terminal.draw(app::render) }
     }
     // --8<-- [end:input-loop]
 }

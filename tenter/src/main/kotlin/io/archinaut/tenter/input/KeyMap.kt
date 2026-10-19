@@ -6,15 +6,15 @@ package io.archinaut.tenter.input
 import com.github.ajalt.mordant.input.KeyboardEvent
 import java.util.Collections
 import java.util.LinkedHashMap
-import java.util.LinkedHashSet
 
 /**
- * Every keyboard binding in the application, as data, addressed by a context key [C].
+ * Every keyboard binding in the application, as data, addressed by a context key [C] and resolving
+ * to the application's own action type [A] — typically an enum, so handling is exhaustive.
  *
  * Resolution is a first-match-wins walk over the contexts the caller says are active *right now*.
  * The keymap deliberately has no notion of which contexts those are: "is a panel focused", "has the
  * match ended" are application state, not binding facts. [layers] is copied at construction, and
- * its captured action values and chords must remain stable in equality and [InputAction.id].
+ * its captured action values and chords must remain stable in equality.
  *
  * Construction validates the structural contract for every layer: exact chords are unique within a
  * layer, references resolve to the layer's own help groups or to exactly one titled owner for a
@@ -24,27 +24,23 @@ import java.util.LinkedHashSet
  * A sectionless layer does not produce a help section. Its bindings can credit a group on exactly
  * one titled layer; this is useful for precedence-only layers such as panel scrolling.
  */
-public class KeyMap<C : Any>(layers: Map<C, KeyLayer>) {
+public class KeyMap<C : Any, A : Any>(layers: Map<C, KeyLayer<A>>) {
 
-    private val layers: Map<C, KeyLayer> = snapshot(layers)
-    private val contextSet: Set<C> = Collections.unmodifiableSet(LinkedHashSet(this.layers.keys))
+    private val layers: Map<C, KeyLayer<A>> = snapshot(layers)
 
     init {
         validate()
     }
 
-    /** Declared contexts in the supplied map's iteration order. The set is an immutable snapshot. */
-    public val contexts: Set<C> get() = contextSet
-
     /** Returns a declared layer, or [IllegalArgumentException] for an undeclared context. */
-    public fun layer(context: C): KeyLayer =
+    private fun layer(context: C): KeyLayer<A> =
         layers[context] ?: throw IllegalArgumentException("No key layer declared for context $context")
 
     /**
      * The action bound to [event] by the first layer in [active] that binds its chord, else null.
      * Every context in [active] must be declared; an unknown active context is an argument error.
      */
-    public fun resolve(active: List<C>, event: KeyboardEvent): InputAction? {
+    public fun resolve(active: List<C>, event: KeyboardEvent): A? {
         for (context in active) {
             val hit = layer(context).bindings.firstOrNull { it.chord == event }
             if (hit != null) return hit.action
@@ -64,7 +60,7 @@ public class KeyMap<C : Any>(layers: Map<C, KeyLayer>) {
     }
 
     /** Every chord bound to [action], across every layer. Used to derive labels such as a panel badge. */
-    public fun chordsFor(action: InputAction): List<KeyboardEvent> =
+    public fun chordsFor(action: A): List<KeyboardEvent> =
         layers.values.flatMap { layer -> layer.bindings.filter { it.action == action }.map { it.chord } }
 
     private fun validate(): Unit {
@@ -113,7 +109,7 @@ public class KeyMap<C : Any>(layers: Map<C, KeyLayer>) {
         }
     }
 
-    private fun validateLayer(context: C, layer: KeyLayer): Unit {
+    private fun validateLayer(context: C, layer: KeyLayer<A>): Unit {
         val duplicateChords = layer.bindings.groupBy { it.chord }.filterValues { it.size > 1 }.keys
         require(duplicateChords.isEmpty()) {
             "Key layer '$context' contains duplicate exact chord(s): ${duplicateChords.joinToString()}"
@@ -135,8 +131,8 @@ public class KeyMap<C : Any>(layers: Map<C, KeyLayer>) {
         }
     }
 
-    private fun snapshot(source: Map<C, KeyLayer>): Map<C, KeyLayer> {
-        val copied = LinkedHashMap<C, KeyLayer>(source.size)
+    private fun snapshot(source: Map<C, KeyLayer<A>>): Map<C, KeyLayer<A>> {
+        val copied = LinkedHashMap<C, KeyLayer<A>>(source.size)
         for ((context, layer) in source) {
             copied[context] = KeyLayer(
                 title = layer.title,

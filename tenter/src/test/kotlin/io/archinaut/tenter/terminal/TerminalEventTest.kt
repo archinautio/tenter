@@ -7,12 +7,15 @@ import io.archinaut.tenter.screen.Size
 import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.ajalt.mordant.terminal.TerminalRecorder
+import com.github.ajalt.mordant.input.MouseTracking
+import com.github.ajalt.mordant.terminal.TerminalInterface
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import org.junit.jupiter.api.Assertions.assertFalse
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
@@ -27,82 +30,47 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class TerminalEventTest {
 
-    private fun key(key: String, ctrl: Boolean = false): KeyboardEvent =
-        KeyboardEvent(key, ctrl = ctrl)
+    /** A recorder that also reports whether raw mode is active, which Mordant keeps private. */
+    private class RawModeProbe(
+        private val recorder: TerminalRecorder,
+    ) : TerminalInterface by recorder {
+        var rawModeActive: Boolean = false
+            private set
+        var rawModeEntries: Int = 0
+            private set
 
-    private val ctrlC = key("c", ctrl = true)
-    private val someKey = key("ArrowUp")
-    private val otherKey = key("Enter")
-
-    private val isQuit: (KeyboardEvent) -> Boolean = { it.ctrl && it.key == "c" }
+        override fun enterRawMode(mouseTracking: MouseTracking): AutoCloseable {
+            val inner = recorder.enterRawMode(mouseTracking)
+            rawModeActive = true
+            rawModeEntries++
+            return AutoCloseable {
+                inner.close()
+                rawModeActive = false
+            }
+        }
+    }
 
     @Nested
-    inner class TerminalEventsTest {
+    inner class EventsTest {
 
         @Test
-        fun `key before ctrl+c emits Input then Quit, ctrl+c is not forwarded as Input`() = runTest {
-            val events = terminalEvents(flowOf(someKey, ctrlC), isQuit).toList()
+        fun `stopping collection on the application's quit key releases raw mode before returning`() {
+            val keys = listOf(KeyboardEvent("a"), KeyboardEvent("q"), KeyboardEvent("b"))
+            val probe = RawModeProbe(TerminalRecorder(width = 80, height = 20).apply { inputEvents = keys.toMutableList() })
+            val terminal = Terminal(terminalInterface = probe)
 
-            assertEquals(listOf(TerminalEvent.Input(someKey), TerminalEvent.Quit), events)
-        }
-
-        @Test
-        fun `flow that completes without quit key still ends with Quit`() = runTest {
-            val events = terminalEvents(flowOf(someKey, otherKey), isQuit).toList()
-
-            assertEquals(listOf(TerminalEvent.Input(someKey), TerminalEvent.Input(otherKey), TerminalEvent.Quit), events)
-        }
-
-        @Test
-        fun `quit placed before other keys suppresses the rest`() = runTest {
-            val events = terminalEvents(flowOf(ctrlC, otherKey), isQuit).toList()
-
-            assertEquals(listOf(TerminalEvent.Quit), events)
-        }
-
-        @Test
-        fun `the supplied predicate chooses the quit key`() = runTest {
-            val events = terminalEvents(flowOf(ctrlC, otherKey), isQuit = { it == otherKey }).toList()
-
-            assertEquals(listOf(TerminalEvent.Input(ctrlC), TerminalEvent.Quit), events)
-        }
-
-        @Test
-        fun `upstream failure propagates without appending Quit`() = runTest {
-            val failure = IllegalStateException("input failed")
-            val seen = mutableListOf<TerminalEvent>()
-
-            val thrown = assertThrows<IllegalStateException> {
-                terminalEvents(
-                    flow {
-                        emit(someKey)
-                        throw failure
-                    },
-                    isQuit,
-                ).collect { seen += it }
+            val seen = runBlocking {
+                withTimeout(5.seconds) {
+                    terminal.events()
+                        .takeWhile { !(it is TerminalEvent.Input && (it.event as? KeyboardEvent)?.key == "q") }
+                        .filterIsInstance<TerminalEvent.Input>()
+                        .toList()
+                }
             }
 
-            assertEquals(failure, thrown)
-            assertEquals(listOf(TerminalEvent.Input(someKey)), seen)
-        }
-
-        @Test
-        fun `downstream cancellation does not become Quit`() = runTest {
-            val seen = mutableListOf<TerminalEvent>()
-            val job = launch {
-                terminalEvents(
-                    flow {
-                        emit(someKey)
-                        awaitCancellation()
-                    },
-                    isQuit,
-                ).collect { seen += it }
-            }
-
-            advanceTimeBy(1)
-            job.cancelAndJoin()
-
-            assertEquals(listOf(TerminalEvent.Input(someKey)), seen)
+            assertEquals(listOf(TerminalEvent.Input(KeyboardEvent("a"))), seen)
+            assertEquals(1, probe.rawModeEntries)
+            assertFalse(probe.rawModeActive)
         }
     }
 

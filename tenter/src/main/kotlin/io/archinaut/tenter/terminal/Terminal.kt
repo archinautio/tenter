@@ -24,7 +24,7 @@ import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
  * has no previous frame to diff against and falls back to a full repaint.
  *
  * [draw] follows [backend]'s size: whenever Mordant reports a new size (for example after
- * [resizeEvents] polls it), the next draw resizes both buffers. [resize] sets a size explicitly,
+ * [events] polls it), the next draw resizes both buffers. [resize] sets a size explicitly,
  * which holds until the backend's size next changes.
  *
  * [palette] resolves every [ColorRole] a caller draws with to a concrete color; picking *which*

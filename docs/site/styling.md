@@ -12,9 +12,8 @@ is inside a measurable widget's loop and draws each row with its text cursor
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt:rows"
 ```
 
-Use `Checkbox` for a standalone checkbox, `Gauge` for a bounded value display,
-`PipTrack` for a used-of-capacity track, `ValueRow` for a label with a right-aligned
-value, `VerticalText` for a minimized panel stub, `FlashMessage` for a transient status
+Use `Checkbox` for a standalone checkbox, `Gauge` for a one-row ratio bar with an
+optional label, `VerticalText` for a minimized panel stub, `FlashMessage` for a transient status
 line, and `KeyHelp` for [keyboard hints](input.md#map-keys-to-application-actions).
 
 ## Choose glyphs

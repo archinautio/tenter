@@ -43,9 +43,7 @@ public class KeyHelp(private val sections: List<KeySection>) : MeasurableWidget 
         }
     }
 
-    public companion object {
-        public const val TITLE: String = "HELP"
-
+    private companion object {
         private val HEADING = Block(
             title = "KEYS",
             borders = Borders.TOP,
