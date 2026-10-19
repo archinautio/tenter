@@ -3,7 +3,6 @@
 
 package io.archinaut.tenter.screen
 
-import io.archinaut.tenter.palette.ColorRole
 import io.archinaut.tenter.text.textClusters
 
 /**
@@ -77,13 +76,6 @@ public class Canvas private constructor(
     public fun set(x: Int, y: Int, cell: Cell) {
         if (!area.contains(x, y)) return
         buffer.writeCell(bounds.x + x, bounds.y + y, cell, clip)
-    }
-
-    /** Writes [symbol] in [fg], preserving whatever background is already painted at ([x], [y]). */
-    public fun setFg(x: Int, y: Int, symbol: String, fg: ColorRole) {
-        if (!visibleArea.contains(x, y)) return
-        val bg = buffer.get(bounds.x + x, bounds.y + y).style.bg
-        buffer.writeCell(bounds.x + x, bounds.y + y, Cell(symbol, Style(fg, bg)), clip)
     }
 
     public fun setString(

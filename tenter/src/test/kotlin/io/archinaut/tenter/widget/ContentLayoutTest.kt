@@ -53,7 +53,7 @@ internal class ContentLayoutTest {
         assertEquals(1, MeasurableWidget { it.newLine() }.measure(12).height)
         assertEquals(
             6,
-            MeasurableWidget { cursor -> cursor.writeAt(column = 0, atRow = 5, text = "overlay") }.measure(12).height,
+            MeasurableWidget { cursor -> cursor.write(column = 0, text = "overlay", row = 5) }.measure(12).height,
         )
     }
 
@@ -152,18 +152,22 @@ internal class ContentLayoutTest {
 
     @Test
     fun `text cursor draw content uses the prepared logical height`() {
-        val canvas = Canvas.offscreen(10, 5)
-        val cursor = TextCursor(canvas)
         val child = MeasurableWidget { content ->
             content.writeLine("A")
             content.newLine()
         }
+        var used = 0
+        var rowAfter = 0
+        val parent = MeasurableWidget { cursor ->
+            used = cursor.draw(child)
+            rowAfter = cursor.row
+        }
 
-        val used = cursor.draw(child)
+        val buffer = render(parent, 10, 5)
 
         assertEquals(2, used)
-        assertEquals(2, cursor.row)
-        assertEquals("A", canvas.get(0, 0).symbol)
+        assertEquals(2, rowAfter)
+        assertEquals("A", buffer.get(0, 0).symbol)
     }
 
     @Test
@@ -269,12 +273,14 @@ internal class ContentLayoutTest {
     }
 
     @Test
-    fun `immediate cursor drawing keeps an earlier reveal when the child has none`() {
+    fun `drawing a child without a request keeps the parent's earlier request`() {
         val canvas = Canvas.offscreen(6, 3)
-        val cursor = TextCursor(canvas)
+        val parent = MeasurableWidget { cursor ->
+            cursor.markReveal()
+            cursor.draw(MeasurableWidget { it.writeLine("child") })
+        }
 
-        cursor.markReveal()
-        cursor.draw(MeasurableWidget { it.writeLine("child") })
+        parent.render(canvas)
 
         assertEquals(Rect(0, 0, 6, 1), canvas.revealRect())
         assertEquals("child", (0 until 5).joinToString("") { canvas.get(it, 0).symbol })

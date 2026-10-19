@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.text
 
-public object TextWrap {
+internal object TextWrap {
 
     /**
      * The wrap engine, expressed as index ranges into [text] so a caller carrying per-index
@@ -14,7 +14,7 @@ public object TextWrap {
      * joins them with one space. A word wider than the row capacity is hard-split by grapheme
      * cluster, so a range never ends inside a cluster.
      */
-    public fun <T> wrapBy(
+    fun <T> wrapBy(
         text: String,
         firstWidth: Int,
         continuationWidth: Int = firstWidth,
@@ -80,7 +80,7 @@ public object TextWrap {
         return rows
     }
 
-    public fun wrap(text: String, firstWidth: Int, continuationWidth: Int = firstWidth): List<String> =
+    fun wrap(text: String, firstWidth: Int, continuationWidth: Int = firstWidth): List<String> =
         wrapBy(text, firstWidth, continuationWidth) { ranges ->
             ranges.joinToString(" ") { text.substring(it.first, it.last + 1) }
         }

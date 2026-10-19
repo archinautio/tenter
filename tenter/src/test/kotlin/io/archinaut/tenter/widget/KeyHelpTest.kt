@@ -19,9 +19,8 @@ internal class KeyHelpTest {
     fun `renders the KEYS header`() {
         val buffer = renderHelp(listOf(KeySection("MOVEMENT", listOf(KeyHint("Enter", "select unit")))))
 
-        assert(buffer.line(0, width = 28).startsWith("── KEYS ")) {
-            "Expected KEYS header on row 0, got: '${buffer.line(0, width = 28)}'"
-        }
+        assertEquals("─── KEYS " + "─".repeat(19), buffer.line(0, width = 28))
+        assertEquals(io.archinaut.tenter.palette.ChromeRole.INFO, buffer.get(4, 0).style.fg)
     }
 
     @Test

@@ -66,7 +66,7 @@ internal fun MeasurableWidget.prepare(availableWidth: Int): ContentLayout {
     require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
     if (this is LayoutWidget) return layout(availableWidth)
     val sink = RecordingTextSink(availableWidth)
-    val cursor = TextCursor(availableWidth, sink)
+    val cursor = TextCursor(sink)
     write(cursor)
     return ContentLayout(availableWidth, cursor.occupiedHeight, sink.snapshot())
 }

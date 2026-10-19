@@ -3,11 +3,11 @@
 
 package io.archinaut.tenter.text
 
-public object TextTruncation {
+internal object TextTruncation {
 
-    public const val ELLIPSIS: String = "…"
+    const val ELLIPSIS: String = "…"
 
-    public fun ellipsize(text: String, maxWidth: Int): String {
+    fun ellipsize(text: String, maxWidth: Int): String {
         val availableWidth = maxWidth.coerceAtLeast(0)
         if (CellWidth.of(text) <= availableWidth) return text
         if (availableWidth == 0) return ""
@@ -19,7 +19,7 @@ public object TextTruncation {
     /**
      * The exclusive code-unit index of the longest prefix of [text] fitting in [maxWidth]
      * display cells — never inside a grapheme cluster. Shared internally with
-     * `io.archinaut.tenter.screen.StyledText` so it does not re-derive the rule.
+     * `io.archinaut.tenter.screen.Line` so it does not re-derive the rule.
      */
     internal fun prefixLengthWithin(text: String, maxWidth: Int): Int {
         var displayWidth = 0

@@ -213,26 +213,6 @@ internal class CanvasTest {
     }
 
     @Test
-    fun `setFg preserves the existing background`() {
-        val canvas = Canvas.offscreen(5, 1)
-        canvas.set(0, 0, Cell(style = Style(ChromeRole.DEFAULT, ChromeRole.INFO)))
-
-        canvas.setFg(0, 0, "X", ChromeRole.DANGER)
-
-        assertEquals(Cell("X", Style(ChromeRole.DANGER, ChromeRole.INFO)), canvas.get(0, 0))
-    }
-
-    @Test
-    fun `setFg outside the canvas is a silent no-op, never throws`() {
-        val canvas = Canvas.offscreen(3, 3)
-
-        canvas.setFg(-1, 0, "X", ChromeRole.DANGER)
-        canvas.setFg(3, 0, "X", ChromeRole.DANGER)
-
-        assertEquals(Cell(), canvas.get(0, 0))
-    }
-
-    @Test
     fun `a wide glyph at the child edge paints a blank instead of a half glyph`() {
         val buffer = Buffer(4, 1)
         val child = Canvas.of(buffer).region(Rect(1, 0, 1, 1))

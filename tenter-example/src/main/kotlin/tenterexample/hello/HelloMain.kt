@@ -12,7 +12,7 @@ import io.archinaut.tenter.palette.DefaultRolePalette
 import io.archinaut.tenter.terminal.TerminalEvent
 import io.archinaut.tenter.terminal.inputEvents
 import io.archinaut.tenter.terminal.withScreen
-import io.archinaut.tenter.widget.MeasurableWidget
+import io.archinaut.tenter.widget.Paragraph
 
 public fun main() {
     val backend = Terminal()
@@ -21,7 +21,7 @@ public fun main() {
 
 /** The application owns the loop; tests can supply input without acquiring a real terminal. */
 public fun runHello(backend: Terminal, events: Flow<TerminalEvent>) {
-    val greeting = MeasurableWidget { cursor -> cursor.writeLine("Hello from Tenter — press q to quit") }
+    val greeting = Paragraph("Hello from Tenter — press q to quit")
     backend.withScreen(DefaultRolePalette) { terminal ->
         terminal.draw { frame -> frame.renderWidget(greeting, frame.area) }
         runBlocking {

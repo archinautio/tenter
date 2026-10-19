@@ -8,6 +8,7 @@ import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.widget.Columns
 import io.archinaut.tenter.widget.Column
 import io.archinaut.tenter.widget.MeasurableWidget
+import io.archinaut.tenter.widget.Paragraph
 import io.archinaut.tenter.widget.Stack
 import io.archinaut.tenter.widget.TextCursor
 import io.archinaut.tenter.widget.CheckState
@@ -54,10 +55,7 @@ internal class ExampleListView(
             gutter = COLUMN_GUTTER,
         )
         // --8<-- [end:columns]
-        val footer = MeasurableWidget { text ->
-            text.newLine()
-            text.writeLine("600 rows • CJK 中 • decomposed e\u0301 • click or use the keyboard")
-        }
+        val footer = Paragraph("\n600 rows • CJK 中 • decomposed e\u0301 • click or use the keyboard")
         cursor.draw(Stack(listOf(catalog, footer)))
     }
 

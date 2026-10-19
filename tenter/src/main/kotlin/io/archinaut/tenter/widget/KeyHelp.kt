@@ -10,15 +10,17 @@ import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.text.TextWrap
 
 /**
- * Content for a HELP panel: a single `KEYS` section (the top-level rule, via
- * [TextCursor.writeHeader]) holding one sub-section per entry in [sections] — each rendered
+ * Content for a HELP panel: a single `KEYS` section (a [Block] with a titled top border)
+ * holding one sub-section per entry in [sections] — each rendered
  * lazygit-style as an indented label followed by its `key  description` rows.
  */
 public class KeyHelp(private val sections: List<KeySection>) : MeasurableWidget {
 
     override fun write(cursor: TextCursor) {
-        cursor.writeHeader("KEYS")
+        cursor.draw(MeasurableWidget { writeSections(it) }.block(HEADING))
+    }
 
+    private fun writeSections(cursor: TextCursor) {
         // One key column shared across every section (not per-hint) so descriptions line up in a
         // single straight edge down the panel instead of jagging with each key's own length.
         // The description is wrapped on its own — not as part of one combined "key + description"
@@ -44,6 +46,12 @@ public class KeyHelp(private val sections: List<KeySection>) : MeasurableWidget 
     public companion object {
         public const val TITLE: String = "HELP"
 
+        private val HEADING = Block(
+            title = "KEYS",
+            borders = Borders.TOP,
+            borderColor = ChromeRole.INFO,
+            titleColor = ChromeRole.INFO,
+        )
         private val SUBSECTION_STYLE = Style(ChromeRole.ACCENT)
         private val KEY_STYLE = Style(ChromeRole.INFO)
         private val DESC_STYLE = Style(ChromeRole.TEXT_PRIMARY)

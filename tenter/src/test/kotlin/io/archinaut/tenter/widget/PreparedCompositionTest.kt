@@ -130,7 +130,7 @@ internal class PreparedCompositionTest {
         val viewport = Viewport(MeasurableWidget { cursor ->
             repeat(20) {
                 cursor.writeLine("row$it")
-                if (it == 19) cursor.markRevealAt(it)
+                if (it == 19) cursor.markReveal(row = it)
             }
         })
 
@@ -150,7 +150,7 @@ internal class PreparedCompositionTest {
         val state = ViewportState()
         val viewport = Viewport(MeasurableWidget { cursor ->
             repeat(20) { cursor.writeLine("row$it") }
-            cursor.markRevealAt(10)
+            cursor.markReveal(row = 10)
         })
         viewport.render(Canvas.offscreen(10, 5), state)
         val before = state.settled
@@ -202,7 +202,7 @@ internal class PreparedCompositionTest {
         val inner = Viewport(
             MeasurableWidget { cursor ->
                 repeat(20) { cursor.writeLine("inner$it") }
-                cursor.markRevealAt(19)
+                cursor.markReveal(row = 19)
             },
         )
         val outerState = ViewportState()

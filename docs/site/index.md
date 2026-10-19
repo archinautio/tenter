@@ -86,6 +86,7 @@ Ratatui, the names map directly:
 | `Buffer`, `Cell`, `Style` | `Buffer`, `Cell`, `Style` | The grid of styled cells. |
 | `Layout`, `Constraint` | `Layout`, `Constraint` | Split a `Rect` into smaller rectangles. |
 | `Block`, `Borders`, `Padding` | `Block`, `Borders`, `Padding` | Borders with a title, and the space inside them. |
+| `Paragraph`, `Line`, `Span` | `Paragraph`, `Line`, `Span` | Text: lines made of styled spans, shown by a paragraph widget. |
 
 Tenter adds measurable widgets (`MeasurableWidget`) for content that measures its own
 height, scrolling viewports, and managed panels on top of these concepts.

@@ -70,15 +70,18 @@ internal class PipTrackTest {
 
     @Test
     fun `a cursor advances past the rows used`() {
-        val buffer = Buffer(40, 10)
-        val cursor = TextCursor(Canvas.of(buffer))
-        cursor.newLine()
-
-        cursor.draw(track(used = 5, capacity = 7, perRow = 3))
+        var rowAfter = 0
+        val buffer = paint(
+            MeasurableWidget { cursor ->
+                cursor.newLine()
+                cursor.draw(track(used = 5, capacity = 7, perRow = 3))
+                rowAfter = cursor.row
+            },
+        )
 
         assertEquals("F F F", buffer.line(1))
         assertEquals("F F E", buffer.line(2))
-        assertEquals(4, cursor.row)
+        assertEquals(4, rowAfter)
     }
 
     @Test

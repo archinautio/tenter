@@ -363,7 +363,6 @@ public final class io/archinaut/tenter/screen/Canvas {
 	public final fun region (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun revealRect ()Lio/archinaut/tenter/screen/Rect;
 	public final fun set (IILio/archinaut/tenter/screen/Cell;)V
-	public final fun setFg (IILjava/lang/String;Lio/archinaut/tenter/palette/ColorRole;)V
 	public final fun setString (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;)V
 	public static synthetic fun setString$default (Lio/archinaut/tenter/screen/Canvas;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
 }
@@ -492,6 +491,19 @@ public final class io/archinaut/tenter/screen/Layout$Companion {
 	public final fun vertical ([Lio/archinaut/tenter/screen/Constraint;)Lio/archinaut/tenter/screen/Layout;
 }
 
+public final class io/archinaut/tenter/screen/Line {
+	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;)V
+	public fun <init> ([Lio/archinaut/tenter/screen/Span;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSpans ()Ljava/util/List;
+	public final fun getWidth ()I
+	public fun hashCode ()I
+	public final fun plus (Lio/archinaut/tenter/screen/Line;)Lio/archinaut/tenter/screen/Line;
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/archinaut/tenter/screen/Padding {
 	public static final field Companion Lio/archinaut/tenter/screen/Padding$Companion;
 	public fun <init> ()V
@@ -571,6 +583,20 @@ public final class io/archinaut/tenter/screen/Size {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/archinaut/tenter/screen/Span {
+	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lio/archinaut/tenter/screen/Style;
+	public final fun copy (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/Span;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Span;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Span;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStyle ()Lio/archinaut/tenter/screen/Style;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/archinaut/tenter/screen/Style {
 	public static final field Companion Lio/archinaut/tenter/screen/Style$Companion;
 	public fun <init> ()V
@@ -591,54 +617,6 @@ public final class io/archinaut/tenter/screen/Style {
 
 public final class io/archinaut/tenter/screen/Style$Companion {
 	public final fun getDEFAULT ()Lio/archinaut/tenter/screen/Style;
-}
-
-public final class io/archinaut/tenter/screen/StyledText {
-	public static final field Companion Lio/archinaut/tenter/screen/StyledText$Companion;
-	public final fun ellipsize (I)Lio/archinaut/tenter/screen/StyledText;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getPlain ()Ljava/lang/String;
-	public final fun getSpans ()Ljava/util/List;
-	public final fun getWidth ()I
-	public fun hashCode ()I
-	public final fun isEmpty ()Z
-	public final fun plus (Lio/archinaut/tenter/screen/StyledText;)Lio/archinaut/tenter/screen/StyledText;
-	public fun toString ()Ljava/lang/String;
-	public final fun wrap (II)Ljava/util/List;
-	public static synthetic fun wrap$default (Lio/archinaut/tenter/screen/StyledText;IIILjava/lang/Object;)Ljava/util/List;
-}
-
-public final class io/archinaut/tenter/screen/StyledText$Builder {
-	public final fun append (Lio/archinaut/tenter/screen/StyledText;)V
-	public final fun append (Ljava/lang/String;Lio/archinaut/tenter/palette/ColorRole;)V
-	public final fun append (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)V
-	public static synthetic fun append$default (Lio/archinaut/tenter/screen/StyledText$Builder;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
-}
-
-public final class io/archinaut/tenter/screen/StyledText$Companion {
-	public final fun getEMPTY ()Lio/archinaut/tenter/screen/StyledText;
-	public final fun of (Ljava/lang/String;Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/screen/StyledText;
-	public final fun of (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/StyledText;
-	public static synthetic fun of$default (Lio/archinaut/tenter/screen/StyledText$Companion;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/StyledText;
-}
-
-public final class io/archinaut/tenter/screen/StyledText$Span {
-	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lio/archinaut/tenter/screen/Style;
-	public final fun copy (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/StyledText$Span;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/StyledText$Span;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/StyledText$Span;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getStyle ()Lio/archinaut/tenter/screen/Style;
-	public final fun getText ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/screen/StyledTextKt {
-	public static final fun joinStyled (Ljava/lang/Iterable;Ljava/lang/String;)Lio/archinaut/tenter/screen/StyledText;
-	public static synthetic fun joinStyled$default (Ljava/lang/Iterable;Ljava/lang/String;ILjava/lang/Object;)Lio/archinaut/tenter/screen/StyledText;
-	public static final fun styled (Lkotlin/jvm/functions/Function1;)Lio/archinaut/tenter/screen/StyledText;
 }
 
 public final class io/archinaut/tenter/terminal/CompletedFrame {
@@ -710,20 +688,6 @@ public final class io/archinaut/tenter/text/CellWidth {
 	public final fun of (I)I
 	public final fun of (Ljava/lang/String;)I
 	public final fun of (Ljava/lang/String;II)I
-}
-
-public final class io/archinaut/tenter/text/TextTruncation {
-	public static final field ELLIPSIS Ljava/lang/String;
-	public static final field INSTANCE Lio/archinaut/tenter/text/TextTruncation;
-	public final fun ellipsize (Ljava/lang/String;I)Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/text/TextWrap {
-	public static final field INSTANCE Lio/archinaut/tenter/text/TextWrap;
-	public final fun wrap (Ljava/lang/String;II)Ljava/util/List;
-	public static synthetic fun wrap$default (Lio/archinaut/tenter/text/TextWrap;Ljava/lang/String;IIILjava/lang/Object;)Ljava/util/List;
-	public final fun wrapBy (Ljava/lang/String;IILkotlin/jvm/functions/Function1;)Ljava/util/List;
-	public static synthetic fun wrapBy$default (Lio/archinaut/tenter/text/TextWrap;Ljava/lang/String;IILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/util/List;
 }
 
 public final class io/archinaut/tenter/widget/Block : io/archinaut/tenter/widget/Widget {
@@ -878,6 +842,15 @@ public final class io/archinaut/tenter/widget/MeasurableWidgetKt {
 	public static final fun measure (Lio/archinaut/tenter/widget/MeasurableWidget;I)Lio/archinaut/tenter/screen/Size;
 }
 
+public final class io/archinaut/tenter/widget/Paragraph : io/archinaut/tenter/widget/MeasurableWidget {
+	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Z)V
+	public synthetic fun <init> (Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
+	public fun write (Lio/archinaut/tenter/widget/TextCursor;)V
+}
+
 public final class io/archinaut/tenter/widget/PipTrack : io/archinaut/tenter/widget/MeasurableWidget {
 	public fun <init> (IILjava/lang/String;Ljava/lang/String;ILio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;I)V
 	public synthetic fun <init> (IILjava/lang/String;Ljava/lang/String;ILio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -953,35 +926,19 @@ public abstract interface class io/archinaut/tenter/widget/StatefulWidget {
 }
 
 public final class io/archinaut/tenter/widget/TextCursor {
-	public fun <init> (Lio/archinaut/tenter/screen/Canvas;)V
 	public final fun draw (Lio/archinaut/tenter/widget/MeasurableWidget;)I
 	public final fun getRow ()I
 	public final fun getWidth ()I
-	public final fun markReveal (I)V
-	public static synthetic fun markReveal$default (Lio/archinaut/tenter/widget/TextCursor;IILjava/lang/Object;)V
-	public final fun markRevealAt (II)V
-	public static synthetic fun markRevealAt$default (Lio/archinaut/tenter/widget/TextCursor;IIILjava/lang/Object;)V
+	public final fun markReveal (II)V
+	public static synthetic fun markReveal$default (Lio/archinaut/tenter/widget/TextCursor;IIILjava/lang/Object;)V
 	public final fun newLine ()V
-	public final fun write (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/widget/TextCursor$Align;)V
-	public final fun write (ILjava/lang/String;Lio/archinaut/tenter/screen/Style;)V
-	public static synthetic fun write$default (Lio/archinaut/tenter/widget/TextCursor;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/widget/TextCursor$Align;ILjava/lang/Object;)V
-	public static synthetic fun write$default (Lio/archinaut/tenter/widget/TextCursor;ILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
-	public final fun writeAt (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;)V
-	public static synthetic fun writeAt$default (Lio/archinaut/tenter/widget/TextCursor;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
-	public final fun writeHeader (Ljava/lang/String;)V
-	public final fun writeLine (Lio/archinaut/tenter/screen/StyledText;)I
+	public final fun write (ILjava/lang/String;Lio/archinaut/tenter/screen/Style;I)V
+	public static synthetic fun write$default (Lio/archinaut/tenter/widget/TextCursor;ILjava/lang/String;Lio/archinaut/tenter/screen/Style;IILjava/lang/Object;)V
+	public final fun writeLine (Lio/archinaut/tenter/screen/Line;)I
 	public final fun writeLine (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)I
 	public static synthetic fun writeLine$default (Lio/archinaut/tenter/widget/TextCursor;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)I
 	public final fun writeRow (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;)I
 	public static synthetic fun writeRow$default (Lio/archinaut/tenter/widget/TextCursor;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)I
-}
-
-public final class io/archinaut/tenter/widget/TextCursor$Align : java/lang/Enum {
-	public static final field LEFT Lio/archinaut/tenter/widget/TextCursor$Align;
-	public static final field RIGHT Lio/archinaut/tenter/widget/TextCursor$Align;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/widget/TextCursor$Align;
-	public static fun values ()[Lio/archinaut/tenter/widget/TextCursor$Align;
 }
 
 public final class io/archinaut/tenter/widget/ValueRow : io/archinaut/tenter/widget/MeasurableWidget {

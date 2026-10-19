@@ -25,9 +25,7 @@ internal class DefaultRolePaletteTest {
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.ANSI16)
         val terminal = Terminal(ansiLevel = AnsiLevel.ANSI16, terminalInterface = recorder)
         val buffer = Buffer(40, 4)
-        val content = TextCursor(Canvas.of(buffer))
-
-        content.draw(SelectableRow(label = "default", checkState = CheckState.CHECKED, selected = true))
+        SelectableRow(label = "default", checkState = CheckState.CHECKED, selected = true).render(Canvas.of(buffer))
         for ((index, role) in ChromeRole.entries.withIndex()) {
             buffer.set(index, 2, Cell("X", Style(fg = role, bg = role)))
         }

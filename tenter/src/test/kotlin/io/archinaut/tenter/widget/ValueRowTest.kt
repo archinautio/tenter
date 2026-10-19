@@ -13,13 +13,12 @@ internal class ValueRowTest {
 
     @Test
     fun `places a right value using display width after a wide left value`() {
-        val buffer = Buffer(10, 1)
-        val content = TextCursor(Canvas.of(buffer))
+        val row = ValueRow(left = "中", right = "R", color = ChromeRole.TEXT_PRIMARY)
 
-        content.draw(ValueRow(left = "中", right = "R", color = ChromeRole.TEXT_PRIMARY))
+        val buffer = render(row, 10, 1)
 
         assertEquals("中", buffer.get(0, 0).symbol)
         assertEquals("R", buffer.get(9, 0).symbol)
-        assertEquals(1, content.row)
+        assertEquals(1, row.measure(10).height)
     }
 }

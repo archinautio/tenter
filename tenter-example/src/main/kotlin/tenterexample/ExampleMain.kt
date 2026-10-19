@@ -36,7 +36,7 @@ public fun runHeadlessSmoke(): SmokeResult {
     // --8<-- [start:padding]
     val framed = MeasurableWidget { cursor ->
         cursor.writeLine("OK")
-        cursor.markRevealAt(0)
+        cursor.markReveal(row = 0)
     }.block(Block.bordered(padding = Padding.uniform(1)))
     val size = framed.measure(8)
     // --8<-- [end:padding]

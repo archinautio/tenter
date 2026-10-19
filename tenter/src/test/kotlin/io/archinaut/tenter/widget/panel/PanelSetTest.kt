@@ -28,7 +28,7 @@ internal class PanelSetTest {
             Panel<SetPanelId, Unit>(id, id.name, normal = {
                 Panel.Presentation.allocated(MeasurableWidget { cursor ->
                     repeat(100) { cursor.writeLine("row$it") }
-                    cursor.markRevealAt(40)
+                    cursor.markReveal(row = 40)
                 })
             })
         })
@@ -97,7 +97,7 @@ internal class PanelSetTest {
         val a = Panel<SetPanelId, Unit>(SetPanelId.A, "A", normal = {
             Panel.Presentation.allocated(MeasurableWidget { cursor ->
                 repeat(100) { cursor.writeLine("row$it") }
-                cursor.markRevealAt(40)
+                cursor.markReveal(row = 40)
             })
         })
         val b = Panel<SetPanelId, Unit>(SetPanelId.B, "B", normal = {

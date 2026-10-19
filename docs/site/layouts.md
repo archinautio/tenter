@@ -2,12 +2,33 @@
 
 Tenter has two kinds of widget. A `Widget` paints into whatever area it is given, as in
 Ratatui. A `MeasurableWidget` can also measure its height for a width before painting,
-so it can be stacked, placed in columns, and scrolled. Most content is measurable:
-write it row by row with a `TextCursor` and its height follows from what you wrote.
+so it can be stacked, placed in columns, and scrolled.
+
+## Show text
+
+`Paragraph` shows lines of text, as Ratatui's `Paragraph` does. A `Line` is made of
+`Span`s, each with its own `Style`, so one line can mix colors without computing columns:
 
 ```kotlin
-val greeting = MeasurableWidget { cursor -> cursor.writeLine("Hello") }
+val greeting = Paragraph("Hello from Tenter")
+val status = Paragraph(
+    listOf(
+        Line("Connected", Style(ChromeRole.SUCCESS)),
+        Line(Span("key ", Style(ChromeRole.INFO)), Span("description")),
+    ),
+    wrap = true,
+)
+```
 
+A string is split into lines at each `\n`. Without `wrap`, each line takes one row and
+is shortened with `…` to fit; with it, lines wrap at word boundaries.
+
+## Write a custom widget
+
+For content that is not plain text, implement `MeasurableWidget` and write it row by
+row with a `TextCursor`; its height follows from what you wrote:
+
+```kotlin
 class Summary(private val items: List<String>) : MeasurableWidget {
     override fun write(cursor: TextCursor) {
         items.forEach { cursor.writeLine(it) }
@@ -15,10 +36,11 @@ class Summary(private val items: List<String>) : MeasurableWidget {
 }
 ```
 
-Use `writeLine` for a line and `newLine` for a blank line; `cursor.width` is the
-available width. Place a child inside measurable content with `cursor.draw(child)`;
-never call a child's `write` yourself, since it would write into your rows instead of
-its own. `widget.measure(width)` returns the `Size` content takes at a width.
+`writeLine` writes a `String` or a `Line` and advances; `newLine` leaves a blank row;
+`write(column, text, row = …)` places text at a column, on the current row unless you
+name an earlier one; `cursor.width` is the available width. Place a child with
+`cursor.draw(child)`; never call a child's `write` yourself, since it would write into
+your rows instead of its own. `widget.measure(width)` returns the `Size` content takes.
 
 ## Stack content vertically
 
@@ -58,7 +80,7 @@ then measures it for an available width of eight cells:
 ```
 
 See the [complete source and imports](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt).
-`markRevealAt(0)` asks an enclosing viewport to keep the marked row visible; omit
+`markReveal(row = 0)` asks an enclosing viewport to keep the marked row visible; omit
 it for a static label. In an allocated area, render the block and then render the
 content into `block.inner(area)`:
 

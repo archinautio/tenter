@@ -17,7 +17,7 @@ internal class ViewportTest {
     private fun content(lines: Int, revealRow: Int? = null): MeasurableWidget = MeasurableWidget {
         repeat(lines) { row ->
             it.writeLine("line$row")
-            if (row == revealRow) it.markRevealAt(row)
+            if (row == revealRow) it.markReveal(row = row)
         }
     }
 

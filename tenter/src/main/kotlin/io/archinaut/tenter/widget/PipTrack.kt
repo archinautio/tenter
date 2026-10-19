@@ -39,9 +39,9 @@ public class PipTrack(
             val row = i / perRow
             val column = (i % perRow) * stride
             if (i < filledCount) {
-                cursor.writeAt(column, row, filled, usedStyle)
+                cursor.write(column, filled, usedStyle, row)
             } else {
-                cursor.writeAt(column, row, empty, emptyStyle)
+                cursor.write(column, empty, emptyStyle, row)
             }
         }
         repeat(((capacity - 1).coerceAtLeast(0) / perRow) + 1) { cursor.newLine() }

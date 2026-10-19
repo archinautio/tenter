@@ -7,18 +7,23 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.screen.Line
+import io.archinaut.tenter.screen.Span
 import io.archinaut.tenter.screen.Style
-import io.archinaut.tenter.screen.styled
 import io.archinaut.tenter.screen.Rect
 
 internal class TextCursorTest {
 
+    /** Writes [block] as a measurable widget painted into a fresh [width]x[height] canvas. */
+    private fun paint(width: Int, height: Int, block: (TextCursor) -> Unit): Canvas =
+        Canvas.offscreen(width, height).also { MeasurableWidget(block).render(it) }
+
     @Test
-    fun `immediate and prepared child insertion retain the last nonempty visible reveal`() {
+    fun `child insertion retains the last nonempty visible reveal`() {
         val cases = listOf(
             EmptyWidget.fixedSize(4, 1) to Rect(0, 0, 4, 1),
             EmptyWidget.fixedSize(0, 0) to Rect(0, 0, 4, 1),
-            MeasurableWidget { it.writeLine("child"); it.markRevealAt(0) } to Rect(0, 1, 4, 1),
+            MeasurableWidget { it.writeLine("child"); it.markReveal(row = 0) } to Rect(0, 1, 4, 1),
             object : Widget {
                 override fun render(canvas: Canvas) { canvas.markReveal(Rect(-2, 0, 3, 1)) }
             }.fixedSize(4, 1) to Rect(0, 1, 1, 1),
@@ -27,45 +32,21 @@ internal class TextCursorTest {
             }.fixedSize(4, 1) to Rect(0, 0, 4, 1),
         )
         for ((child, expected) in cases) {
-            val instructions: (TextCursor) -> Unit = { cursor ->
+            val canvas = paint(4, 3) { cursor ->
                 cursor.writeLine("parent")
-                cursor.markRevealAt(0)
+                cursor.markReveal(row = 0)
                 cursor.draw(child)
             }
-            val immediate = Canvas.offscreen(4, 3)
-            val prepared = Canvas.offscreen(4, 3)
 
-            instructions(TextCursor(immediate))
-            MeasurableWidget { instructions(it) }.render(prepared)
-
-            assertEquals(expected, immediate.revealRect())
-            assertEquals(expected, prepared.revealRect())
+            assertEquals(expected, canvas.revealRect())
         }
     }
 
     @Test
-    fun `a child beyond the allocated canvas does not clear its existing reveal`() {
-        val canvas = Canvas.offscreen(4, 1)
-        val cursor = TextCursor(canvas)
-        cursor.writeLine("parent")
-        cursor.markRevealAt(0)
-
-        cursor.draw(MeasurableWidget { it.writeLine("child"); it.markRevealAt(0) })
-
-        assertEquals(Rect(0, 0, 4, 1), canvas.revealRect())
-    }
-
-    @Test
     fun `writeLine paints each span in its own style at the right column`() {
-        val canvas = Canvas.offscreen(20, 3)
-        val cursor = TextCursor(canvas)
-
-        cursor.writeLine(
-            styled {
-                append("foo", ChromeRole.DANGER)
-                append("bar", ChromeRole.SUCCESS)
-            },
-        )
+        val canvas = paint(20, 3) { cursor ->
+            cursor.writeLine(Line(Span("foo", Style(ChromeRole.DANGER)), Span("bar", Style(ChromeRole.SUCCESS))))
+        }
 
         assertEquals(Style(ChromeRole.DANGER), canvas.get(0, 0).style)
         assertEquals(Style(ChromeRole.DANGER), canvas.get(2, 0).style)
@@ -77,15 +58,9 @@ internal class TextCursorTest {
 
     @Test
     fun `writeLine advances a wide codepoint's column by two cells`() {
-        val canvas = Canvas.offscreen(20, 3)
-        val cursor = TextCursor(canvas)
-
-        cursor.writeLine(
-            styled {
-                append("中", ChromeRole.DANGER)
-                append("A", ChromeRole.SUCCESS)
-            },
-        )
+        val canvas = paint(20, 3) { cursor ->
+            cursor.writeLine(Line(Span("中", Style(ChromeRole.DANGER)), Span("A", Style(ChromeRole.SUCCESS))))
+        }
 
         assertEquals("中", canvas.get(0, 0).symbol)
         assertEquals("", canvas.get(1, 0).symbol, "filler reserves the wide glyph's second cell")
@@ -94,44 +69,54 @@ internal class TextCursorTest {
     }
 
     @Test
-    fun `writeLine ellipsizes at the canvas width`() {
-        val canvas = Canvas.offscreen(5, 1)
-        val cursor = TextCursor(canvas)
-
-        cursor.writeLine(styled { append("hello world", ChromeRole.DANGER) })
+    fun `writeLine ellipsizes at the available width`() {
+        val canvas = paint(5, 1) { cursor -> cursor.writeLine("hello world", Style(ChromeRole.DANGER)) }
 
         assertEquals("hell…", (0 until 5).joinToString("") { canvas.get(it, 0).symbol })
     }
 
     @Test
     fun `writeLine advances row by one and returns the row written`() {
-        val canvas = Canvas.offscreen(10, 3)
-        val cursor = TextCursor(canvas)
-
-        val written = cursor.writeLine(styled { append("a") })
+        var written = -1
+        var rowAfter = -1
+        paint(10, 3) { cursor ->
+            written = cursor.writeLine("a")
+            rowAfter = cursor.row
+        }
 
         assertEquals(0, written)
-        assertEquals(1, cursor.row)
+        assertEquals(1, rowAfter)
     }
 
     @Test
-    fun `fixed width write clips before aligning`() {
-        val canvas = Canvas.offscreen(12, 1)
-        val cursor = TextCursor(canvas)
+    fun `write overlays an earlier row without advancing`() {
+        var rowAfter = -1
+        val canvas = paint(6, 2) { cursor ->
+            cursor.writeLine("ab")
+            cursor.writeLine("cd")
+            cursor.write(column = 3, text = "X", row = 0)
+            rowAfter = cursor.row
+        }
 
-        cursor.write(column = 2, width = 4, text = "abcdef")
-
-        assertEquals("  abc…      ", (0 until 12).joinToString("") { canvas.get(it, 0).symbol })
+        assertEquals("ab X  ", (0 until 6).joinToString("") { canvas.get(it, 0).symbol })
+        assertEquals(2, rowAfter)
     }
 
     @Test
-    fun `fixed width write leaves zero width and adjacent fields harmless`() {
-        val canvas = Canvas.offscreen(12, 1)
-        val cursor = TextCursor(canvas)
+    fun `markReveal defaults to the current row and accepts an explicit one`() {
+        val current = paint(4, 3) { cursor ->
+            cursor.newLine()
+            cursor.markReveal(height = 2)
+            cursor.newLine()
+            cursor.newLine()
+        }
+        val explicit = paint(4, 3) { cursor ->
+            cursor.newLine()
+            cursor.newLine()
+            cursor.markReveal(row = 0)
+        }
 
-        cursor.write(column = 2, width = 0, text = "ignored")
-        cursor.write(column = 6, width = 4, text = "right", align = TextCursor.Align.RIGHT)
-
-        assertEquals("      rig…  ", (0 until 12).joinToString("") { canvas.get(it, 0).symbol })
+        assertEquals(Rect(0, 1, 4, 2), current.revealRect())
+        assertEquals(Rect(0, 0, 4, 1), explicit.revealRect())
     }
 }

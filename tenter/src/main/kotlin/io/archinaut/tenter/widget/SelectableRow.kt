@@ -42,7 +42,7 @@ public class SelectableRow(
             checkboxColor != null -> checkboxColor
             else -> Checkbox.intrinsicColor(checkState)
         }
-        cursor.writeAt(CHECKBOX_COLUMN, 0, checkboxIcon(checkState, glyphs), Style(resolvedCheckboxColor))
+        cursor.write(CHECKBOX_COLUMN, checkboxIcon(checkState, glyphs), Style(resolvedCheckboxColor), row = 0)
     }
 
     private companion object {

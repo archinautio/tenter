@@ -369,7 +369,7 @@ internal class TerminalTest {
         Canvas.of(buffer).setString(0, 0, "中", Style(fg = ChromeRole.DANGER))
         terminal.renderBuffer(buffer)
 
-        Canvas.of(buffer).setFg(0, 0, "中", ChromeRole.SUCCESS)
+        Canvas.of(buffer).setString(0, 0, "中", Style(fg = ChromeRole.SUCCESS))
         recorder.clearOutput()
         terminal.renderBuffer(buffer)
 

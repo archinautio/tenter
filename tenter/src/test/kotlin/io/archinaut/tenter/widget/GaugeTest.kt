@@ -52,11 +52,16 @@ internal class GaugeTest {
     @Test
     fun `occupies two rows`() {
         val gauge = Gauge(value = 0, maxValue = 30, barWidth = 20)
-        val cursor = TextCursor(Canvas.of(Buffer(28, 5)))
+        var used = 0
+        var rowAfter = 0
+        MeasurableWidget { cursor ->
+            used = cursor.draw(gauge)
+            rowAfter = cursor.row
+        }.measure(28)
 
         assertEquals(2, gauge.measure(28).height)
-        assertEquals(2, cursor.draw(gauge))
-        assertEquals(2, cursor.row)
+        assertEquals(2, used)
+        assertEquals(2, rowAfter)
     }
 
     @Test

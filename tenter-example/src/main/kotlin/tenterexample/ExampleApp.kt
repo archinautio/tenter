@@ -14,6 +14,7 @@ import io.archinaut.tenter.widget.panel.PanelSet
 import io.archinaut.tenter.widget.panel.PanelMode
 import io.archinaut.tenter.terminal.Frame
 import io.archinaut.tenter.widget.MeasurableWidget
+import io.archinaut.tenter.widget.Paragraph
 import io.archinaut.tenter.widget.KeyHelp
 import io.archinaut.tenter.widget.Stack
 
@@ -126,11 +127,7 @@ internal class ExampleApp(
     private fun helpContent(input: ExampleState): MeasurableWidget = Stack(
         listOf(
             KeyHelp(listOf(ExampleKeyMap.map.hints(ExampleContext.LIST))),
-            MeasurableWidget { cursor ->
-                cursor.newLine()
-                cursor.writeLine("Selected: row ${input.selectedRow}")
-                cursor.writeLine("Checked: ${input.checkedRows.size}")
-            },
+            Paragraph("\nSelected: row ${input.selectedRow}\nChecked: ${input.checkedRows.size}"),
         ),
     )
 
