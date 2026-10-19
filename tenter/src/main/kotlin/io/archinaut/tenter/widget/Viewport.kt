@@ -4,10 +4,11 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Canvas
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
 
 /**
- * Scrolls prepared content in an exactly sized offscreen stream. The caller owns the
+ * Scrolls prepared content, painting only the part inside the viewport. The caller owns the
  * [ViewportState] and passes it to every render; read the completed frame from
  * [ViewportState.settled].
  */
@@ -23,19 +24,44 @@ public class Viewport(
         if (canvas.width <= 0 || canvas.height <= 0) return
 
         val layout = content.layout(canvas.width)
-        val stream = Canvas.offscreen(layout.width, layout.height)
-        layout.render(stream)
-
         val maxOffsetX = (layout.width - canvas.width).coerceAtLeast(0)
         val maxOffsetY = (layout.height - canvas.height).coerceAtLeast(0)
-        val reveal = stream.revealRect()
-        val follow = viewportState.shouldFollow(reveal, canvas.width, canvas.height)
+        var offset = ScrollOffset.ZERO
+        // The offset depends on the reveal request, so the layout resolves it first and paints
+        // only the rows and children inside the window, shifted by the resolved offset.
+        val revealed = layout.paintAt(canvas) { reveal ->
+            offset = resolveOffset(viewportState, reveal, canvas.width, canvas.height, maxOffsetX, maxOffsetY)
+            Point(-offset.x, -offset.y)
+        }
+
+        viewportState.settle(
+            ScrollState(
+                offset = offset,
+                maxOffset = ScrollOffset(maxOffsetX, maxOffsetY),
+                revealed = revealed,
+                viewportWidth = canvas.width,
+                viewportHeight = canvas.height,
+                contentWidth = layout.width,
+                contentHeight = layout.height,
+            ),
+        )
+    }
+
+    private fun resolveOffset(
+        viewportState: ViewportState,
+        reveal: Rect?,
+        viewportWidth: Int,
+        viewportHeight: Int,
+        maxOffsetX: Int,
+        maxOffsetY: Int,
+    ): ScrollOffset {
+        val follow = viewportState.shouldFollow(reveal, viewportWidth, viewportHeight)
         val base = viewportState.requestedOffset()
         val recenter = viewportState.recenterRequested()
         val offsetX = resolveAxis(
             base = base.x,
             revealRange = reveal?.let { it.x to it.x + it.width },
-            viewportSize = canvas.width,
+            viewportSize = viewportWidth,
             maxOffset = maxOffsetX,
             shouldFollow = follow,
             recenter = recenter,
@@ -43,24 +69,12 @@ public class Viewport(
         val offsetY = resolveAxis(
             base = base.y,
             revealRange = reveal?.let { it.y to it.y + it.height },
-            viewportSize = canvas.height,
+            viewportSize = viewportHeight,
             maxOffset = maxOffsetY,
             shouldFollow = follow,
             recenter = recenter,
         )
-
-        canvas.blit(stream.region(Rect(offsetX, offsetY, canvas.width, canvas.height)))
-        viewportState.settle(
-            ScrollState(
-                offset = ScrollOffset(offsetX, offsetY),
-                maxOffset = ScrollOffset(maxOffsetX, maxOffsetY),
-                revealed = reveal,
-                viewportWidth = canvas.width,
-                viewportHeight = canvas.height,
-                contentWidth = layout.width,
-                contentHeight = layout.height,
-            ),
-        )
+        return ScrollOffset(offsetX, offsetY)
     }
 
     private fun resolveAxis(

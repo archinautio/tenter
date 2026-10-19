@@ -17,8 +17,13 @@ import io.archinaut.tenter.text.textClusters
  */
 public class Canvas private constructor(
     private val buffer: Buffer,
-    /** This canvas's rectangle in [buffer]'s absolute coordinates. */
+    /** This canvas's logical rectangle — its origin and size — in [buffer]'s absolute coordinates. */
     private val bounds: Rect,
+    /**
+     * The absolute cells this canvas may write: [bounds] narrowed by every ancestor. Equal to
+     * [bounds] except for a [window], whose logical rectangle may extend past its parent.
+     */
+    private val clip: Rect = bounds,
 ) {
 
     public val width: Int get() = bounds.width
@@ -31,34 +36,54 @@ public class Canvas private constructor(
     /** This canvas's top-left corner in its buffer's absolute (frame) coordinates. */
     internal val origin: Point get() = Point(bounds.x, bounds.y)
 
+    /** The part of [area] this canvas can actually write, in local coordinates. */
+    internal val visibleArea: Rect get() = clip.offset(-bounds.x, -bounds.y)
+
     /**
      * The intersection of [rect] with this canvas — e.g. a [Layout] split of [area], or a rectangle a
      * completed frame publishes (see [io.archinaut.tenter.widget.panel.PanelLayout]).
      */
-    public fun region(rect: Rect): Canvas = Canvas(buffer, rect.clipTo(area).toAbsolute())
+    public fun region(rect: Rect): Canvas = narrowed(rect.clipTo(area))
 
     /** The region left after removing [padding] from each edge, clamped to never go negative. */
-    public fun inner(padding: Padding): Canvas = Canvas(buffer, area.inner(padding).toAbsolute())
+    public fun inner(padding: Padding): Canvas = narrowed(area.inner(padding))
+
+    /**
+     * A canvas whose local `(0, 0)` is this canvas's local ([rect].x, [rect].y) — either of which
+     * may be negative — with [rect]'s logical size, writing only where [rect] overlaps this canvas.
+     * Unlike [region], the origin is never moved to stay inside this canvas, so content can be
+     * painted shifted by a scroll offset or placed partly outside its parent.
+     */
+    internal fun window(rect: Rect): Canvas {
+        val absolute = rect.toAbsolute()
+        return Canvas(buffer, absolute, absolute.clipTo(clip))
+    }
+
+    private fun narrowed(local: Rect): Canvas {
+        val absolute = local.toAbsolute()
+        return Canvas(buffer, absolute, absolute.clipTo(clip))
+    }
 
     /** @throws IndexOutOfBoundsException if ([x], [y]) is outside this canvas. */
     public fun get(x: Int, y: Int): Cell {
         if (!area.contains(x, y)) {
             throw IndexOutOfBoundsException("($x, $y) out of bounds for ${width}x$height canvas")
         }
+        if (!visibleArea.contains(x, y)) return Cell.EMPTY
         return buffer.get(bounds.x + x, bounds.y + y)
     }
 
     /** No-op if ([x], [y]) is outside this canvas. */
     public fun set(x: Int, y: Int, cell: Cell) {
         if (!area.contains(x, y)) return
-        buffer.writeCell(bounds.x + x, bounds.y + y, cell, bounds)
+        buffer.writeCell(bounds.x + x, bounds.y + y, cell, clip)
     }
 
     /** Writes [symbol] in [fg], preserving whatever background is already painted at ([x], [y]). */
     public fun setFg(x: Int, y: Int, symbol: String, fg: ColorRole) {
-        if (!area.contains(x, y)) return
+        if (!visibleArea.contains(x, y)) return
         val bg = buffer.get(bounds.x + x, bounds.y + y).style.bg
-        buffer.writeCell(bounds.x + x, bounds.y + y, Cell(symbol, Style(fg, bg)), bounds)
+        buffer.writeCell(bounds.x + x, bounds.y + y, Cell(symbol, Style(fg, bg)), clip)
     }
 
     public fun setString(
@@ -70,7 +95,7 @@ public class Canvas private constructor(
         var column = x
         for (cluster in textClusters(text)) {
             if (cluster.width == 0) continue
-            buffer.writeCell(bounds.x + column, bounds.y + y, Cell(cluster.drawableText, style), bounds)
+            buffer.writeCell(bounds.x + column, bounds.y + y, Cell(cluster.drawableText, style), clip)
             column += cluster.width
         }
     }
@@ -106,10 +131,14 @@ public class Canvas private constructor(
      * buffer.
      */
     public fun blit(src: Canvas, destX: Int = 0, destY: Int = 0) {
-        val startCol = maxOf(0, -destX)
-        val endCol = minOf(src.width, this.width - destX)
-        val startRow = maxOf(0, -destY)
-        val endRow = minOf(src.height, this.height - destY)
+        // Only cells both readable in [src] and writable here are visited, so a blit into a mostly
+        // clipped window costs its visible part, not its logical size.
+        val writable = visibleArea
+        val readable = src.visibleArea
+        val startCol = maxOf(0, -destX, writable.x - destX, readable.x)
+        val endCol = minOf(src.width, this.width - destX, writable.right - destX, readable.right)
+        val startRow = maxOf(0, -destY, writable.y - destY, readable.y)
+        val endRow = minOf(src.height, this.height - destY, writable.bottom - destY, readable.bottom)
         if (startCol >= endCol || startRow >= endRow) return
 
         // Reading through a snapshot is what makes an overlapping blit within ONE buffer copy
@@ -130,7 +159,7 @@ public class Canvas private constructor(
                 val sourceY = src.bounds.y + row
                 val stored = source[sourceY][sourceX]
                 val completeWide = !stored.continuation && stored.width == 2 &&
-                    column + 1 < endCol && sourceX + 1 < src.bounds.x + src.width &&
+                    column + 1 < endCol &&
                     source[sourceY][sourceX + 1].continuation
                 val destinationX = bounds.x + destX + column
                 val destinationY = bounds.y + destY + row
@@ -151,6 +180,10 @@ public class Canvas private constructor(
     }
 
     private fun Rect.toAbsolute(): Rect = offset(bounds.x, bounds.y)
+
+    private val Rect.right: Int get() = x + width
+
+    private val Rect.bottom: Int get() = y + height
 
     public companion object {
         /** A canvas over the whole of [buffer]. */

@@ -99,6 +99,9 @@ are retained rather than deep-copied. Capture stable frame data in raw widgets w
 you need repeatable output. `fixedContent` uses the dimensions you supply without
 painting to measure; it calls the original widget each time it paints.
 
-Prepared layouts retain all logical content for scrolling. Very long content uses
-proportionally more memory, so limit or page the application data you prepare when
-working with large datasets.
+A viewport paints only the rows and children inside its window, so painting costs
+the visible area, not the content length. Preparation still records all logical
+content, so very long content uses proportionally more memory and preparation time;
+limit or page the application data you prepare when working with large datasets.
+A raw widget from `fixedContent` is painted in full once per frame wherever it is
+placed, because its reveal request is only known after it paints.

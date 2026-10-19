@@ -4,6 +4,7 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Canvas
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 
@@ -20,12 +21,8 @@ internal class CanvasTextSink(private val canvas: Canvas) : TextSink {
 
     override fun place(layout: ContentLayout, x: Int, y: Int) {
         if (layout.width == 0 || layout.height == 0) return
-        val stream = Canvas.offscreen(layout.width, layout.height)
-        layout.render(stream)
-        canvas.blit(stream, x, y)
-        stream.revealRect()?.let { reveal ->
+        layout.paintAt(canvas) { Point(x, y) }?.let { reveal ->
             canvas.markReveal(reveal.offset(x, y))
         }
     }
-
 }

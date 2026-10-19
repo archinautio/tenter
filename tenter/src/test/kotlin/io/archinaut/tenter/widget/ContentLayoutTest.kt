@@ -295,4 +295,48 @@ internal class ContentLayoutTest {
         assertEquals("X", canvas.get(0, 0).symbol)
         assertEquals(Rect(0, 0, 1, 1), canvas.revealRect())
     }
+
+    @Test
+    fun `a child's wide glyph is clipped at its own edge without touching its neighbour`() {
+        val columns = Columns(
+            children = listOf(
+                Columns.Child(3, contentWidget { it.write(0, "ab中") }),
+                Columns.Child(1, contentWidget { it.writeLine("z") }),
+            ),
+            gutter = 0,
+        )
+
+        assertEquals("ab z", render(columns, 4, 1).line(0))
+    }
+
+    @Test
+    fun `immediate cursor drawing keeps an earlier reveal when the child has none`() {
+        val canvas = Canvas.offscreen(6, 3)
+        val cursor = TextCursor(canvas)
+
+        cursor.markReveal()
+        cursor.draw(contentWidget { it.writeLine("child") })
+
+        assertEquals(Rect(0, 0, 6, 1), canvas.revealRect())
+        assertEquals("child", (0 until 5).joinToString("") { canvas.get(it, 0).symbol })
+    }
+
+    @Test
+    fun `a viewport invokes a raw widget once per frame and follows its reveal`() {
+        var paints = 0
+        val raw = fixedContent(5, 20, object : Widget {
+            override fun render(canvas: Canvas) {
+                paints++
+                canvas.setString(0, 15, "here")
+                canvas.markReveal(Rect(0, 15, 5, 1))
+            }
+        })
+        val state = ViewportState()
+
+        val buffer = render(Viewport(raw), 5, 4, state)
+
+        assertEquals(1, paints)
+        assertEquals(12, checkNotNull(state.settled).offset.y)
+        assertEquals("here", buffer.line(3))
+    }
 }

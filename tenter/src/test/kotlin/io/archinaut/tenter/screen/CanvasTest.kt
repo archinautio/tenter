@@ -357,4 +357,38 @@ internal class CanvasTest {
         assertEquals("AABCDE", (0 until 6).joinToString("") { canvas.get(it, 0).symbol })
     }
 
+    @Test
+    fun `a window keeps a negative origin and writes only where it overlaps its parent`() {
+        val buffer = Buffer(6, 2)
+        val parent = Canvas.of(buffer).region(Rect(1, 0, 4, 2))
+        val window = parent.window(Rect(-2, 1, 10, 1))
+
+        window.setString(0, 0, "abcdefgh")
+
+        assertEquals(Rect(2, 0, 4, 1), window.visibleArea)
+        assertEquals(" cdef ", (0 until 6).joinToString("") { buffer.get(it, 1).symbol })
+        assertEquals(Cell(), window.get(0, 0))
+    }
+
+    @Test
+    fun `a wide glyph across a window's left edge paints only a blank surviving slot`() {
+        val canvas = Canvas.offscreen(4, 1)
+        val window = canvas.window(Rect(-1, 0, 5, 1))
+
+        window.setString(0, 0, "中x", Style(fg = ChromeRole.ACCENT))
+
+        assertEquals(Cell(" ", Style(fg = ChromeRole.ACCENT)), canvas.get(0, 0))
+        assertEquals("x", canvas.get(1, 0).symbol)
+    }
+
+    @Test
+    fun `blit into a window copies only its visible part`() {
+        val source = Canvas.offscreen(3, 3)
+        (0 until 3).forEach { row -> source.setString(0, row, "$row$row$row") }
+        val canvas = Canvas.offscreen(3, 1)
+
+        canvas.window(Rect(0, -1, 3, 3)).blit(source)
+
+        assertEquals("111", (0 until 3).joinToString("") { canvas.get(it, 0).symbol })
+    }
 }
