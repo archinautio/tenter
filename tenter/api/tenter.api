@@ -328,19 +328,8 @@ public final class io/archinaut/tenter/palette/RolePalette$DefaultImpls {
 	public static fun background (Lio/archinaut/tenter/palette/RolePalette;Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/palette/PaletteColor;
 }
 
-public final class io/archinaut/tenter/screen/Buffer {
-	public fun <init> (II)V
-	public final fun get (II)Lio/archinaut/tenter/screen/Cell;
-	public final fun getHeight ()I
-	public final fun getWidth ()I
-	public final fun reset ()V
-	public final fun set (IILio/archinaut/tenter/screen/Cell;)V
-}
-
 public final class io/archinaut/tenter/screen/Canvas {
 	public static final field Companion Lio/archinaut/tenter/screen/Canvas$Companion;
-	public final fun blit (Lio/archinaut/tenter/screen/Canvas;II)V
-	public static synthetic fun blit$default (Lio/archinaut/tenter/screen/Canvas;Lio/archinaut/tenter/screen/Canvas;IIILjava/lang/Object;)V
 	public final fun get (II)Lio/archinaut/tenter/screen/Cell;
 	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
 	public final fun getHeight ()I
@@ -348,14 +337,12 @@ public final class io/archinaut/tenter/screen/Canvas {
 	public final fun inner (Lio/archinaut/tenter/screen/Padding;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun markReveal (Lio/archinaut/tenter/screen/Rect;)V
 	public final fun region (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Canvas;
-	public final fun revealRect ()Lio/archinaut/tenter/screen/Rect;
 	public final fun set (IILio/archinaut/tenter/screen/Cell;)V
 	public final fun setString (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;)V
 	public static synthetic fun setString$default (Lio/archinaut/tenter/screen/Canvas;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
 }
 
 public final class io/archinaut/tenter/screen/Canvas$Companion {
-	public final fun of (Lio/archinaut/tenter/screen/Buffer;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun offscreen (II)Lio/archinaut/tenter/screen/Canvas;
 }
 
@@ -619,8 +606,6 @@ public final class io/archinaut/tenter/terminal/CompletedFrame {
 }
 
 public final class io/archinaut/tenter/terminal/Frame {
-	public final fun canvas (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Canvas;
-	public static synthetic fun canvas$default (Lio/archinaut/tenter/terminal/Frame;Lio/archinaut/tenter/screen/Rect;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
 	public final fun renderStatefulWidget (Lio/archinaut/tenter/widget/StatefulWidget;Lio/archinaut/tenter/screen/Rect;Ljava/lang/Object;)V
 	public final fun renderWidget (Lio/archinaut/tenter/widget/Widget;Lio/archinaut/tenter/screen/Rect;)V

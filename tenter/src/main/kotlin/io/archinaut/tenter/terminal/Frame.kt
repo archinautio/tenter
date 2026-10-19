@@ -23,8 +23,8 @@ public class Frame internal constructor(
     /** The full drawable area of this frame. Split it with [io.archinaut.tenter.screen.Layout]. */
     public val area: Rect get() = Rect(0, 0, buffer.width, buffer.height)
 
-    /** A canvas clipped to [area] within this frame, for APIs that paint a canvas directly. */
-    public fun canvas(area: Rect = this.area): Canvas = Canvas.of(buffer).region(area)
+    /** A canvas clipped to [area] within this frame. */
+    private fun canvas(area: Rect): Canvas = Canvas.of(buffer).region(area)
 
     /** Renders [widget] into [area]. */
     public fun renderWidget(widget: Widget, area: Rect) {

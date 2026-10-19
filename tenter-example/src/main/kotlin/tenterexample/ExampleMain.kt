@@ -23,6 +23,8 @@ import io.archinaut.tenter.terminal.withScreen
 import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.Widget
 import io.archinaut.tenter.widget.MeasurableWidget
+import io.archinaut.tenter.widget.ViewportState
+import io.archinaut.tenter.widget.Viewport
 import io.archinaut.tenter.widget.block
 import io.archinaut.tenter.widget.measure
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
@@ -43,7 +45,9 @@ public fun runHeadlessSmoke(): SmokeResult {
     val framedCanvas = Canvas.offscreen(size.width, size.height)
     framed.render(framedCanvas)
     check(size.height == 5 && framedCanvas.get(2, 2).symbol == "O")
-    check(framedCanvas.revealRect()?.y == 2) { "the block lost the child's reveal" }
+    val followed = ViewportState()
+    Viewport(framed).render(Canvas.offscreen(size.width, 3), followed)
+    check(followed.settled?.revealed?.y == 2) { "the block lost the child's reveal" }
 
     val app = ExampleApp(ExampleLayoutMode.MAIN_AND_SIDES)
     val terminal = headlessTerminal(width = 80, height = 12)

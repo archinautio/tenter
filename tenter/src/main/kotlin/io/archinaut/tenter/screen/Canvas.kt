@@ -108,7 +108,7 @@ public class Canvas private constructor(
     }
 
     /** The rect last marked via [markReveal], translated into THIS canvas's local coords, or `null` if none. */
-    public fun revealRect(): Rect? = buffer.reveal?.offset(-bounds.x, -bounds.y)
+    internal fun revealRect(): Rect? = buffer.reveal?.offset(-bounds.x, -bounds.y)
 
     /** Clears the reveal request in this canvas's backing frame. Used by prepared frame scopes. */
     internal fun clearReveal() {
@@ -122,7 +122,7 @@ public class Canvas private constructor(
      * read or write past either canvas's edge, regardless of where each canvas sits in the shared
      * buffer.
      */
-    public fun blit(src: Canvas, destX: Int = 0, destY: Int = 0) {
+    internal fun blit(src: Canvas, destX: Int = 0, destY: Int = 0) {
         // Only cells both readable in [src] and writable here are visited, so a blit into a mostly
         // clipped window costs its visible part, not its logical size.
         val writable = visibleArea
@@ -179,7 +179,7 @@ public class Canvas private constructor(
 
     public companion object {
         /** A canvas over the whole of [buffer]. */
-        public fun of(buffer: Buffer): Canvas = Canvas(buffer, Rect(0, 0, buffer.width, buffer.height))
+        internal fun of(buffer: Buffer): Canvas = Canvas(buffer, Rect(0, 0, buffer.width, buffer.height))
 
         /** A detached canvas over its own backing buffer — for measuring or scrolling content off-screen. */
         public fun offscreen(width: Int, height: Int): Canvas = of(Buffer(width, height))

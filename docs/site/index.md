@@ -82,8 +82,8 @@ Ratatui, the names map directly:
 | `Terminal` | `Terminal` | Owns the screen buffers and sends only what changed on each `draw`. Wraps a Mordant terminal as its backend. |
 | `Frame` | `Frame` | One frame inside `terminal.draw { frame -> }`: its `area` and `renderWidget` / `renderStatefulWidget`. |
 | `Widget`, `StatefulWidget` | `Widget`, `StatefulWidget` | Something that renders into an area, optionally with caller-owned state. |
-| `Canvas` | `Rect` + `Buffer` | The area a widget renders into: clipped, with local coordinates. |
-| `Buffer`, `Cell`, `Style` | `Buffer`, `Cell`, `Style` | The grid of styled cells. |
+| `Canvas` | `Rect` + `Buffer` | The area a widget renders into: clipped, with local coordinates. Test a widget by rendering it into `Canvas.offscreen(width, height)`. |
+| `Cell`, `Style` | `Cell`, `Style` | A styled terminal cell, and its colors. |
 | `Layout`, `Constraint` | `Layout`, `Constraint` | Split a `Rect` into smaller rectangles. |
 | `Block`, `Borders`, `Padding` | `Block`, `Borders`, `Padding` | Borders with a title, and the space inside them. |
 | `Paragraph`, `Line`, `Span` | `Paragraph`, `Line`, `Span` | Text: lines made of styled spans, shown by a paragraph widget. |

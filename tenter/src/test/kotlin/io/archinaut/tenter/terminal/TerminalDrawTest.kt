@@ -184,12 +184,18 @@ internal class TerminalDrawTest {
     }
 
     @Test
-    fun `the frame canvas exposes the same clipped region`() {
-        val completed = terminal.draw { frame ->
-            val canvas = frame.canvas(Rect(4, 1, 10, 10))
-            assertEquals(Rect(0, 0, 2, 1), canvas.area)
-            canvas.setString(0, 0, "ok")
+    fun `a widget rendered into an area receives that clipped region`() {
+        var area: Rect? = null
+        val widget = object : Widget {
+            override fun render(canvas: Canvas) {
+                area = canvas.area
+                canvas.setString(0, 0, "ok")
+            }
         }
+
+        val completed = terminal.draw { frame -> frame.renderWidget(widget, Rect(4, 1, 10, 10)) }
+
+        assertEquals(Rect(0, 0, 2, 1), area)
 
         assertEquals("ok", completed.get(4, 1).symbol + completed.get(5, 1).symbol)
     }

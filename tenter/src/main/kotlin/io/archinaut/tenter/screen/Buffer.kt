@@ -5,9 +5,9 @@ package io.archinaut.tenter.screen
 
 import io.archinaut.tenter.text.textClusters
 
-public class Buffer(
-    public val width: Int,
-    public val height: Int,
+internal class Buffer(
+    val width: Int,
+    val height: Int,
 ) {
     private val cells: Array<Array<StoredCell>>
 
@@ -24,19 +24,19 @@ public class Buffer(
     internal var reveal: Rect? = null
 
     /** Blanks every cell to [Cell.EMPTY] and drops any reveal request, so the buffer can be redrawn from scratch. */
-    public fun reset() {
+    fun reset() {
         for (row in cells) row.fill(EMPTY_STORED)
         reveal = null
     }
 
-    public fun get(x: Int, y: Int): Cell {
+    fun get(x: Int, y: Int): Cell {
         if (!area.contains(x, y)) {
             throw IndexOutOfBoundsException("($x, $y) out of bounds for ${width}x$height buffer")
         }
         return cells[y][x].asPublicCell()
     }
 
-    public fun set(x: Int, y: Int, cell: Cell) {
+    fun set(x: Int, y: Int, cell: Cell) {
         if (!area.contains(x, y)) return
         writeCell(x, y, cell, area)
     }
