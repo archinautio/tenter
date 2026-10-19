@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.widget.MeasurableWidget
-import io.archinaut.tenter.widget.ScrollOffset
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.widget.ScrollState
 import io.archinaut.tenter.widget.ViewportState
 import io.archinaut.tenter.widget.Widget
@@ -29,7 +29,7 @@ internal class PanelViewportTest {
     }
 
     private fun panel(content: MeasurableWidget, scrollOffset: Int? = 0, state: ViewportState = ViewportState(
-        scrollOffset?.let { ScrollOffset(y = it) } ?: ScrollOffset.ZERO,
+        scrollOffset?.let { Point(0, it) } ?: Point.ORIGIN,
     )): Widget = panelViewport(content, title = "T", badge = "0").bind(state)
 
     /** The settled frame the panel published to the state its caller supplied. */

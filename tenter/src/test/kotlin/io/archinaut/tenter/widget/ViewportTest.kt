@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget
 
+import io.archinaut.tenter.screen.Point
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -35,7 +36,7 @@ internal class ViewportTest {
 
     @Test
     fun `explicit offset shifts visible window`() {
-        val state = ViewportState(ScrollOffset(y = 3))
+        val state = ViewportState(Point(0, 3))
         val buffer = Buffer(viewportWidth, viewportHeight)
         val viewport = Viewport(content(20))
         viewport.render(Canvas.of(buffer), state)
@@ -46,7 +47,7 @@ internal class ViewportTest {
 
     @Test
     fun `prepared layout reaches rows beyond the old measurement ceiling`() {
-        val state = ViewportState(ScrollOffset(y = 999))
+        val state = ViewportState(Point(0, 999))
         val viewport = Viewport(content(600))
         viewport.render(Canvas.offscreen(viewportWidth, viewportHeight), state)
 
@@ -122,7 +123,7 @@ internal class ViewportTest {
 
     @Test
     fun `a block stays fixed around the scrolling content`() {
-        val state = ViewportState(ScrollOffset(y = 5))
+        val state = ViewportState(Point(0, 5))
 
         val buffer = render(Viewport(content(20), block = Block.bordered(title = "LOG")), 12, 5, state)
 
@@ -151,7 +152,7 @@ internal class ViewportTest {
 
     @Test
     fun `a block on the content scrolls away with it`() {
-        val state = ViewportState(ScrollOffset(y = 1))
+        val state = ViewportState(Point(0, 1))
 
         val buffer = render(Viewport(content(5).block(Block.bordered())), 10, 3, state)
 

@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget.panel
 
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.ViewportState
@@ -110,11 +111,11 @@ public class PanelSet<K : PanelId, I> private constructor(
 
         val contentX = x - slot.content.x + scroll.offset.x
         val contentY = y - slot.content.y + scroll.offset.y - Block.PADDING.verticalEdges().top
-        val contentHeight = scroll.contentHeight - Block.PADDING.verticalEdges().top
-        if (contentX !in 0 until scroll.contentWidth || contentY !in 0 until contentHeight) {
+        val contentHeight = scroll.content.height - Block.PADDING.verticalEdges().top
+        if (contentX !in 0 until scroll.content.width || contentY !in 0 until contentHeight) {
             return PanelHit(slot.id, null)
         }
-        return PanelHit(slot.id, io.archinaut.tenter.screen.Point(contentX, contentY))
+        return PanelHit(slot.id, Point(contentX, contentY))
     }
 
     /**

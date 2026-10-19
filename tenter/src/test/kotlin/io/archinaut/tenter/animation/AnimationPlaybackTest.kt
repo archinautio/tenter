@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.animation
 
+import io.archinaut.tenter.screen.Size
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.ZERO
@@ -33,7 +34,7 @@ internal class AnimationPlaybackTest {
         private val calls: MutableList<Int> = mutableListOf(),
         private val firstLetter: Char = 'A',
     ) : Animation {
-        public override val size: AnimationSize = AnimationSize(width = 1, height = 1)
+        public override val size: Size = Size(width = 1, height = 1)
 
         public override fun frame(index: Int): Widget {
             calls += index
@@ -52,7 +53,7 @@ internal class AnimationPlaybackTest {
         public override val frameDuration: Duration,
         private val calls: MutableList<Int>,
     ) : Animation {
-        public override val size: AnimationSize = AnimationSize(width = 12, height = 1)
+        public override val size: Size = Size(width = 12, height = 1)
 
         public override fun frame(index: Int): Widget {
             calls += index
@@ -329,9 +330,23 @@ internal class AnimationPlaybackTest {
     }
 
     @Test
+    fun `an animation needs a positive size`() {
+        val empty = object : Animation {
+            override val size = Size(0, 1)
+            override val frameCount = 1
+            override val frameDuration = 1.milliseconds
+            override fun frame(index: Int): Widget = LetterWidget('Z')
+        }
+
+        assertThrows<IllegalArgumentException> {
+            AnimationPlayback(listOf(AnimationPlayback.Clip(empty, "empty")))
+        }
+    }
+
+    @Test
     fun `ordinary widgets can be played without glyph grids`() {
         val animation = object : Animation {
-            override val size = AnimationSize(1, 1)
+            override val size = Size(1, 1)
             override val frameCount = 1
             override val frameDuration = 1.milliseconds
             override fun frame(index: Int): Widget = LetterWidget('Z')

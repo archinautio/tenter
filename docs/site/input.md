@@ -24,7 +24,7 @@ Mordant terminal, and `terminal` is the Tenter `Terminal` that `withScreen` prov
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt:input-loop"
 ```
 
-`TerminalEvent.Input` carries a Mordant input event. `Resized` supplies the new size.
+`TerminalEvent.Input` carries a Mordant input event. `Resized` supplies the new `Size` in cells.
 The quit predicate turns `q` into `TerminalEvent.Quit`, ending collection and allowing
 the terminal scope to close. `terminal.draw` follows the backend's current size, so
 drawing again after a resize is enough; `frame.area` already has the new dimensions.

@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.animation
 
+import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Style
@@ -20,10 +21,14 @@ import io.archinaut.tenter.widget.Widget
  * returned grid unchanged so that its rendering remains stable.
  */
 public class GlyphGrid(
-    public val size: AnimationSize,
+    public val size: Size,
     private val priority: (Char) -> Int,
     private val style: (Char) -> Style,
 ) : Widget {
+    init {
+        require(size.width > 0 && size.height > 0) { "grid size must be positive, was $size" }
+    }
+
     public val width: Int = size.width
     public val height: Int = size.height
 

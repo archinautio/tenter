@@ -6,6 +6,7 @@ package io.archinaut.tenter.widget
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
+import io.archinaut.tenter.screen.Size
 
 /**
  * Scrolls a [MeasurableWidget], painting only the part inside the viewport. The caller owns the
@@ -38,7 +39,7 @@ public class Viewport(
         val layout = content.prepare(canvas.width)
         val maxOffsetX = (layout.width - canvas.width).coerceAtLeast(0)
         val maxOffsetY = (layout.height - canvas.height).coerceAtLeast(0)
-        var offset = ScrollOffset.ZERO
+        var offset = Point.ORIGIN
         // The offset depends on the reveal request, so the layout resolves it first and paints
         // only the rows and children inside the window, shifted by the resolved offset.
         val revealed = layout.paintAt(canvas) { reveal ->
@@ -49,12 +50,10 @@ public class Viewport(
         viewportState.settle(
             ScrollState(
                 offset = offset,
-                maxOffset = ScrollOffset(maxOffsetX, maxOffsetY),
+                maxOffset = Point(maxOffsetX, maxOffsetY),
+                viewport = Size(canvas.width, canvas.height),
+                content = Size(layout.width, layout.height),
                 revealed = revealed,
-                viewportWidth = canvas.width,
-                viewportHeight = canvas.height,
-                contentWidth = layout.width,
-                contentHeight = layout.height,
             ),
         )
     }
@@ -66,8 +65,8 @@ public class Viewport(
         viewportHeight: Int,
         maxOffsetX: Int,
         maxOffsetY: Int,
-    ): ScrollOffset {
-        val follow = viewportState.shouldFollow(reveal, viewportWidth, viewportHeight)
+    ): Point {
+        val follow = viewportState.shouldFollow(reveal, Size(viewportWidth, viewportHeight))
         val base = viewportState.requestedOffset()
         val recenter = viewportState.recenterRequested()
         val offsetX = resolveAxis(
@@ -86,7 +85,7 @@ public class Viewport(
             shouldFollow = follow,
             recenter = recenter,
         )
-        return ScrollOffset(offsetX, offsetY)
+        return Point(offsetX, offsetY)
     }
 
     private fun resolveAxis(

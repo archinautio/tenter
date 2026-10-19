@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.terminal
 
+import io.archinaut.tenter.screen.Size
 import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.ajalt.mordant.terminal.TerminalRecorder
@@ -125,9 +126,7 @@ internal class TerminalEventTest {
             job.cancel()
 
             assertEquals(1, seen.size, "expected a single startup emission, got: $seen")
-            val only = seen.single() as TerminalEvent.Resized
-            assertEquals(80, only.size.width)
-            assertEquals(20, only.size.height)
+            assertEquals(TerminalEvent.Resized(Size(80, 20)), seen.single())
         }
 
         @Test

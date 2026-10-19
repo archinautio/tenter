@@ -7,8 +7,8 @@ import com.github.ajalt.mordant.input.InputEvent
 import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.input.MouseTracking
 import com.github.ajalt.mordant.input.enterRawMode
-import com.github.ajalt.mordant.rendering.Size
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
+import io.archinaut.tenter.screen.Size
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -26,6 +26,7 @@ import kotlin.time.Duration.Companion.milliseconds
 /** A terminal-level event: raw input, a resize, or the quit signal. */
 public sealed interface TerminalEvent {
     public data class Input(val event: InputEvent) : TerminalEvent
+    /** The terminal now has [size] cells. */
     public data class Resized(val size: Size) : TerminalEvent
     public object Quit : TerminalEvent
 }
@@ -107,8 +108,8 @@ private fun MordantTerminal.rawModePollingFlow(
  * Deduplicating on `Size` itself therefore never suppresses anything: every poll would emit, and
  * a naive collector would re-render several times a second forever. Worse than wasteful, that
  * repaint is indistinguishable from a real resize, so anything keyed off "the terminal resized"
- * would fire on a timer and stomp the user's manual scroll. Dedupe on the dimensions instead,
- * which do compare by value, then rebuild the [Size] for the event.
+ * would fire on a timer and stomp the user's manual scroll. Each poll is therefore converted to
+ * Tenter's [Size], which compares by value, before deduplicating.
  *
  * This flow intentionally has **no** [flowOn] — it runs in the collector's context so that size
  * reads can be co-located with rendering without cross-thread synchronisation. The caller owns
@@ -119,7 +120,7 @@ public fun MordantTerminal.resizeEvents(period: Duration = 200.milliseconds): Fl
         "resize polling period must be finite and positive: $period"
     }
     return flow { while (true) { emit(updateSize()); delay(period) } }
-        .map { it.width to it.height }
+        .map { Size(it.width, it.height) }
         .distinctUntilChanged()
-        .map { (width, height) -> TerminalEvent.Resized(Size(width, height)) }
+        .map { TerminalEvent.Resized(it) }
 }

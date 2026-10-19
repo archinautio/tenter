@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.animation
 
+import io.archinaut.tenter.screen.Size
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
 import io.archinaut.tenter.widget.Widget
@@ -31,7 +32,7 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
     /** A visible animation frame and its application-owned value. */
     public data class VisibleFrame<T>(
         public val value: T,
-        public val size: AnimationSize,
+        public val size: Size,
         public val content: Widget,
     )
 
@@ -89,13 +90,14 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
     private class Timeline<T>(clip: Clip<T>) {
         internal val animation: Animation = clip.animation
         internal val value: T = clip.value
-        internal val size: AnimationSize = animation.size
+        internal val size: Size = animation.size
         internal val frameCount: Int = animation.frameCount
         internal val frameDuration: Duration = animation.frameDuration
         internal val startAfter: Duration = clip.startAfter
         internal val endAt: Duration
 
         init {
+            require(size.width > 0 && size.height > 0) { "animation size must be positive, was $size" }
             require(frameCount > 0) { "frameCount must be positive, was $frameCount" }
             require(frameDuration.isFinite() && frameDuration > ZERO) {
                 "frameDuration must be finite and positive, was $frameDuration"

@@ -6,7 +6,7 @@ package tenterexample
 import kotlin.time.Duration.Companion.milliseconds
 import io.archinaut.tenter.animation.Animation
 import io.archinaut.tenter.animation.AnimationPlayback
-import io.archinaut.tenter.animation.AnimationSize
+import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.animation.GlyphGrid
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.palette.ChromeRole
@@ -14,7 +14,7 @@ import io.archinaut.tenter.widget.Widget
 
 // --8<-- [start:animation]
 internal class ExampleAnimation : Animation {
-    override val size: AnimationSize = AnimationSize(width = 3, height = 1)
+    override val size: Size = Size(width = 3, height = 1)
     override val frameCount: Int = 2
     override val frameDuration = 100.milliseconds
 

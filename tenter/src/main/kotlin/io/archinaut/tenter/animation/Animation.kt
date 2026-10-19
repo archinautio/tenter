@@ -3,20 +3,21 @@
 
 package io.archinaut.tenter.animation
 
+import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.widget.Widget
 import kotlin.time.Duration
 
 /**
  * A finite sequence of equally timed, deterministic terminal widgets.
  *
- * Implementations expose stable metadata: [frameCount] is positive and [frameDuration] is finite
- * and positive after construction. [frame] is non-advancing and deterministic for an index in
+ * Implementations expose stable metadata: [size] has a positive width and height, [frameCount]
+ * is positive, and [frameDuration] is finite and positive after construction. [frame] is non-advancing and deterministic for an index in
  * `0 until [frameCount]`; it draws in local coordinates within [size], so a smaller destination
  * clips naturally through [io.archinaut.tenter.screen.Canvas]. A frame returned from [frame] must remain stable
  * after later frame requests.
  */
 public interface Animation {
-    public val size: AnimationSize
+    public val size: Size
     public val frameCount: Int
     public val frameDuration: Duration
 

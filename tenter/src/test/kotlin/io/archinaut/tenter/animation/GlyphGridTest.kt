@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.animation
 
+import io.archinaut.tenter.screen.Size
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
@@ -15,7 +16,7 @@ import io.archinaut.tenter.widget.render
 
 internal class GlyphGridTest {
 
-    private val size = AnimationSize(width = 3, height = 2)
+    private val size = Size(width = 3, height = 2)
     private val priority: (Char) -> Int = { char -> if (char == 'X') 10 else 0 }
     private val style: (Char) -> Style = { char ->
         if (char == 'X') Style(fg = ChromeRole.DANGER, bg = ChromeRole.INFO)
@@ -94,5 +95,11 @@ internal class GlyphGridTest {
         assertEquals("X", buffer.get(2, 1).symbol)
         assertEquals(size.width, glyphs.width)
         assertEquals(size.height, glyphs.height)
+    }
+
+    @Test
+    fun `a grid needs a positive size`() {
+        assertThrows<IllegalArgumentException> { GlyphGrid(Size(0, 1), priority, style) }
+        assertThrows<IllegalArgumentException> { GlyphGrid(Size(1, 0), priority, style) }
     }
 }

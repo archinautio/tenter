@@ -3,14 +3,16 @@
 
 package io.archinaut.tenter.widget
 
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
+import io.archinaut.tenter.screen.Size
 
 /**
  * Mutable scrolling intent and the last immutable frame observation for one viewport. Commands
  * are queued until a drawable frame; they never rewrite [settled]. A state belongs to one
  * viewport and is confined to the application's rendering context.
  */
-public class ViewportState(initialOffset: ScrollOffset = ScrollOffset.ZERO) {
+public class ViewportState(initialOffset: Point = Point.ORIGIN) {
 
     /**
      * Every value a frame carries forward, in one immutable record. [fork] and [adopt] copy this
@@ -18,7 +20,7 @@ public class ViewportState(initialOffset: ScrollOffset = ScrollOffset.ZERO) {
      * one of them and go stale across a managed frame.
      */
     private data class Carried(
-        public val requestedOffset: ScrollOffset,
+        public val requestedOffset: Point,
         public val pendingRecenter: Boolean = false,
         public val settled: ScrollState? = null,
     )
@@ -38,7 +40,7 @@ public class ViewportState(initialOffset: ScrollOffset = ScrollOffset.ZERO) {
     /** Queues a relative scroll request for the next drawable frame. */
     public fun scrollBy(dx: Int, dy: Int) {
         carried = carried.copy(
-            requestedOffset = ScrollOffset(
+            requestedOffset = Point(
                 saturatingAdd(carried.requestedOffset.x, dx),
                 saturatingAdd(carried.requestedOffset.y, dy),
             ),
@@ -50,13 +52,12 @@ public class ViewportState(initialOffset: ScrollOffset = ScrollOffset.ZERO) {
         carried = carried.copy(pendingRecenter = true)
     }
 
-    internal fun requestedOffset(): ScrollOffset = carried.requestedOffset
+    internal fun requestedOffset(): Point = carried.requestedOffset
 
-    internal fun shouldFollow(reveal: Rect?, viewportWidth: Int, viewportHeight: Int): Boolean {
+    internal fun shouldFollow(reveal: Rect?, viewport: Size): Boolean {
         if (reveal == null) return false
         val previous = carried.settled ?: return true
-        return reveal != previous.revealed ||
-            viewportHeight != previous.viewportHeight || viewportWidth != previous.viewportWidth
+        return reveal != previous.revealed || viewport != previous.viewport
     }
 
     internal fun recenterRequested(): Boolean = carried.pendingRecenter

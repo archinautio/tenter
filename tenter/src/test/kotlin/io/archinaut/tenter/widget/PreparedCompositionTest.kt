@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget
 
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.screen.Rect
 
@@ -111,8 +112,8 @@ internal class PreparedCompositionTest {
         viewport.render(Canvas.of(buffer), state)
 
         assertEquals(590, state.settled?.maxOffset?.y)
-        assertEquals(10, state.settled?.viewportHeight)
-        assertEquals(600, state.settled?.contentHeight)
+        assertEquals(10, state.settled?.viewport?.height)
+        assertEquals(600, state.settled?.content?.height)
         assertEquals("row0", buffer.line(0, width = 10))
 
         state.scrollBy(0, 590)
@@ -186,7 +187,7 @@ internal class PreparedCompositionTest {
                 canvas.set(12, 5, Cell("X"))
             }
         }.fixedSize(20, 10)
-        val state = ViewportState(ScrollOffset(10, 4))
+        val state = ViewportState(Point(10, 4))
         val viewport = Viewport(fixed)
         val buffer = Buffer(10, 4)
 

@@ -3,19 +3,19 @@
 
 package io.archinaut.tenter.widget
 
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
+import io.archinaut.tenter.screen.Size
 
 /**
- * An immutable observation of a completed viewport frame. [revealed] is in content coordinates;
- * dimensions are in cells and describe the exact measured content and destination used for the
- * frame.
+ * An immutable observation of a completed viewport frame, in cells: the [offset] shown and the
+ * largest one possible, the [viewport] it was shown in, the measured [content], and the reveal
+ * request followed, in content coordinates.
  */
 public data class ScrollState(
-    public val offset: ScrollOffset,
-    public val maxOffset: ScrollOffset,
+    public val offset: Point,
+    public val maxOffset: Point,
+    public val viewport: Size,
+    public val content: Size,
     public val revealed: Rect? = null,
-    public val viewportWidth: Int = 0,
-    public val viewportHeight: Int = 0,
-    public val contentWidth: Int = 0,
-    public val contentHeight: Int = 0,
 )

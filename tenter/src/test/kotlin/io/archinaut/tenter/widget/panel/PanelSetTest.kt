@@ -13,7 +13,6 @@ import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.widget.MeasurableWidget
-import io.archinaut.tenter.widget.ScrollOffset
 import io.archinaut.tenter.widget.fixedSize
 import io.archinaut.tenter.widget.Widget
 
@@ -65,7 +64,7 @@ internal class PanelSetTest {
             assertEquals(3, previous.offsetOf(SetPanelId.A).y)
             val restored = render(set, visible, width = 40, height = 12)
             assertEquals(5, restored.offsetOf(SetPanelId.A).y)
-            assertEquals(36, checkNotNull(restored.sides.single().scroll).viewportWidth)
+            assertEquals(36, checkNotNull(restored.sides.single().scroll).viewport.width)
         }
     }
 
@@ -381,16 +380,16 @@ internal class PanelSetTest {
 
         val previous = render(set, setOf(SetPanelId.A))
         val hit = set.hitTest(2, 2)
-        assertEquals(ScrollOffset.ZERO, previous.offsetOf(SetPanelId.A))
+        assertEquals(Point.ORIGIN, previous.offsetOf(SetPanelId.A))
         set.scrollFocused(0, 3)
 
-        assertEquals(ScrollOffset.ZERO, previous.offsetOf(SetPanelId.A))
+        assertEquals(Point.ORIGIN, previous.offsetOf(SetPanelId.A))
         assertEquals(hit, set.hitTest(2, 2))
         val scrolled = render(set, setOf(SetPanelId.A))
-        assertEquals(ScrollOffset(y = 3), scrolled.offsetOf(SetPanelId.A))
+        assertEquals(Point(0, 3), scrolled.offsetOf(SetPanelId.A))
     }
 
-    private fun PanelLayout<SetPanelId>.offsetOf(id: SetPanelId): ScrollOffset =
+    private fun PanelLayout<SetPanelId>.offsetOf(id: SetPanelId): Point =
         checkNotNull((listOfNotNull(main) + sides).single { it.id == id }.scroll).offset
 
     @Test
