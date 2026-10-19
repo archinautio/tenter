@@ -902,13 +902,6 @@ public final class io/archinaut/tenter/widget/ScrollState {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/archinaut/tenter/widget/ScrollingPanel : io/archinaut/tenter/widget/StatefulWidget {
-	public fun <init> (Lio/archinaut/tenter/widget/MeasurableWidget;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/widget/MeasurableWidget;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun render (Lio/archinaut/tenter/screen/Canvas;Lio/archinaut/tenter/widget/ViewportState;)V
-	public synthetic fun render (Lio/archinaut/tenter/screen/Canvas;Ljava/lang/Object;)V
-}
-
 public final class io/archinaut/tenter/widget/SelectableRow : io/archinaut/tenter/widget/MeasurableWidget {
 	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;)V
 	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Ljava/util/List;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -956,7 +949,8 @@ public final class io/archinaut/tenter/widget/VerticalText : io/archinaut/tenter
 }
 
 public final class io/archinaut/tenter/widget/Viewport : io/archinaut/tenter/widget/StatefulWidget {
-	public fun <init> (Lio/archinaut/tenter/widget/MeasurableWidget;)V
+	public fun <init> (Lio/archinaut/tenter/widget/MeasurableWidget;Lio/archinaut/tenter/widget/Block;)V
+	public synthetic fun <init> (Lio/archinaut/tenter/widget/MeasurableWidget;Lio/archinaut/tenter/widget/Block;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun render (Lio/archinaut/tenter/screen/Canvas;Lio/archinaut/tenter/widget/ViewportState;)V
 	public synthetic fun render (Lio/archinaut/tenter/screen/Canvas;Ljava/lang/Object;)V
 }

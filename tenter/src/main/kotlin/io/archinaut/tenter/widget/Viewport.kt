@@ -11,13 +11,25 @@ import io.archinaut.tenter.screen.Rect
  * Scrolls a [MeasurableWidget], painting only the part inside the viewport. The caller owns the
  * [ViewportState] and passes it to every render; read the completed frame from
  * [ViewportState.settled].
+ *
+ * With a [block], the viewport draws it around the scrolling area, keeps it fixed while the
+ * content scrolls, and paints scrollbar thumbs on its right and bottom borders. To make a border
+ * scroll away with the content instead, put it on the content: `Viewport(content.block(b))`.
  */
 public class Viewport(
     private val content: MeasurableWidget,
+    private val block: Block? = null,
 ) : StatefulWidget<ViewportState> {
 
     override fun render(canvas: Canvas, state: ViewportState) {
-        drawPrepared(canvas, state)
+        if (block == null) {
+            drawPrepared(canvas, state)
+            return
+        }
+        block.render(canvas)
+        drawPrepared(block.inner(canvas), state)
+        // Thumbs need the settled offset, so they are painted after the content.
+        state.settled?.let { block.drawThumbs(canvas, it) }
     }
 
     private fun drawPrepared(canvas: Canvas, viewportState: ViewportState) {

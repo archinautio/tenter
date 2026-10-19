@@ -119,4 +119,42 @@ internal class ViewportTest {
 
         assertEquals(settled, state.settled)
     }
+
+    @Test
+    fun `a block stays fixed around the scrolling content`() {
+        val state = ViewportState(ScrollOffset(y = 5))
+
+        val buffer = render(Viewport(content(20), block = Block.bordered(title = "LOG")), 12, 5, state)
+
+        assertEquals("╭── LOG ───╮", buffer.line(0))
+        assertEquals("│line5", buffer.line(1, width = 6))
+        assertEquals(5, state.frame().offset.y)
+    }
+
+    @Test
+    fun `thumbs are painted only on sides that have a border`() {
+        val state = ViewportState()
+        val openRight = Block(borders = Borders.LEFT + Borders.TOP + Borders.BOTTOM)
+
+        val buffer = render(Viewport(content(20), block = openRight), 10, 5, state)
+
+        assertEquals(0, (0 until 5).count { buffer.get(9, it).symbol == "▐" })
+        assertEquals(19 - 2, state.frame().maxOffset.y)
+    }
+
+    @Test
+    fun `a bordered block paints the vertical thumb on its right border`() {
+        val buffer = render(Viewport(content(20), block = Block.bordered()), 10, 5, ViewportState())
+
+        assertTrue((1 until 4).any { buffer.get(9, it).symbol == "▐" })
+    }
+
+    @Test
+    fun `a block on the content scrolls away with it`() {
+        val state = ViewportState(ScrollOffset(y = 1))
+
+        val buffer = render(Viewport(content(5).block(Block.bordered())), 10, 3, state)
+
+        assertEquals("│line0", buffer.line(0, width = 6))
+    }
 }

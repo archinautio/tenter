@@ -23,7 +23,7 @@ import io.archinaut.tenter.text.CellWidth
  * borders and the content.
  *
  * The single place every framed widget gets its box from — no widget should draw its own border.
- * Scrollbar thumbs are painted by [ScrollingPanel] from its settled [ScrollState].
+ * A [Viewport] given a block paints scrollbar thumbs on it from its settled [ScrollState].
  */
 public class Block(
     private val title: String = "",
@@ -97,7 +97,7 @@ public class Block(
 
     /**
      * Draws a scrollbar thumb on the right border ([ScrollState.maxOffset]`.y > 0`) and/or bottom
-     * border (`.x > 0`), at the ranges [ScrollGeometry.thumb] computes from [scroll]'s settled
+     * border (`.x > 0`), on whichever of those sides this block has a border, at the ranges [ScrollGeometry.thumb] computes from [scroll]'s settled
      * values and this box's own viewport size — the same region [inner] gives the content.
      */
     internal fun drawThumbs(canvas: Canvas, scroll: ScrollState) {
@@ -106,19 +106,23 @@ public class Block(
 
         val thumbStyle = Style(borderColor)
 
-        ScrollGeometry.thumb(
-            track = viewportHeight,
-            contentLength = scroll.maxOffset.y + viewportHeight,
-            viewportLength = viewportHeight,
-            offset = scroll.offset.y,
-        )?.forEach { i -> canvas.set(canvas.width - 1, insets.top + i, Cell("▐", thumbStyle)) }
+        if (borders.right) {
+            ScrollGeometry.thumb(
+                track = viewportHeight,
+                contentLength = scroll.maxOffset.y + viewportHeight,
+                viewportLength = viewportHeight,
+                offset = scroll.offset.y,
+            )?.forEach { i -> canvas.set(canvas.width - 1, insets.top + i, Cell("▐", thumbStyle)) }
+        }
 
-        ScrollGeometry.thumb(
-            track = viewportWidth,
-            contentLength = scroll.maxOffset.x + viewportWidth,
-            viewportLength = viewportWidth,
-            offset = scroll.offset.x,
-        )?.forEach { i -> canvas.set(insets.left + i, canvas.height - 1, Cell("▬", thumbStyle)) }
+        if (borders.bottom) {
+            ScrollGeometry.thumb(
+                track = viewportWidth,
+                contentLength = scroll.maxOffset.x + viewportWidth,
+                viewportLength = viewportWidth,
+                offset = scroll.offset.x,
+            )?.forEach { i -> canvas.set(insets.left + i, canvas.height - 1, Cell("▬", thumbStyle)) }
+        }
     }
 
     public companion object {
@@ -140,7 +144,7 @@ public class Block(
          * flush against the bottom border.
          *
          * The horizontal padding is frame — fixed for a scrolling panel's lifetime — but [top]
-         * is NOT: it is prepended to the content stream (see [ScrollingPanel]) rather than baked
+         * is NOT: it is prepended to the content stream (see [io.archinaut.tenter.widget.panel.Panel]) rather than baked
          * into the viewport, so it is visible at rest and the content reclaims its row the moment
          * the user scrolls.
          */

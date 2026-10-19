@@ -11,6 +11,7 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.widget.panel.panelViewport
 
 /** Pixel parity for [Block]'s border, title, badge, padding, and scrollbar-thumb decoration. */
 internal class BlockTest {
@@ -192,7 +193,7 @@ internal class BlockTest {
 
     @Test
     fun `scrollbar block cells appear on right border only when content overflows`() {
-        val widget = ScrollingPanel(title = "T", badge = "0", content = stubContent(20))
+        val widget = panelViewport(stubContent(20), title = "T", badge = "0")
 
         val buffer = render(widget, 30, 10, ViewportState())
 
@@ -215,7 +216,7 @@ internal class BlockTest {
         val viewportHeight = 8
         // The stream includes one extra row for the reclaimable top padding, so
         // `viewportHeight - 1` content lines exactly fill it with no overflow.
-        val widget = ScrollingPanel(title = "T", badge = "0", content = stubContent(viewportHeight - 1))
+        val widget = panelViewport(stubContent(viewportHeight - 1), title = "T", badge = "0")
 
         val buffer = render(widget, 30, 10, ViewportState())
 
@@ -226,10 +227,10 @@ internal class BlockTest {
 
     @Test
     fun `scrollbar thumb uses the box's own borderColor, not a hardcoded one`() {
-        val widget = ScrollingPanel(
+        val widget = panelViewport(
+            stubContent(20),
             title = "T",
             badge = "0",
-            content = stubContent(20),
             borderColor = ChromeRole.PANEL_BORDER_FOCUSED,
         )
 

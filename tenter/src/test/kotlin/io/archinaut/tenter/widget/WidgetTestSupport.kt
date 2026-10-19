@@ -20,25 +20,6 @@ public fun <S> render(widget: StatefulWidget<S>, width: Int, height: Int, state:
     return buffer
 }
 
-/** Renders [content] inside the real [ScrollingPanel] chrome — the pixel-parity regression guard. */
-public fun renderInPanel(
-    content: MeasurableWidget,
-    badge: Char = '0',
-    title: String = "T",
-    width: Int = 28,
-    height: Int = 30,
-    scrollOffset: Int? = 0,
-): Buffer = render(
-    ScrollingPanel(
-        title = title,
-        badge = badge.toString(),
-        content = content,
-    ),
-    width,
-    height,
-    ViewportState(scrollOffset?.let { ScrollOffset(y = it) } ?: ScrollOffset.ZERO),
-)
-
 /** Row [y], columns [x] until [x] + [width], right-trimmed. */
 public fun Buffer.line(y: Int, x: Int = 0, width: Int = this.width - x): String =
     (x until x + width).joinToString("") { get(it, y).symbol }.trimEnd()

@@ -4,10 +4,13 @@
 package io.archinaut.tenter.widget.panel
 
 import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.palette.ColorRole
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.widget.MeasurableWidget
 import io.archinaut.tenter.widget.ViewportState
-import io.archinaut.tenter.widget.ScrollingPanel
+import io.archinaut.tenter.widget.Block
+import io.archinaut.tenter.widget.Viewport
+import io.archinaut.tenter.widget.block
 
 /**
  * One stateful panel declaration. A panel owns its current state, restore state, attachment, and
@@ -112,14 +115,7 @@ public class Panel<K : PanelId, I>(
     ): ViewportState {
         val candidate = viewportState.fork()
         val role = if (focused) ChromeRole.PANEL_BORDER_FOCUSED else ChromeRole.PANEL_BORDER
-        val scrollingPanel = ScrollingPanel(
-            content = presentation.content,
-            title = title,
-            badge = badge,
-            borderColor = role,
-            titleColor = role,
-        )
-        scrollingPanel.render(canvas, candidate)
+        panelViewport(presentation.content, title, badge, borderColor = role, titleColor = role).render(canvas, candidate)
         return candidate
     }
 
@@ -132,3 +128,25 @@ public class Panel<K : PanelId, I>(
         public const val MINIMIZED_WIDTH: Int = 7
     }
 }
+
+/**
+ * The scrolling viewport every panel renders through: a bordered frame with horizontal padding
+ * around [content]. The frame's padding is fixed, but the top spacer row is written into the
+ * content stream, so it shows at rest and the content reclaims it the moment it scrolls.
+ */
+internal fun panelViewport(
+    content: MeasurableWidget,
+    title: String,
+    badge: String?,
+    borderColor: ColorRole = ChromeRole.PANEL_BORDER,
+    titleColor: ColorRole = ChromeRole.ACCENT,
+): Viewport = Viewport(
+    content.block(Block(padding = Block.PADDING.verticalEdges())),
+    block = Block.bordered(
+        title = title,
+        badge = badge,
+        padding = Block.PADDING.horizontalEdges(),
+        borderColor = borderColor,
+        titleColor = titleColor,
+    ),
+)

@@ -1,20 +1,28 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.widget
+package io.archinaut.tenter.widget.panel
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import io.archinaut.tenter.widget.MeasurableWidget
+import io.archinaut.tenter.widget.ScrollOffset
+import io.archinaut.tenter.widget.ScrollState
+import io.archinaut.tenter.widget.ViewportState
+import io.archinaut.tenter.widget.Widget
+import io.archinaut.tenter.widget.bind
+import io.archinaut.tenter.widget.line
+import io.archinaut.tenter.widget.render
 
 /**
- * [ScrollingPanel] composes [Block], [Viewport], and [Padded] — border/badge in [BlockTest],
- * scroll math in [ScrolledTest] — into what a scrolling panel actually renders. These cases
- * exercise the composition itself: specifically, that [Block.PADDING]'s top row is folded into
- * the *content stream* (via [Padded]) rather than the viewport, which is what makes it a spacer
- * at rest that the content reclaims the instant the content scrolls.
+ * [panelViewport] composes a bordered [io.archinaut.tenter.widget.Block], a
+ * [io.archinaut.tenter.widget.Viewport], and a borderless top-padding block into what a panel
+ * actually renders. These cases exercise the composition itself: specifically, that the top
+ * padding row is folded into the *content stream* rather than the viewport, which is what makes it
+ * a spacer at rest that the content reclaims the instant the content scrolls.
  */
-internal class ScrollingPanelTest {
+internal class PanelViewportTest {
 
     private fun stubContent(lines: Int): MeasurableWidget = MeasurableWidget { cursor ->
         repeat(lines) { row -> cursor.writeLine("line$row") }
@@ -22,7 +30,7 @@ internal class ScrollingPanelTest {
 
     private fun panel(content: MeasurableWidget, scrollOffset: Int? = 0, state: ViewportState = ViewportState(
         scrollOffset?.let { ScrollOffset(y = it) } ?: ScrollOffset.ZERO,
-    )): Widget = ScrollingPanel(title = "T", badge = "0", content = content).bind(state)
+    )): Widget = panelViewport(content, title = "T", badge = "0").bind(state)
 
     /** The settled frame the panel published to the state its caller supplied. */
     private fun ViewportState.frame(): ScrollState = checkNotNull(settled) { "no drawable frame" }

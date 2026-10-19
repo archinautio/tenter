@@ -6,8 +6,11 @@
 of the scrollable area and render the viewport with it on every frame:
 `frame.renderStatefulWidget(Viewport(content), area, state)`. To move down one row,
 call `state.scrollBy(dx = 0, dy = 1)` and draw again. Negative deltas move up or left.
-`ScrollingPanel(content, title, badge)` adds a block border and scrollbar thumbs around
-the same viewport and is rendered the same way.
+Give the viewport a `block` to frame it:
+`Viewport(content, block = Block.bordered(title = "LOG"))` keeps the border fixed while
+the content scrolls, and paints scrollbar thumbs on its right and bottom borders. To make
+a border scroll away with the content instead, put it on the content:
+`Viewport(content.block(Block.bordered()))`.
 
 After rendering, `state.settled` describes the completed frame, including its scroll
 offset. It is initially null. Keep the state between frames; recreating it resets
