@@ -4,11 +4,11 @@ Public API signatures are tracked by `tenter/api/tenter.api`.
 
 ## Package layering
 
-`palette`, `text`, and `input` are leaves. `screen` uses `palette` and `text`; `widget` uses `input`, `palette`, `screen`, and `text`; `animation` uses `screen`, `widget`, and `text`; `panel` uses `palette`, `screen`, and `widget`; `terminal` uses `input`, `palette`, `screen`, and `widget`. `tenter/src/test/kotlin/io/archinaut/tenter/LayeringTest.kt` enforces the full allowed-dependency matrix.
+`palette`, `text`, and `input` are leaves. `screen` uses `palette` and `text`; `widget` uses `input`, `palette`, `screen`, and `text`; `animation` uses `screen`, `widget`, and `text`; `terminal` uses `input`, `palette`, `screen`, and `widget`. `tenter/src/test/kotlin/io/archinaut/tenter/LayeringTest.kt` enforces the full allowed-dependency matrix.
 
 `tenter/src/test/kotlin/io/archinaut/tenter/ArchitectureTest.kt` enforces the dependency boundaries below, prevents BattleTech imports, and keeps managed `Panel` mutations behind `PanelSet`.
 
-The packages have distinct jobs: `palette` owns semantic colors; `text` owns display-cell metrics; `screen` owns buffers, cells, styles, canvas painting, and `Layout`/`Constraint` rectangle splitting; `widget` owns the `Widget` and `StatefulWidget` contracts, prepared content, blocks, and viewports, with TextCursor fragments in `widget.fragment`; `animation` owns finite frame descriptions and elapsed-time playback; `panel` owns stateful panel composition; `input` owns key maps and pointer helpers; `terminal` owns the double-buffered `Terminal`, its per-draw `Frame`, diff rendering, terminal event flows, and screen lifecycle.
+The packages have distinct jobs: `palette` owns semantic colors; `text` owns display-cell metrics; `screen` owns buffers, cells, styles, canvas painting, and `Layout`/`Constraint` rectangle splitting; `widget` owns the `Widget` and `StatefulWidget` contracts, prepared content, and every widget (blocks, viewports, rows, gauges), with stateful panel composition (the `Panels` widget over its `PanelSet` state) in `widget.panel`; `animation` owns finite frame descriptions and elapsed-time playback; `input` owns key maps and pointer helpers; `terminal` owns the double-buffered `Terminal`, its per-draw `Frame`, diff rendering, terminal event flows, and screen lifecycle.
 
 The rendering model follows Ratatui: `Terminal.draw` hands a `Frame` to the caller, widgets render into a `Canvas` clipped to their `Rect`, and the terminal diffs the drawn `Buffer` against the previous one.
 

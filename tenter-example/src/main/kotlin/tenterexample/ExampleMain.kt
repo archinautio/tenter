@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.runBlocking
 import io.archinaut.tenter.palette.DefaultRolePalette
-import io.archinaut.tenter.panel.PanelState
+import io.archinaut.tenter.widget.panel.PanelMode
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.terminal.CompletedFrame
@@ -50,7 +50,7 @@ public fun runHeadlessSmoke(): SmokeResult {
     check("row 0" in initialText) { "the rendered list did not contain its first generated row" }
     check("PgUp/PgDn" in initialText) { "the rendered help did not contain the keymap hints" }
 
-    val initialLayout = checkNotNull(app.lastLayout)
+    val initialLayout = checkNotNull(app.panels.layout)
     val wheelTarget = checkNotNull(initialLayout.main).content
     repeat(EXAMPLE_ROW_COUNT) {
         app.handle(MouseEvent(x = wheelTarget.x + 1, y = wheelTarget.y + 1, wheelDown = true))
@@ -59,7 +59,7 @@ public fun runHeadlessSmoke(): SmokeResult {
     val scrolledText = frameText(frame)
     check("row 599" in scrolledText) { "wheel scrolling did not reach the final generated row" }
 
-    val scrolledLayout = checkNotNull(app.lastLayout)
+    val scrolledLayout = checkNotNull(app.panels.layout)
     val clickTarget = checkNotNull(scrolledLayout.main).content
     val clickX = clickTarget.x + 1
     val clickY = clickTarget.y + 1
@@ -72,13 +72,13 @@ public fun runHeadlessSmoke(): SmokeResult {
     check(app.state.selectedRow in app.state.checkedRows) { "the click did not toggle the selected row" }
     check(frame.width == 44 && frame.height == 8) { "the resized frame did not use the new dimensions" }
 
-    check(app.cycleHelp() == PanelState.MAXIMIZED) { "the help panel did not maximize" }
-    check(app.cycleHelp() == PanelState.MINIMIZED) { "the help panel did not minimize" }
-    check(app.cycleHelp() == PanelState.NORMAL) { "the help panel did not restore its normal state" }
+    check(app.cycleHelp() == PanelMode.MAXIMIZED) { "the help panel did not maximize" }
+    check(app.cycleHelp() == PanelMode.MINIMIZED) { "the help panel did not minimize" }
+    check(app.cycleHelp() == PanelMode.NORMAL) { "the help panel did not restore its normal state" }
 
     val uniform = ExampleApp(ExampleLayoutMode.UNIFORM)
     headlessTerminal(width = 100, height = 12).draw(uniform::render)
-    val uniformLayout = checkNotNull(uniform.lastLayout)
+    val uniformLayout = checkNotNull(uniform.panels.layout)
     check(uniformLayout.main == null && uniformLayout.sides.size == 2) {
         "the uniform layout did not place both fresh panel instances"
     }

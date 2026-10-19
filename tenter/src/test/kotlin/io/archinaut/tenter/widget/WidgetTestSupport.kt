@@ -20,7 +20,7 @@ public fun <S> render(widget: StatefulWidget<S>, width: Int, height: Int, state:
     return buffer
 }
 
-/** Renders [content] inside the real [scrollingPanel] chrome — the pixel-parity regression guard. */
+/** Renders [content] inside the real [ScrollingPanel] chrome — the pixel-parity regression guard. */
 public fun renderInPanel(
     content: ContentWidget,
     badge: Char = '0',
@@ -29,7 +29,7 @@ public fun renderInPanel(
     height: Int = 30,
     scrollOffset: Int? = 0,
 ): Buffer = render(
-    scrollingPanel(
+    ScrollingPanel(
         title = title,
         badge = badge.toString(),
         content = content,

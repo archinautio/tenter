@@ -3,7 +3,7 @@
 
 package tenterexample
 
-import io.archinaut.tenter.panel.PanelId
+import io.archinaut.tenter.widget.panel.PanelId
 
 internal enum class ExamplePanelId : PanelId {
     ROWS,

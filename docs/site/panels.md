@@ -6,7 +6,7 @@
 of the scrollable area and render the viewport with it on every frame:
 `frame.renderStatefulWidget(Viewport(content), area, state)`. To move down one row,
 call `state.scrollBy(dx = 0, dy = 1)` and draw again. Negative deltas move up or left.
-`scrollingPanel(title, badge, content)` adds a block border and scrollbar thumbs around
+`ScrollingPanel(content, title, badge)` adds a block border and scrollbar thumbs around
 the same viewport and is rendered the same way.
 
 After rendering, `state.settled` describes the completed frame, including its scroll
@@ -18,7 +18,8 @@ the next drawable frame.
 ## Create a panel layout
 
 Panels combine content with a title, border, and scrolling. Keep one `PanelSet` for
-the screen's lifetime and pass your current application state when rendering.
+the screen's lifetime: it is the state of the `Panels` widget, which you render each
+frame with your current application state.
 
 This excerpt from the compiled [panel example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt)
 creates a catalog and a help panel. `ExamplePanelId` identifies each panel;
@@ -40,20 +41,23 @@ sets: a panel instance belongs to one set.
 
 ## Render and control panels
 
-`ExampleApp.render(frame)` runs inside `terminal.draw`. It passes the frame's canvas
-and the current state into the set, and stores the completed layout for later inspection:
+`ExampleApp.render(frame)` runs inside `terminal.draw`. It renders a `Panels` widget,
+built from the current application state and the visible ids, into an area of the
+frame with the set as its state:
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt:panel-render"
 ```
 
-`visible` contains the ids to display. Focus a declared id with `panels.focus(id)`.
+`visible` contains the ids to display. Render into any `Rect`; split the frame with
+`Layout` to leave room for a header or status line. Focus a declared id with `panels.focus(id)`.
 Use `scrollFocused(0, 1)` to scroll a row, `pageFocused(1)` to scroll a page, and
-`cycleFocusedState(1)` to cycle through the panel's available presentations.
+`cycleFocusedMode(1)` to cycle through the panel's available presentations.
 Repaint after changing state or issuing a command. Use ids declared by the set;
 unknown ids throw `IllegalArgumentException`.
 
-Read rectangles and scroll offsets from the returned `PanelLayout`. A slot with
+After rendering, read rectangles and scroll offsets from `panels.layout`, a
+`PanelLayout` in terminal (frame) coordinates. It is null before the first frame. A slot with
 no drawable frame can have a null scroll observation. Hidden panels retain their
 state and can be shown again without recreating the set. Focus remains on a hidden
 panel, so focused commands still target it. Without a displayed viewport, a page

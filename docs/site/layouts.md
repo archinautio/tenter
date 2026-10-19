@@ -8,7 +8,7 @@ the available width and can be composed with other content.
 
 Use `Stack(listOf(first, second))` to place content one below another. The example's
 [help panel](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt)
-combines a `HelpWidget` with text showing the selected row and checked count.
+combines a `KeyHelp` with text showing the selected row and checked count.
 A plain `Widget` only renders into an allocated area; if you need to compose one,
 wrap it with `fixedContent(width, height, widget)` using its known dimensions.
 

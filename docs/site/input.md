@@ -41,7 +41,7 @@ and `ExampleAction` are the example application's own types.
 
 Resolve a keyboard event with `map.resolve(listOf(context), event)` and handle the
 returned action in your application. A null result means no binding matched.
-`HelpWidget(listOf(map.hints(context)))` displays hints from the same definition.
+`KeyHelp(listOf(map.hints(context)))` displays hints from the same definition.
 
 Keys match the Mordant event exactly, including modifiers. Use unique exact bindings
 and nonblank hint ids. Group references must exist, sectionless credits must be

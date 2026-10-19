@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.panel
+package io.archinaut.tenter.widget.panel
 
 import io.archinaut.tenter.screen.Point
 

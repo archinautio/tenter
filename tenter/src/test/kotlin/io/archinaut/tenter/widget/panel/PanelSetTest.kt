@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.panel
+package io.archinaut.tenter.widget.panel
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Buffer
+import io.archinaut.tenter.screen.Point
+import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.widget.ContentWidget
 import io.archinaut.tenter.widget.ScrollOffset
 import io.archinaut.tenter.widget.contentWidget
@@ -78,11 +80,11 @@ internal class PanelSetTest {
 
         set.scrollFocused(0, 3)
         set.pageFocused(1)
-        set.cycleFocusedState(1)
+        set.cycleFocusedMode(1)
 
         assertEquals(SetPanelId.B, set.focused)
-        assertEquals(PanelState.NORMAL, set.stateOf(SetPanelId.A))
-        assertEquals(PanelState.MAXIMIZED, set.stateOf(SetPanelId.B))
+        assertEquals(PanelMode.NORMAL, set.modeOf(SetPanelId.A))
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(SetPanelId.B))
         assertNull(set.hitTest(2, 2))
         val returned = render(set, visible)
         assertEquals(SetPanelId.B, returned.sides.single().id)
@@ -211,7 +213,7 @@ internal class PanelSetTest {
         val set = PanelSet.uniform(listOf(sidePanel(SetPanelId.A), sidePanel(SetPanelId.B)))
 
         assertEquals(80, render(set, setOf(SetPanelId.A)).sides.single().outer.width)
-        set.cycleFocusedState(-1)
+        set.cycleFocusedMode(-1)
         val layout = render(set, setOf(SetPanelId.A, SetPanelId.B))
 
         assertEquals(listOf(7, 73), layout.sides.map { it.outer.width })
@@ -230,7 +232,7 @@ internal class PanelSetTest {
         val layout = render(set, setOf(SetPanelId.A, SetPanelId.B))
         assertEquals(listOf(20, 20), layout.sides.map { it.outer.width })
         assertEquals(listOf(0, 60), layout.sides.map { it.outer.x })
-        set.cycleFocusedState(-1)
+        set.cycleFocusedMode(-1)
         val minimized = render(set, setOf(SetPanelId.A, SetPanelId.B))
 
         assertEquals(listOf(7, 20), minimized.sides.map { it.outer.width })
@@ -276,12 +278,10 @@ internal class PanelSetTest {
         visible: Set<SetPanelId>,
         width: Int = 80,
         height: Int = 24,
-    ): PanelLayout<SetPanelId> = set.render(
-        Canvas.of(Buffer(width, height)),
-        Unit,
-        visible,
-        reservedTop = 0,
-    )
+    ): PanelLayout<SetPanelId> {
+        Panels<SetPanelId, Unit>(Unit, visible).render(Canvas.of(Buffer(width, height)), set)
+        return checkNotNull(set.layout)
+    }
 
     @Test
     fun `initial focus is main and named operations own state changes`() {
@@ -292,7 +292,7 @@ internal class PanelSetTest {
         set.focusOrCycle(SetPanelId.A)
 
         assertEquals(SetPanelId.A, set.focused)
-        assertEquals(PanelState.MAXIMIZED, set.stateOf(SetPanelId.A))
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(SetPanelId.A))
     }
 
     @Test
@@ -303,7 +303,7 @@ internal class PanelSetTest {
         assertThrows(IllegalArgumentException::class.java) { set.focusOrCycle(SetPanelId.B) }
         assertThrows(IllegalArgumentException::class.java) { set.scroll(SetPanelId.B, 0, 2) }
         assertThrows(IllegalArgumentException::class.java) { set.requestRecenter(SetPanelId.B) }
-        assertThrows(IllegalArgumentException::class.java) { set.stateOf(SetPanelId.B) }
+        assertThrows(IllegalArgumentException::class.java) { set.modeOf(SetPanelId.B) }
 
         assertEquals(SetPanelId.MAIN, set.focused)
     }
@@ -313,12 +313,12 @@ internal class PanelSetTest {
         val a = sidePanel(SetPanelId.A)
         val set = PanelSet.mainAndSides(mainPanel(), listOf(a, sidePanel(SetPanelId.B)))
         set.focus(SetPanelId.A)
-        set.cycleFocusedState(-1)
-        set.cycleFocusedState(-1)
+        set.cycleFocusedMode(-1)
+        set.cycleFocusedMode(-1)
 
         set.focus(SetPanelId.B)
 
-        assertEquals(PanelState.MINIMIZED, set.stateOf(SetPanelId.A))
+        assertEquals(PanelMode.MINIMIZED, set.modeOf(SetPanelId.A))
     }
 
     @Test
@@ -326,12 +326,12 @@ internal class PanelSetTest {
         val a = sidePanel(SetPanelId.A)
         val set = PanelSet.uniform(listOf(a, sidePanel(SetPanelId.B)))
         set.focus(SetPanelId.A)
-        set.cycleFocusedState(-1)
-        set.cycleFocusedState(-1)
-        set.cycleFocusedState(3)
+        set.cycleFocusedMode(-1)
+        set.cycleFocusedMode(-1)
+        set.cycleFocusedMode(3)
         set.focus(SetPanelId.B)
 
-        assertEquals(PanelState.MINIMIZED, set.stateOf(SetPanelId.A))
+        assertEquals(PanelMode.MINIMIZED, set.modeOf(SetPanelId.A))
     }
 
     @Test
@@ -341,12 +341,12 @@ internal class PanelSetTest {
         val set = PanelSet.uniform(listOf(a, b))
 
         set.focus(SetPanelId.A)
-        set.cycleFocusedState(1)
+        set.cycleFocusedMode(1)
         set.focus(SetPanelId.B)
-        set.cycleFocusedState(1)
+        set.cycleFocusedMode(1)
 
-        assertEquals(PanelState.NORMAL, set.stateOf(SetPanelId.A))
-        assertEquals(PanelState.MAXIMIZED, set.stateOf(SetPanelId.B))
+        assertEquals(PanelMode.NORMAL, set.modeOf(SetPanelId.A))
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(SetPanelId.B))
     }
 
     @Test
@@ -354,15 +354,15 @@ internal class PanelSetTest {
         val a = sidePanel(SetPanelId.A)
         val set = PanelSet.uniform(listOf(a, sidePanel(SetPanelId.B)))
         set.focus(SetPanelId.B)
-        set.cycleFocusedState(1)
+        set.cycleFocusedMode(1)
 
         render(set, emptySet())
 
         assertEquals(SetPanelId.B, set.focused)
-        assertEquals(PanelState.MAXIMIZED, set.stateOf(SetPanelId.B))
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(SetPanelId.B))
         render(set, setOf(SetPanelId.A, SetPanelId.B))
         assertEquals(SetPanelId.B, set.focused)
-        assertEquals(PanelState.MAXIMIZED, set.stateOf(SetPanelId.B))
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(SetPanelId.B))
     }
 
     @Test
@@ -493,11 +493,29 @@ internal class PanelSetTest {
     @Test
     fun `hit testing identifies border and main panel without content point`() {
         val set = PanelSet.mainAndSides(mainPanel(), listOf(sidePanel(SetPanelId.A)))
-        val layout = set.render(Canvas.of(Buffer(60, 12)), Unit, setOf(SetPanelId.A), reservedTop = 2)
+        val area = Rect(5, 2, 55, 10)
+        Panels<SetPanelId, Unit>(Unit, setOf(SetPanelId.A)).render(Canvas.of(Buffer(60, 12)).region(area), set)
+        val layout = checkNotNull(set.layout)
         val main = checkNotNull(layout.main)
 
         assertEquals(SetPanelId.MAIN, set.hitTest(main.outer.x, main.outer.y)?.id)
         assertNull(set.hitTest(main.outer.x, main.outer.y)?.contentPoint)
         assertEquals(SetPanelId.A, set.panelAt(layout.sides.single().outer.x, layout.sides.single().outer.y))
+    }
+
+    @Test
+    fun `panels rendered into an offset area publish frame coordinates for hit testing`() {
+        val set = PanelSet.mainAndSides(mainPanel(), listOf(sidePanel(SetPanelId.A)))
+        val area = Rect(5, 2, 55, 10)
+
+        Panels<SetPanelId, Unit>(Unit, setOf(SetPanelId.A)).render(Canvas.of(Buffer(60, 12)).region(area), set)
+
+        val layout = checkNotNull(set.layout)
+        val side = layout.sides.single()
+        assertEquals(area, layout.area)
+        assertEquals(Rect(5, 2, 35, 10), checkNotNull(layout.main).outer)
+        assertEquals(Rect(40, 2, 20, 10), side.outer)
+        assertNull(set.panelAt(0, 0))
+        assertEquals(Point(0, 0), set.hitTest(side.content.x, side.content.y + 1)?.contentPoint)
     }
 }

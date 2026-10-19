@@ -149,7 +149,7 @@ public class Block(
          * flush against the bottom border.
          *
          * The horizontal padding is frame — fixed for a scrolling panel's lifetime — but [top]
-         * is NOT: it is prepended to the content stream (see [scrollingPanel]) rather than baked
+         * is NOT: it is prepended to the content stream (see [ScrollingPanel]) rather than baked
          * into the viewport, so it is visible at rest and the content reclaims its row the moment
          * the user scrolls.
          */
@@ -158,7 +158,7 @@ public class Block(
         /**
          * A scrolling panel's viewport: border plus the horizontal padding, at full inner height.
          * Deliberately not public: a caller translating a screen click into content-stream
-         * coordinates asks [io.archinaut.tenter.panel.PanelSet.hitTest], which reads the completed frame's own
+         * coordinates asks [io.archinaut.tenter.widget.panel.PanelSet.hitTest], which reads the completed frame's own
          * geometry, rather than re-deriving it from this constant and a scroll offset.
          */
         internal val VIEWPORT_INSET: Padding = BORDER + PADDING.horizontalEdges()

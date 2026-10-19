@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.panel
+package io.archinaut.tenter.widget.panel
 
 import java.util.Collections
 import io.archinaut.tenter.screen.Rect
@@ -9,12 +9,13 @@ import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.ScrollState
 
 /**
- * The content rect and every placed panel's immutable geometry from one completed frame.
- * Coordinates are local to the canvas supplied to [PanelSet.render].
+ * The rendered area and every placed panel's immutable geometry from one completed frame of
+ * [Panels]. Coordinates are absolute frame coordinates, the same space as terminal mouse events,
+ * whatever area the panels were rendered into.
  */
 public class PanelLayout<K : PanelId> private constructor(
-    /** The whole region below the reserved top rows — where a maximized panel goes. */
-    public val content: Rect,
+    /** The whole area the panels were rendered into — where a maximized panel goes. */
+    public val area: Rect,
     /** The main panel's slot, or null for a uniform layout. */
     public val main: Slot<K>?,
     /** Uniform-layout slots in declaration order. */
@@ -40,10 +41,19 @@ public class PanelLayout<K : PanelId> private constructor(
     }.firstOrNull { it.outer.contains(x, y) }
 
     internal fun withSettledScroll(scrollOf: (K) -> ScrollState?): PanelLayout<K> = PanelLayout(
-        content = content,
+        area = area,
         main = main?.withScroll(scrollOf(main.id)),
         sides = sides.map { it.withScroll(scrollOf(it.id)) },
     )
+
+    /** This layout moved by ([dx], [dy]) — from canvas-local to frame coordinates. */
+    internal fun offset(dx: Int, dy: Int): PanelLayout<K> = PanelLayout(
+        area = area.offset(dx, dy),
+        main = main?.offset(dx, dy),
+        sides = sides.map { it.offset(dx, dy) },
+    )
+
+    private fun Slot<K>.offset(dx: Int, dy: Int): Slot<K> = copy(outer = outer.offset(dx, dy), content = content.offset(dx, dy))
 
     private fun Slot<K>.withScroll(scroll: ScrollState?): Slot<K> = copy(
         scroll = if (content.width > 0 && content.height > 0) scroll else null,
@@ -51,25 +61,23 @@ public class PanelLayout<K : PanelId> private constructor(
 
     public companion object {
         /**
-         * Lays out [sides] and [main] over a [width]x[height] canvas, reserving [reservedTop]
-         * rows above the content area. Side widths are reserved first; if they do not fit, the
-         * main slot becomes zero-width and sides are clipped in declaration order.
+         * Lays out [sides] and [main] over a [width]x[height] canvas. Side widths are reserved first;
+         * if they do not fit, the main slot becomes zero-width and sides are clipped in declaration order.
          */
         internal fun <K : PanelId, I> compute(
             width: Int,
             height: Int,
-            reservedTop: Int,
             main: Panel<K, I>,
             sides: List<Panel<K, I>>,
             widthOf: (Panel<K, I>) -> Int,
         ): PanelLayout<K> {
-            validateCanvas(width, height, reservedTop)
-            val content = contentRect(width, height, reservedTop)
-            sides.firstOrNull { it.state == PanelState.MAXIMIZED }?.let { maximized ->
+            validateCanvas(width, height)
+            val area = Rect(0, 0, width, height)
+            sides.firstOrNull { it.mode == PanelMode.MAXIMIZED }?.let { maximized ->
                 return PanelLayout(
-                    content = content,
+                    area = area,
                     main = null,
-                    sides = listOf(slot(maximized.id, content.x, content.y, content.width, content.height, width)),
+                    sides = listOf(slot(maximized.id, 0, width, height, width)),
                 )
             }
             val sideWidths = sides.map { panel -> checkedWidth(widthOf(panel), panel.id) }
@@ -82,45 +90,45 @@ public class PanelLayout<K : PanelId> private constructor(
                 for ((index, panel) in sides.withIndex()) {
                     val available = (width - nextX).coerceAtLeast(0)
                     val slotWidth = sideWidths[index].coerceAtMost(available)
-                    add(slot(panel.id, nextX, content.y, slotWidth, content.height, width))
+                    add(slot(panel.id, nextX, slotWidth, height, width))
                     nextX += slotWidth
                 }
             }
             return PanelLayout(
-                content = content,
-                main = slot(main.id, 0, content.y, mainWidth, content.height, width),
+                area = area,
+                main = slot(main.id, 0, mainWidth, height, width),
                 sides = slots,
             )
         }
 
         /**
-         * Lays [panels] out as proportional columns with an optional trailing fixed group.
+         * Lays [panels] out over a [width]x[height] canvas as proportional columns with an optional
+         * trailing fixed group.
          * Minimized panels are fixed-width, but remain at their declaration positions among the
          * proportional panels. Other fixed panels form a trailing group in declaration order.
          */
         internal fun <K : PanelId, I> computeUniform(
             width: Int,
             height: Int,
-            reservedTop: Int,
             panels: List<Panel<K, I>>,
             columnCount: Int = panels.size,
             fixedWidthPanels: Set<K> = emptySet(),
             widthOf: (Panel<K, I>) -> Int,
         ): PanelLayout<K> {
-            validateCanvas(width, height, reservedTop)
+            validateCanvas(width, height)
             require(columnCount >= 0) { "uniform column count must not be negative: $columnCount" }
-            val content = contentRect(width, height, reservedTop)
-            if (panels.isEmpty()) return PanelLayout(content, null, emptyList())
+            val area = Rect(0, 0, width, height)
+            if (panels.isEmpty()) return PanelLayout(area, null, emptyList())
 
-            panels.firstOrNull { it.state == PanelState.MAXIMIZED }?.let { maximized ->
+            panels.firstOrNull { it.mode == PanelMode.MAXIMIZED }?.let { maximized ->
                 return PanelLayout(
-                    content = content,
+                    area = area,
                     main = null,
-                    sides = listOf(slot(maximized.id, content.x, content.y, content.width, content.height, width)),
+                    sides = listOf(slot(maximized.id, 0, width, height, width)),
                 )
             }
 
-            val fixed = panels.filter { it.id in fixedWidthPanels || it.state == PanelState.MINIMIZED }
+            val fixed = panels.filter { it.id in fixedWidthPanels || it.mode == PanelMode.MINIMIZED }
             val proportional = panels.filter { it !in fixed }
             require(columnCount >= proportional.size || proportional.isEmpty()) {
                 "A uniform layout needs at least one column per proportional panel"
@@ -133,7 +141,7 @@ public class PanelLayout<K : PanelId> private constructor(
                 .toInt()
             val columnWidths = proportionalWidths(proportionalWidth, columnCount, proportional.size)
             val minimizedWidth = fixed
-                .filter { it.state == PanelState.MINIMIZED }
+                .filter { it.mode == PanelMode.MINIMIZED }
                 .sumOf { widths.getValue(it.id).toLong() }
                 .coerceAtMost(Int.MAX_VALUE.toLong())
                 .toInt()
@@ -144,36 +152,35 @@ public class PanelLayout<K : PanelId> private constructor(
                 for (panel in panels) {
                     if (panel in proportional) {
                         val panelWidth = columnWidths[proportionalIndex]
-                        add(slot(panel.id, x, content.y, panelWidth, content.height, width))
+                        add(slot(panel.id, x, panelWidth, height, width))
                         x += panelWidth
                         proportionalIndex++
-                    } else if (panel.state == PanelState.MINIMIZED) {
+                    } else if (panel.mode == PanelMode.MINIMIZED) {
                         val panelWidth = widths.getValue(panel.id).coerceAtMost((width - x).coerceAtLeast(0))
-                        add(slot(panel.id, x, content.y, panelWidth, content.height, width))
+                        add(slot(panel.id, x, panelWidth, height, width))
                         x += panelWidth
                     }
                 }
                 x = proportionalWidth + minimizedWidth
                 for (panel in fixed) {
-                    if (panel.state != PanelState.MINIMIZED) {
+                    if (panel.mode != PanelMode.MINIMIZED) {
                         val panelWidth = widths.getValue(panel.id).coerceAtMost((width - x).coerceAtLeast(0))
-                        add(slot(panel.id, x, content.y, panelWidth, content.height, width))
+                        add(slot(panel.id, x, panelWidth, height, width))
                         x += panelWidth
                     }
                 }
             }
-            return PanelLayout(content, null, slots)
+            return PanelLayout(area, null, slots)
         }
 
         private fun <K : PanelId> slot(
             id: K,
             x: Int,
-            y: Int,
             width: Int,
             height: Int,
             canvasWidth: Int,
         ): Slot<K> {
-            val outer = Rect(x.coerceIn(0, canvasWidth), y, width, height)
+            val outer = Rect(x.coerceIn(0, canvasWidth), 0, width, height)
             return Slot(
                 id = id,
                 outer = outer,
@@ -189,17 +196,9 @@ public class PanelLayout<K : PanelId> private constructor(
             return List(panelCount) { index -> base + if (index < remainder) 1 else 0 }
         }
 
-        private fun contentRect(width: Int, height: Int, reservedTop: Int): Rect = Rect(
-            x = 0,
-            y = reservedTop.coerceAtMost(height),
-            width = width,
-            height = height - reservedTop.coerceAtMost(height),
-        )
-
-        private fun validateCanvas(width: Int, height: Int, reservedTop: Int) {
+        private fun validateCanvas(width: Int, height: Int) {
             require(width >= 0) { "canvas width must not be negative: $width" }
             require(height >= 0) { "canvas height must not be negative: $height" }
-            require(reservedTop >= 0) { "reserved top rows must not be negative: $reservedTop" }
         }
 
         private fun checkedWidth(width: Int, id: PanelId): Int {

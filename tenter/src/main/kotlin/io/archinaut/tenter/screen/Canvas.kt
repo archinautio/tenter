@@ -28,9 +28,12 @@ public class Canvas private constructor(
     /** This canvas in its own local coordinates: always `Rect(0, 0, width, height)`. Split it with [Layout]. */
     public val area: Rect = Rect(0, 0, bounds.width, bounds.height)
 
+    /** This canvas's top-left corner in its buffer's absolute (frame) coordinates. */
+    internal val origin: Point get() = Point(bounds.x, bounds.y)
+
     /**
      * The intersection of [rect] with this canvas — e.g. a [Layout] split of [area], or a rectangle a
-     * completed frame publishes (see [io.archinaut.tenter.panel.PanelLayout]).
+     * completed frame publishes (see [io.archinaut.tenter.widget.panel.PanelLayout]).
      */
     public fun region(rect: Rect): Canvas = Canvas(buffer, rect.clipTo(area).toAbsolute())
 

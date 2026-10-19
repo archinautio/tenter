@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.widget.fragment
+package io.archinaut.tenter.widget
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

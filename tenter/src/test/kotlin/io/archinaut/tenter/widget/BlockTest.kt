@@ -191,7 +191,7 @@ internal class BlockTest {
 
     @Test
     fun `scrollbar block cells appear on right border only when content overflows`() {
-        val widget = scrollingPanel(title = "T", badge = "0", content = stubContent(20))
+        val widget = ScrollingPanel(title = "T", badge = "0", content = stubContent(20))
 
         val buffer = render(widget, 30, 10, ViewportState())
 
@@ -214,7 +214,7 @@ internal class BlockTest {
         val viewportHeight = 8
         // The stream includes one extra row for the reclaimable top padding, so
         // `viewportHeight - 1` content lines exactly fill it with no overflow.
-        val widget = scrollingPanel(title = "T", badge = "0", content = stubContent(viewportHeight - 1))
+        val widget = ScrollingPanel(title = "T", badge = "0", content = stubContent(viewportHeight - 1))
 
         val buffer = render(widget, 30, 10, ViewportState())
 
@@ -225,7 +225,7 @@ internal class BlockTest {
 
     @Test
     fun `scrollbar thumb uses the box's own borderColor, not a hardcoded one`() {
-        val widget = scrollingPanel(
+        val widget = ScrollingPanel(
             title = "T",
             badge = "0",
             content = stubContent(20),

@@ -1,17 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.panel
+package io.archinaut.tenter.widget.panel
 
 /**
  * The states [id] steps through over four forward cycles from NORMAL — the observable consequence
  * of which states a [Panel] declares, asserted by driving the set rather than by reading the
  * declaration back. Four steps tells every declared combination apart.
  */
-public fun <K : PanelId, I> PanelSet<K, I>.declaredCycle(id: K): List<PanelState> {
+public fun <K : PanelId, I> PanelSet<K, I>.declaredCycle(id: K): List<PanelMode> {
     focus(id)
     return List(4) {
-        cycleFocusedState(1)
-        stateOf(id)
+        cycleFocusedMode(1)
+        modeOf(id)
     }
 }

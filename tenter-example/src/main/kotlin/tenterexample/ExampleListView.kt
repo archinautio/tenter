@@ -10,9 +10,9 @@ import io.archinaut.tenter.widget.ContentLayout
 import io.archinaut.tenter.widget.ContentWidget
 import io.archinaut.tenter.widget.Stack
 import io.archinaut.tenter.widget.contentWidget
-import io.archinaut.tenter.widget.fragment.CheckState
-import io.archinaut.tenter.widget.fragment.CheckboxGlyphs
-import io.archinaut.tenter.widget.fragment.SelectableRow
+import io.archinaut.tenter.widget.CheckState
+import io.archinaut.tenter.widget.CheckboxGlyphs
+import io.archinaut.tenter.widget.SelectableRow
 
 /** The generated catalog content, deliberately composed from prepared stack and column views. */
 internal class ExampleListView(
@@ -34,12 +34,13 @@ internal class ExampleListView(
                     else -> "row $index — decomposed e\u0301 accent"
                 }
                 // --8<-- [start:rows]
-                SelectableRow.draw(
-                    content = cursor,
-                    label = label,
-                    checkState = if (index in state.checkedRows) CheckState.CHECKED else CheckState.UNCHECKED,
-                    cursor = index == state.selectedRow,
-                    glyphs = CheckboxGlyphs.ASCII,
+                cursor.draw(
+                    SelectableRow(
+                        label = label,
+                        checkState = if (index in state.checkedRows) CheckState.CHECKED else CheckState.UNCHECKED,
+                        selected = index == state.selectedRow,
+                        glyphs = CheckboxGlyphs.ASCII,
+                    ),
                 )
                 // --8<-- [end:rows]
             }

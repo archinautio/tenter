@@ -14,7 +14,7 @@ import io.archinaut.tenter.text.TextWrap
  * [TextCursor.writeHeader]) holding one sub-section per entry in [sections] — each rendered
  * lazygit-style as an indented label followed by its `key  description` rows.
  */
-public class HelpWidget(private val sections: List<KeySection>) : ContentWidget {
+public class KeyHelp(private val sections: List<KeySection>) : ContentWidget {
 
     override fun layout(availableWidth: Int): ContentLayout = contentWidget { content ->
         content.writeHeader("KEYS")

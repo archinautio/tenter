@@ -8,13 +8,13 @@ import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.input.MouseEvent
 import io.archinaut.tenter.input.MouseInput
 import io.archinaut.tenter.input.ScrollAction
-import io.archinaut.tenter.panel.Panel
-import io.archinaut.tenter.panel.PanelLayout
-import io.archinaut.tenter.panel.PanelSet
-import io.archinaut.tenter.panel.PanelState
+import io.archinaut.tenter.widget.panel.Panel
+import io.archinaut.tenter.widget.panel.Panels
+import io.archinaut.tenter.widget.panel.PanelSet
+import io.archinaut.tenter.widget.panel.PanelMode
 import io.archinaut.tenter.terminal.Frame
 import io.archinaut.tenter.widget.ContentWidget
-import io.archinaut.tenter.widget.HelpWidget
+import io.archinaut.tenter.widget.KeyHelp
 import io.archinaut.tenter.widget.Stack
 import io.archinaut.tenter.widget.contentWidget
 
@@ -32,17 +32,10 @@ internal class ExampleApp(
         private set
     internal var running: Boolean = true
         private set
-    internal var lastLayout: PanelLayout<ExamplePanelId>? = null
-        private set
 
     internal fun render(frame: Frame) {
         // --8<-- [start:panel-render]
-        lastLayout = panels.render(
-            canvas = frame.canvas(),
-            inputs = state,
-            visible = VISIBLE,
-            reservedTop = 0,
-        )
+        frame.renderStatefulWidget(Panels(state, VISIBLE), frame.area, panels)
         // --8<-- [end:panel-render]
     }
 
@@ -61,7 +54,7 @@ internal class ExampleApp(
             ExampleAction.FOCUS_HELP -> panels.focus(ExamplePanelId.HELP)
             ExampleAction.CYCLE_PANEL -> {
                 panels.focus(ExamplePanelId.HELP)
-                panels.cycleFocusedState(1)
+                panels.cycleFocusedMode(1)
             }
             ExampleAction.QUIT -> running = false
             is ScrollAction.Lines -> panels.scrollFocused(0, action.delta)
@@ -90,10 +83,10 @@ internal class ExampleApp(
         // --8<-- [end:mouse]
     }
 
-    internal fun cycleHelp(): PanelState? {
+    internal fun cycleHelp(): PanelMode? {
         panels.focus(ExamplePanelId.HELP)
-        panels.cycleFocusedState(1)
-        return panels.stateOf(ExamplePanelId.HELP)
+        panels.cycleFocusedMode(1)
+        return panels.modeOf(ExamplePanelId.HELP)
     }
 
     private fun moveSelection(delta: Int) {
@@ -133,7 +126,7 @@ internal class ExampleApp(
 
     private fun helpContent(input: ExampleState): ContentWidget = Stack(
         listOf(
-            HelpWidget(listOf(ExampleKeyMap.map.hints(ExampleContext.LIST))),
+            KeyHelp(listOf(ExampleKeyMap.map.hints(ExampleContext.LIST))),
             contentWidget { cursor ->
                 cursor.newLine()
                 cursor.writeLine("Selected: row ${input.selectedRow}")

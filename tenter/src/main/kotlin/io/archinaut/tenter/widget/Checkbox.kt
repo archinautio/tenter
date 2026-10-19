@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.widget.fragment
+package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.palette.ColorRole
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.text.CellWidth
-import io.archinaut.tenter.widget.TextCursor
 
 // Nerd Fonts icons (https://www.nerdfonts.com/cheat-sheet)
 private val NF_MD_CHECKBOX_BLANK_OUTLINE = String(Character.toChars(0xF0131))
@@ -53,24 +52,22 @@ public fun checkboxIcon(
     CheckState.INDETERMINATE -> glyphs.indeterminate
 }
 
-/** Reusable checkbox drawing operations with no global font or theme state. */
-public object Checkbox {
+/** A one-cell checkbox glyph for [state], in [color], with no global font or theme state. */
+public class Checkbox(
+    private val state: CheckState,
+    private val color: ColorRole = intrinsicColor(state),
+    private val glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
+) : ContentWidget {
 
-    /** Default per-state color when the surrounding row does not override it. */
-    public fun intrinsicColor(state: CheckState): ColorRole = when (state) {
-        CheckState.CHECKED -> ChromeRole.SUCCESS
-        else -> ChromeRole.TEXT_MUTED
-    }
+    override fun layout(availableWidth: Int): ContentLayout = contentWidget { content ->
+        content.write(0, checkboxIcon(state, glyphs), Style(color))
+    }.layout(1)
 
-    /** Overlays the checkbox onto [row] at [column]; occupies exactly one cell. */
-    public fun draw(
-        content: TextCursor,
-        column: Int,
-        row: Int,
-        state: CheckState,
-        color: ColorRole = intrinsicColor(state),
-        glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
-    ) {
-        content.writeAt(column, row, checkboxIcon(state, glyphs), Style(color))
+    public companion object {
+        /** Default per-state color when the surrounding row does not override it. */
+        public fun intrinsicColor(state: CheckState): ColorRole = when (state) {
+            CheckState.CHECKED -> ChromeRole.SUCCESS
+            else -> ChromeRole.TEXT_MUTED
+        }
     }
 }

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 /**
- * [scrollingPanel] composes [Block], [Viewport], and [Padded] — border/badge in [BlockTest],
+ * [ScrollingPanel] composes [Block], [Viewport], and [Padded] — border/badge in [BlockTest],
  * scroll math in [ScrolledTest] — into what a scrolling panel actually renders. These cases
  * exercise the composition itself: specifically, that [Block.PADDING]'s top row is folded into
  * the *content stream* (via [Padded]) rather than the viewport, which is what makes it a spacer
@@ -22,7 +22,7 @@ internal class ScrollingPanelTest {
 
     private fun panel(content: ContentWidget, scrollOffset: Int? = 0, state: ViewportState = ViewportState(
         scrollOffset?.let { ScrollOffset(y = it) } ?: ScrollOffset.ZERO,
-    )): Widget = scrollingPanel(title = "T", badge = "0", content = content).bind(state)
+    )): Widget = ScrollingPanel(title = "T", badge = "0", content = content).bind(state)
 
     /** The settled frame the panel published to the state its caller supplied. */
     private fun ViewportState.frame(): ScrollState = checkNotNull(settled) { "no drawable frame" }

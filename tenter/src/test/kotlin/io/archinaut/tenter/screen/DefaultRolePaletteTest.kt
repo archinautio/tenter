@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.terminal.renderBuffer
 import io.archinaut.tenter.widget.TextCursor
-import io.archinaut.tenter.widget.fragment.CheckState
-import io.archinaut.tenter.widget.fragment.SelectableRow
+import io.archinaut.tenter.widget.CheckState
+import io.archinaut.tenter.widget.SelectableRow
 
 internal class DefaultRolePaletteTest {
 
@@ -27,12 +27,7 @@ internal class DefaultRolePaletteTest {
         val buffer = Buffer(40, 4)
         val content = TextCursor(Canvas.of(buffer))
 
-        SelectableRow.draw(
-            content = content,
-            label = "default",
-            checkState = CheckState.CHECKED,
-            cursor = true,
-        )
+        content.draw(SelectableRow(label = "default", checkState = CheckState.CHECKED, selected = true))
         for ((index, role) in ChromeRole.entries.withIndex()) {
             buffer.set(index, 2, Cell("X", Style(fg = role, bg = role)))
         }

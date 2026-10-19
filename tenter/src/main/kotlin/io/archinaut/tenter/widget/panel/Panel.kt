@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.panel
+package io.archinaut.tenter.widget.panel
 
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.widget.ContentWidget
 import io.archinaut.tenter.widget.ViewportState
-import io.archinaut.tenter.widget.scrollingPanel
+import io.archinaut.tenter.widget.ScrollingPanel
 
 /**
  * One stateful panel declaration. A panel owns its current state, restore state, attachment, and
@@ -16,7 +16,7 @@ import io.archinaut.tenter.widget.scrollingPanel
  * together for one frame.
  *
  * Visibility is still the host application's decision. A declared builder must always return a
- * presentation, while a host chooses which panels to include in a [PanelSet.render] call.
+ * presentation, while a host chooses which panels to include in a [Panels] frame.
  */
 public class Panel<K : PanelId, I>(
     internal val id: K,
@@ -52,30 +52,30 @@ public class Panel<K : PanelId, I>(
     }
 
     private val viewportState: ViewportState = ViewportState()
-    private var restoreState: PanelState = PanelState.NORMAL
+    private var restoreMode: PanelMode = PanelMode.NORMAL
     private var attached: Boolean = false
 
-    internal var state: PanelState = PanelState.NORMAL
+    internal var mode: PanelMode = PanelMode.NORMAL
         private set
 
     /** The declared states, smallest first — what the owning set cycles. */
-    internal val states: List<PanelState> = listOfNotNull(
-        minimized?.let { PanelState.MINIMIZED },
-        PanelState.NORMAL,
-        maximized?.let { PanelState.MAXIMIZED },
+    internal val modes: List<PanelMode> = listOfNotNull(
+        minimized?.let { PanelMode.MINIMIZED },
+        PanelMode.NORMAL,
+        maximized?.let { PanelMode.MAXIMIZED },
     )
 
     /** Steps [delta] through declared states, wrapping while preserving the restore state. */
-    internal fun cycleState(delta: Int) {
-        val index = states.indexOf(state)
-        val next = states[(index + delta).mod(states.size)]
-        if (next == PanelState.MAXIMIZED && state != PanelState.MAXIMIZED) restoreState = state
-        state = next
+    internal fun cycleMode(delta: Int) {
+        val index = modes.indexOf(mode)
+        val next = modes[(index + delta).mod(modes.size)]
+        if (next == PanelMode.MAXIMIZED && mode != PanelMode.MAXIMIZED) restoreMode = mode
+        mode = next
     }
 
     /** Returns to the state this panel was maximized from. */
     internal fun demoteFromMaximized() {
-        if (state == PanelState.MAXIMIZED) state = restoreState
+        if (mode == PanelMode.MAXIMIZED) mode = restoreMode
     }
 
     internal fun scrollBy(dx: Int, dy: Int) {
@@ -86,10 +86,10 @@ public class Panel<K : PanelId, I>(
         viewportState.requestRecenter()
     }
 
-    internal fun presentation(inputs: I): Presentation = when (state) {
-        PanelState.MINIMIZED -> minimized ?: error("Panel $id is in MINIMIZED state but declares no minimized presentation")
-        PanelState.NORMAL -> normal
-        PanelState.MAXIMIZED -> maximized ?: error("Panel $id is in MAXIMIZED state but declares no maximized presentation")
+    internal fun presentation(inputs: I): Presentation = when (mode) {
+        PanelMode.MINIMIZED -> minimized ?: error("Panel $id is in MINIMIZED mode but declares no minimized presentation")
+        PanelMode.NORMAL -> normal
+        PanelMode.MAXIMIZED -> maximized ?: error("Panel $id is in MAXIMIZED mode but declares no maximized presentation")
     }.invoke(inputs)
 
     internal fun claimAttachment() {
@@ -103,7 +103,7 @@ public class Panel<K : PanelId, I>(
 
     /**
      * Renders the already-selected [presentation] into [canvas]. Selection happens in
-     * [PanelSet.render] so the application builder runs exactly once per rendered presentation.
+     * [PanelSet] so the application builder runs exactly once per rendered presentation.
      */
     internal fun render(
         canvas: Canvas,
@@ -112,10 +112,10 @@ public class Panel<K : PanelId, I>(
     ): ViewportState {
         val candidate = viewportState.fork()
         val role = if (focused) ChromeRole.PANEL_BORDER_FOCUSED else ChromeRole.PANEL_BORDER
-        val scrollingPanel = scrollingPanel(
+        val scrollingPanel = ScrollingPanel(
+            content = presentation.content,
             title = title,
             badge = badge,
-            content = presentation.content,
             borderColor = role,
             titleColor = role,
         )

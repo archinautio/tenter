@@ -10,10 +10,10 @@ import io.archinaut.tenter.input.KeyHint
 import io.archinaut.tenter.input.KeySection
 import io.archinaut.tenter.screen.Buffer
 
-internal class HelpWidgetTest {
+internal class KeyHelpTest {
 
     private fun renderHelp(sections: List<KeySection>, width: Int = 28, height: Int = 20): Buffer =
-        render(HelpWidget(sections), width, height)
+        render(KeyHelp(sections), width, height)
 
     @Test
     fun `renders the KEYS header`() {

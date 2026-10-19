@@ -4,14 +4,12 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.screen.StyledText
 import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.text.TextTruncation
-import io.archinaut.tenter.text.textClusters
 
 public class TextCursor private constructor(
     private val sink: TextSink,
@@ -150,13 +148,3 @@ public class TextCursor private constructor(
     }
 }
 
-internal fun drawVerticalText(canvas: Canvas, text: String, style: Style) {
-    val centerX = canvas.width / 2
-    var row = 0
-    for (cluster in textClusters(text)) {
-        if (row >= canvas.height) break
-        if (cluster.width == 0) continue
-        canvas.set(centerX, row, Cell(cluster.drawableText, style))
-        row++
-    }
-}

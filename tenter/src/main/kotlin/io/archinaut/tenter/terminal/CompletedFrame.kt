@@ -11,7 +11,10 @@ import io.archinaut.tenter.screen.Rect
  * A read-only view of the cells a [Terminal.draw] call sent to the terminal. It reads the
  * terminal's own buffer, so it is only valid until the next draw.
  */
-public class CompletedFrame internal constructor(private val buffer: Buffer) {
+public class CompletedFrame internal constructor(
+    private val buffer: Buffer
+) {
+
     public val width: Int get() = buffer.width
     public val height: Int get() = buffer.height
 

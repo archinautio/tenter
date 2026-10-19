@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.panel
+package io.archinaut.tenter.widget.panel
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -9,7 +9,7 @@ import io.archinaut.tenter.widget.contentWidget
 
 private enum class TestPanelId : PanelId { A, B }
 
-internal class PanelStateTest {
+internal class PanelModeTest {
 
     private fun panel(
         minimized: Boolean = true,
@@ -23,29 +23,29 @@ internal class PanelStateTest {
     )
 
     @Test
-    fun `states list exactly the declared states in cycle order`() {
+    fun `modes list exactly the declared modes in cycle order`() {
         assertEquals(
-            listOf(PanelState.MINIMIZED, PanelState.NORMAL, PanelState.MAXIMIZED),
-            panel().states,
+            listOf(PanelMode.MINIMIZED, PanelMode.NORMAL, PanelMode.MAXIMIZED),
+            panel().modes,
         )
-        assertEquals(listOf(PanelState.NORMAL), panel(false, false).states)
-        assertEquals(listOf(PanelState.MINIMIZED, PanelState.NORMAL), panel(true, false).states)
+        assertEquals(listOf(PanelMode.NORMAL), panel(false, false).modes)
+        assertEquals(listOf(PanelMode.MINIMIZED, PanelMode.NORMAL), panel(true, false).modes)
     }
 
     @Test
-    fun `set operations cycle forward and backward and skip undeclared states`() {
+    fun `set operations cycle forward and backward and skip undeclared modes`() {
         val set = PanelSet.uniform(listOf(panel()))
 
-        set.cycleFocusedState(1)
-        assertEquals(PanelState.MAXIMIZED, set.stateOf(TestPanelId.A))
-        set.cycleFocusedState(1)
-        assertEquals(PanelState.MINIMIZED, set.stateOf(TestPanelId.A))
-        set.cycleFocusedState(-1)
-        assertEquals(PanelState.MAXIMIZED, set.stateOf(TestPanelId.A))
+        set.cycleFocusedMode(1)
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(TestPanelId.A))
+        set.cycleFocusedMode(1)
+        assertEquals(PanelMode.MINIMIZED, set.modeOf(TestPanelId.A))
+        set.cycleFocusedMode(-1)
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(TestPanelId.A))
 
         val minimizedAndNormal = PanelSet.uniform(listOf(panel(minimized = true, maximized = false)))
-        minimizedAndNormal.cycleFocusedState(1)
-        assertEquals(PanelState.MINIMIZED, minimizedAndNormal.stateOf(TestPanelId.A))
+        minimizedAndNormal.cycleFocusedMode(1)
+        assertEquals(PanelMode.MINIMIZED, minimizedAndNormal.modeOf(TestPanelId.A))
     }
 
     @Test
@@ -57,11 +57,11 @@ internal class PanelStateTest {
             normal = { Panel.Presentation.fixedWidth(contentWidget { }, 20) },
         )
         val set = PanelSet.uniform(listOf(a, b))
-        set.cycleFocusedState(-1)
-        set.cycleFocusedState(-1)
-        assertEquals(PanelState.MAXIMIZED, set.stateOf(TestPanelId.A))
+        set.cycleFocusedMode(-1)
+        set.cycleFocusedMode(-1)
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(TestPanelId.A))
         set.focus(TestPanelId.B)
-        assertEquals(PanelState.MINIMIZED, set.stateOf(TestPanelId.A))
+        assertEquals(PanelMode.MINIMIZED, set.modeOf(TestPanelId.A))
     }
 
     @Test

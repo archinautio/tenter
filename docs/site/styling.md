@@ -2,9 +2,10 @@
 
 ## Draw selectable rows
 
-`SelectableRow` combines a label, optional check state, and selection highlighting.
-This excerpt from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
-is inside a `contentWidget` loop. `cursor` is its text cursor; `index`, `label`, and
+`SelectableRow` is a content widget that combines a label, optional check state, and
+selection highlighting. A selected row requests visibility, so an enclosing viewport
+follows it. This excerpt from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
+is inside a `contentWidget` loop and draws each row with the text cursor `cursor`; `index`, `label`, and
 `state` describe the row currently being drawn.
 
 ```kotlin
@@ -12,7 +13,9 @@ is inside a `contentWidget` loop. `cursor` is its text cursor; `index`, `label`,
 ```
 
 Use `Checkbox` for a standalone checkbox, `Gauge` for a bounded value display,
-and `HelpWidget` for [keyboard hints](input.md#map-keys-to-application-actions).
+`PipTrack` for a used-of-capacity track, `ValueRow` for a label with a right-aligned
+value, `VerticalText` for a minimized panel stub, `FlashMessage` for a transient status
+line, and `KeyHelp` for [keyboard hints](input.md#map-keys-to-application-actions).
 
 ## Choose glyphs
 

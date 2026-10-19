@@ -1,14 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.widget.fragment
+package io.archinaut.tenter.widget
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.screen.Buffer
-import io.archinaut.tenter.widget.TextCursor
 
 internal class SelectableRowTest {
 
@@ -16,12 +15,7 @@ internal class SelectableRowTest {
     fun `draws a highlighted row with its cursor and checkbox`() {
         val (content, buffer) = content()
 
-        SelectableRow.draw(
-            content = content,
-            label = "host",
-            checkState = CheckState.UNCHECKED,
-            cursor = true,
-        )
+        content.draw(SelectableRow(label = "host", checkState = CheckState.UNCHECKED, selected = true))
 
         assertEquals("▶", buffer.get(0, 0).symbol)
         assertEquals("host", rowText(buffer, 4, 4))
@@ -34,15 +28,16 @@ internal class SelectableRowTest {
     fun `draws value rows and preserves custom disabled styling`() {
         val (content, buffer) = content()
 
-        SelectableRow.draw(
-            content = content,
-            label = "AC/20",
-            checkState = CheckState.INDETERMINATE,
-            cursor = false,
-            right = "58%",
-            subLines = listOf("+2 range"),
-            textColor = ChromeRole.DISABLED,
-            checkboxColor = ChromeRole.DISABLED,
+        content.draw(
+            SelectableRow(
+                label = "AC/20",
+                checkState = CheckState.INDETERMINATE,
+                selected = false,
+                right = "58%",
+                subLines = listOf("+2 range"),
+                textColor = ChromeRole.DISABLED,
+                checkboxColor = ChromeRole.DISABLED,
+            ),
         )
 
         assertEquals(" ", buffer.get(0, 0).symbol)
@@ -57,15 +52,26 @@ internal class SelectableRowTest {
     fun `uses the requested checkbox glyph set`() {
         val (content, buffer) = content()
 
-        SelectableRow.draw(
-            content = content,
-            label = "ascii",
-            checkState = CheckState.CHECKED,
-            cursor = false,
-            glyphs = CheckboxGlyphs.ASCII,
+        content.draw(
+            SelectableRow(label = "ascii", checkState = CheckState.CHECKED, selected = false, glyphs = CheckboxGlyphs.ASCII),
         )
 
         assertEquals("x", buffer.get(2, 0).symbol)
+    }
+
+    @Test
+    fun `a selected row deep in a list is followed by the enclosing viewport`() {
+        val rows = contentWidget { cursor ->
+            repeat(50) { index ->
+                cursor.draw(SelectableRow(label = "row $index", checkState = CheckState.UNCHECKED, selected = index == 40))
+            }
+        }
+        val state = ViewportState()
+
+        val buffer = render(Viewport(rows), 20, 5, state)
+
+        assertEquals(40, checkNotNull(state.settled).revealed?.y)
+        assertEquals("▶ □ row 40", buffer.line(4))
     }
 
     private fun content(width: Int = 32, height: Int = 5): Pair<TextCursor, Buffer> {

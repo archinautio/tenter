@@ -1,18 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.panel
+package io.archinaut.tenter.widget
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import io.archinaut.tenter.widget.line
-import io.archinaut.tenter.widget.render
 
-internal class VerticalTitleWidgetTest {
+internal class VerticalTextTest {
 
     @Test
     fun `draws no border cells — content only`() {
-        val widget = VerticalTitleWidget("LOG")
+        val widget = VerticalText("LOG")
 
         val buffer = render(widget, 7, 10)
 
@@ -22,7 +20,7 @@ internal class VerticalTitleWidgetTest {
 
     @Test
     fun `renders vertical title chars centred`() {
-        val widget = VerticalTitleWidget("LOG")
+        val widget = VerticalText("LOG")
 
         val buffer = render(widget, 7, 10)
 
@@ -35,7 +33,7 @@ internal class VerticalTitleWidgetTest {
 
     @Test
     fun `renders a multi-word title with space as blank row`() {
-        val widget = VerticalTitleWidget("UNIT STATUS")
+        val widget = VerticalText("UNIT STATUS")
 
         val buffer = render(widget, 7, 15)
 
@@ -56,7 +54,7 @@ internal class VerticalTitleWidgetTest {
 
     @Test
     fun `clips title that exceeds panel height without throwing`() {
-        val widget = VerticalTitleWidget("ABCDEFGHIJKLMNOPQRST")
+        val widget = VerticalText("ABCDEFGHIJKLMNOPQRST")
 
         val buffer = render(widget, 7, 3)
 
@@ -68,7 +66,7 @@ internal class VerticalTitleWidgetTest {
 
     @Test
     fun `uses one row per grapheme cluster`() {
-        val buffer = render(VerticalTitleWidget("e\u0301👩‍💻X"), 7, 4)
+        val buffer = render(VerticalText("e\u0301👩‍💻X"), 7, 4)
 
         assertEquals("e\u0301", buffer.get(3, 0).symbol)
         assertEquals("👩‍💻", buffer.get(3, 1).symbol)

@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import io.archinaut.tenter.panel.Panel
-import io.archinaut.tenter.panel.PanelSet
+import io.archinaut.tenter.widget.panel.Panel
+import io.archinaut.tenter.widget.panel.PanelSet
 
 internal class ExampleSmokeTest {
 
@@ -34,7 +34,7 @@ internal class ExampleSmokeTest {
         assertEquals(1, app.state.selectedRow)
         assertTrue(1 in app.state.checkedRows)
 
-        val slot = checkNotNull(checkNotNull(app.lastLayout).main)
+        val slot = checkNotNull(checkNotNull(app.panels.layout).main)
         val clickX = slot.content.x + 1
         val clickY = slot.content.y + 3
         val hit = checkNotNull(app.panels.hitTest(clickX, clickY))

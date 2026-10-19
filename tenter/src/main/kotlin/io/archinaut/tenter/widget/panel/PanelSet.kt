@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Alejandro Pérez García
 // SPDX-License-Identifier: Apache-2.0
 
-package io.archinaut.tenter.panel
+package io.archinaut.tenter.widget.panel
 
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.ViewportState
 
 /**
- * The coordinator for one screen's stateful panels. It owns focus and cross-panel transitions;
- * each [Panel] retains its own state and [io.archinaut.tenter.widget.ViewportState]. A panel instance is claimed
- * by exactly one set for its lifetime.
+ * The state of one screen's stateful panels, rendered by the [Panels] widget in the manner of a
+ * Ratatui `StatefulWidget` state. It owns focus and cross-panel transitions; each [Panel] retains
+ * its own mode and [ViewportState]. A panel instance is claimed by exactly one set for its
+ * lifetime.
  */
 public class PanelSet<K : PanelId, I> private constructor(
     /** The always-included derived-width panel, or null for a uniform set. */
@@ -21,8 +22,14 @@ public class PanelSet<K : PanelId, I> private constructor(
     fixedWidthPanels: Set<K>,
 ) {
     private val fixedWidthPanels: Set<K> = HashSet(fixedWidthPanels)
-    private var lastLayout: PanelLayout<K>? = null
     private var focusedId: K = main?.id ?: sides.first().id
+
+    /**
+     * The geometry and settled scroll of the last completed [Panels] frame, in frame coordinates,
+     * or null before the first one. A failed frame leaves the previous layout in place.
+     */
+    public var layout: PanelLayout<K>? = null
+        private set
 
     /**
      * The panel that receives focused input. Never absent: a set always owns at least one panel,
@@ -52,18 +59,18 @@ public class PanelSet<K : PanelId, I> private constructor(
     /** Focuses [id], or cycles it forward when it is already focused. */
     public fun focusOrCycle(id: K) {
         if (id == focusedId) {
-            cycleFocusedState(1)
+            cycleFocusedMode(1)
         } else {
             focus(id)
         }
     }
 
-    /** Cycles the focused panel's declared state. */
-    public fun cycleFocusedState(delta: Int) {
+    /** Cycles the focused panel's declared mode. */
+    public fun cycleFocusedMode(delta: Int) {
         val panel = panelFor(focusedId)
-        val oldState = panel.state
-        panel.cycleState(delta)
-        if (panel.state == PanelState.MAXIMIZED && oldState != PanelState.MAXIMIZED) {
+        val oldMode = panel.mode
+        panel.cycleMode(delta)
+        if (panel.mode == PanelMode.MAXIMIZED && oldMode != PanelMode.MAXIMIZED) {
             allPanels().forEach { if (it !== panel) it.demoteFromMaximized() }
         }
     }
@@ -88,16 +95,16 @@ public class PanelSet<K : PanelId, I> private constructor(
         panelFor(id).requestRecenter()
     }
 
-    /** The panel at ([x], [y]) in the last completed frame, including the main panel. */
-    public fun panelAt(x: Int, y: Int): K? = lastLayout?.panelAt(x, y)?.id
+    /** The panel at frame coordinate ([x], [y]) in the last completed frame, including the main panel. */
+    public fun panelAt(x: Int, y: Int): K? = layout?.panelAt(x, y)?.id
 
     /**
-     * Resolves ([x], [y]) against the last completed frame. Border and padding hits identify the
+     * Resolves frame coordinate ([x], [y]) against the last completed frame. Border and padding hits identify the
      * panel but have no content point; a content point is translated through the settled offset
      * and the scrolling panel's reclaimable top spacer.
      */
     public fun hitTest(x: Int, y: Int): PanelHit<K>? {
-        val slot = lastLayout?.panelAt(x, y) ?: return null
+        val slot = layout?.panelAt(x, y) ?: return null
         val scroll = slot.scroll ?: return PanelHit(slot.id, null)
         if (!slot.content.contains(x, y)) return PanelHit(slot.id, null)
 
@@ -111,35 +118,28 @@ public class PanelSet<K : PanelId, I> private constructor(
     }
 
     /**
-     * The state observed for [id] — an immutable observation of managed state; callers cannot
+     * The mode observed for [id] — an immutable observation of managed state; callers cannot
      * mutate a panel through it.
      */
-    public fun stateOf(id: K): PanelState = panelFor(id).state
+    public fun modeOf(id: K): PanelMode = panelFor(id).mode
 
     private fun slotFor(id: K): PanelLayout.Slot<K>? {
-        val layout = lastLayout ?: return null
-        if (layout.main?.id == id) return layout.main
-        return layout.sides.firstOrNull { it.id == id }
+        val completed = layout ?: return null
+        if (completed.main?.id == id) return completed.main
+        return completed.sides.firstOrNull { it.id == id }
     }
 
     /**
-     * Lays out [visible] panels, selecting each rendered presentation exactly once, then draws
-     * every slot and returns the layout used. Width comes from that same selected presentation;
-     * it is never recomputed by asking an application builder again.
-     * Managed offsets and hit geometry publish together only after every slot paints successfully.
-     * A failed frame retains queued scrolling intent; application callbacks and canvas writes
-     * are not rolled back, so discard the failed frame's canvas.
+     * The body of [Panels.render]: lays out [visible] panels over [canvas], selecting each rendered
+     * presentation exactly once, then draws every slot and publishes [layout]. Width comes from
+     * that same selected presentation; it is never recomputed by asking an application builder
+     * again.
      */
-    public fun render(
-        canvas: Canvas,
-        inputs: I,
-        visible: Set<K>,
-        reservedTop: Int,
-    ): PanelLayout<K> {
+    internal fun render(canvas: Canvas, inputs: I, visible: Set<K>) {
         val visibleSides = sides.filter { it.id in visible }
         normalizeFocus(visibleSides)
 
-        val maximizedPanel = visibleSides.firstOrNull { it.state == PanelState.MAXIMIZED }
+        val maximizedPanel = visibleSides.firstOrNull { it.mode == PanelMode.MAXIMIZED }
         val renderedPanels = if (maximizedPanel != null) {
             listOf(maximizedPanel)
         } else {
@@ -151,32 +151,30 @@ public class PanelSet<K : PanelId, I> private constructor(
         val presentations = renderedPanels.associateBy({ it.id }, { it.presentation(inputs) })
         val widthOf: (Panel<K, I>) -> Int = { panel -> presentations.getValue(panel.id).requiredWidth() }
         val fixedPanels = fixedWidthPanels + visibleSides
-            .filter { it.state == PanelState.MINIMIZED }
+            .filter { it.mode == PanelMode.MINIMIZED }
             .map { it.id }
 
-        val layout = if (main != null) {
-            PanelLayout.compute(canvas.width, canvas.height, reservedTop, main, visibleSides, widthOf)
+        val local = if (main != null) {
+            PanelLayout.compute(canvas.width, canvas.height, main, visibleSides, widthOf)
         } else {
             PanelLayout.computeUniform(
                 canvas.width,
                 canvas.height,
-                reservedTop,
                 visibleSides,
                 (reservedColumns ?: visibleSides.count { it.id !in fixedWidthPanels }) -
-                    visibleSides.count { it.id !in fixedWidthPanels && it.state == PanelState.MINIMIZED },
+                    visibleSides.count { it.id !in fixedWidthPanels && it.mode == PanelMode.MINIMIZED },
                 fixedPanels,
                 widthOf,
             )
         }
         val candidates = buildMap {
-            for (slot in listOfNotNull(layout.main) + layout.sides) {
+            for (slot in listOfNotNull(local.main) + local.sides) {
                 put(slot.id, renderSlot(canvas, slot, presentations))
             }
         }
-        val settledLayout = layout.withSettledScroll { id -> candidates.getValue(id).settled }
+        val settled = local.withSettledScroll { id -> candidates.getValue(id).settled }
         candidates.forEach { (id, candidate) -> panelFor(id).settle(candidate) }
-        lastLayout = settledLayout
-        return settledLayout
+        layout = settled.offset(canvas.origin.x, canvas.origin.y)
     }
 
     private fun renderSlot(
@@ -250,7 +248,7 @@ public class PanelSet<K : PanelId, I> private constructor(
         ): PanelSet<K, I> {
             require(main != null || sides.isNotEmpty()) { "A PanelSet needs at least one panel" }
             if (main != null) {
-                require(main.states == listOf(PanelState.NORMAL)) {
+                require(main.modes == listOf(PanelMode.NORMAL)) {
                     "Main panel ${main.id} must declare NORMAL only"
                 }
             }
