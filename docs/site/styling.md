@@ -45,5 +45,9 @@ and `DefaultRolePalette.defaultBackground`. Pass the new palette to `withScreen`
 Keep the palette stable for that terminal's lifetime. `AnsiLevel.NONE` is a terminal
 capability, not a palette authoring tier; do not use it to construct a map palette.
 
+For a color that must not change with the theme, use a `PaletteColor` directly as
+the role, as Ratatui uses `Color::Rgb`: `Style(fg = PaletteColor.TrueColor(255, 128, 0))`.
+The terminal renders it as given, without consulting the palette.
+
 If the terminal reports no color support, Tenter suppresses color escapes while
 keeping text and layout usable.

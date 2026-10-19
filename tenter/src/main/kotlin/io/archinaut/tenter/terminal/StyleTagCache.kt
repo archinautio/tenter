@@ -10,7 +10,6 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.colormath.Color as ColorValue
 import com.github.ajalt.colormath.model.Ansi16 as ColormathAnsi16
 import io.archinaut.tenter.palette.ColorRole
-import io.archinaut.tenter.palette.FixedColorRole
 import io.archinaut.tenter.palette.PaletteColor
 import io.archinaut.tenter.palette.RolePalette
 import io.archinaut.tenter.screen.Style
@@ -69,7 +68,7 @@ internal class StyleTagCache(private val palette: RolePalette, private val ansiL
     )
 
     private fun resolve(role: ColorRole, background: Boolean): PaletteColor = when (role) {
-        is FixedColorRole -> role.color
+        is PaletteColor -> role
         else -> if (background) palette.background(role) else palette.foreground(role)
     }
 

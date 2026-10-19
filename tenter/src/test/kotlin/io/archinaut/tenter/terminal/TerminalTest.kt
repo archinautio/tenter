@@ -10,7 +10,6 @@ import io.archinaut.tenter.screen.Style
 
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.palette.ColorRole
-import io.archinaut.tenter.palette.FixedColorRole
 import io.archinaut.tenter.palette.PaletteColor
 import io.archinaut.tenter.palette.RolePalette
 
@@ -44,7 +43,6 @@ private object FixturePalette : RolePalette {
             ChromeRole.SUCCESS -> rgb(139, 209, 124)
             ChromeRole.WARNING -> rgb(243, 211, 106)
             ChromeRole.DANGER -> rgb(255, 153, 153)
-            ChromeRole.DRAFT -> rgb(166, 173, 180)
             ChromeRole.DISABLED -> rgb(137, 145, 152)
             ChromeRole.PANEL_BORDER -> rgb(114, 191, 114)
             ChromeRole.PANEL_BORDER_FOCUSED -> rgb(114, 191, 114)
@@ -86,9 +84,7 @@ internal class TerminalTest {
         }
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val customBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder)
-        val fixed = object : FixedColorRole {
-            override val color: PaletteColor = TrueColor(255, 0, 0)
-        }
+        val fixed = TrueColor(255, 0, 0)
         val buffer = Buffer(1, 1)
         buffer.set(0, 0, Cell("X", Style(fg = fixed, bg = fixed)))
 

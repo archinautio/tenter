@@ -10,7 +10,8 @@ import org.junit.jupiter.api.assertThrows
 
 internal class MapRolePaletteTest {
 
-    private data class Fixed(override val color: PaletteColor) : FixedColorRole
+    /** A role the palette was never given. */
+    private object Unknown : ColorRole
 
     @Test
     fun `a map palette requires every toolkit chrome role before rendering`() {
@@ -68,7 +69,7 @@ internal class MapRolePaletteTest {
 
         assertEquals(accent, palette.foreground(ChromeRole.ACCENT))
         assertThrows<IllegalStateException> {
-            palette.foreground(Fixed(PaletteColor.TrueColor(255, 0, 0)))
+            palette.foreground(Unknown)
         }
     }
 

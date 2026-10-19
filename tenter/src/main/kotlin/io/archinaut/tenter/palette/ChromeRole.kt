@@ -4,8 +4,10 @@
 package io.archinaut.tenter.palette
 
 /**
- * The roles tenter's own widgets (chrome, borders, help text, gauges, …) draw with. Every
- * [RolePalette] a host application supplies must resolve all of them.
+ * The semantic roles tenter's widgets (chrome, borders, help text, gauges, …) and typical
+ * applications (status and text emphasis) draw with. Every [RolePalette] a host application
+ * supplies must resolve all of them; an application defines its own [ColorRole] enum for
+ * domain-specific roles.
  *
  * Several roles may deliberately resolve to the same value in some palettes — that's a palette
  * choice, not a reason to merge roles here: they are semantically distinct call sites that a
@@ -23,7 +25,6 @@ public enum class ChromeRole : ColorRole {
     SUCCESS,
     WARNING,
     DANGER,
-    DRAFT,
     DISABLED,
     PANEL_BORDER,
     PANEL_BORDER_FOCUSED,

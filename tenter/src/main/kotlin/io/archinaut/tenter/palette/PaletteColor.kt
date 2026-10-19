@@ -6,12 +6,16 @@ package io.archinaut.tenter.palette
 import com.github.ajalt.mordant.rendering.AnsiLevel
 
 /**
- * A color in whatever space its palette was authored in. Never converted between spaces — a
- * palette picks one [PaletteColor] subtype for every role it defines, matching the terminal
- * capability that palette targets, and [io.archinaut.tenter.screen.StyleTagCache] renders each subtype with the matching
- * ANSI encoding directly. There is no nearest-color downsampling anywhere in this package.
+ * A concrete color, in whatever space it was authored in. It is also a [ColorRole] that resolves to
+ * itself: use one directly in a [io.archinaut.tenter.screen.Style] for content whose color must not
+ * change with the theme, as Ratatui uses `Color::Rgb`; use a semantic role for themeable content.
+ *
+ * Colors are never converted between spaces: a palette picks one [PaletteColor] subtype for every
+ * role it defines, matching the terminal capability it targets, and the terminal renders each
+ * subtype with the matching ANSI encoding directly. There is no nearest-color downsampling
+ * anywhere in this package.
  */
-public sealed interface PaletteColor {
+public sealed interface PaletteColor : ColorRole {
     /** 24-bit color for a truecolor-capable terminal. Channels in `0..255`. */
     public data class TrueColor(val red: Int, val green: Int, val blue: Int) : PaletteColor {
         init {

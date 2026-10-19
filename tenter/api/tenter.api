@@ -153,7 +153,6 @@ public final class io/archinaut/tenter/palette/ChromeRole : java/lang/Enum, io/a
 	public static final field DANGER Lio/archinaut/tenter/palette/ChromeRole;
 	public static final field DEFAULT Lio/archinaut/tenter/palette/ChromeRole;
 	public static final field DISABLED Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field DRAFT Lio/archinaut/tenter/palette/ChromeRole;
 	public static final field INFO Lio/archinaut/tenter/palette/ChromeRole;
 	public static final field PANEL_BORDER Lio/archinaut/tenter/palette/ChromeRole;
 	public static final field PANEL_BORDER_FOCUSED Lio/archinaut/tenter/palette/ChromeRole;
@@ -177,10 +176,6 @@ public final class io/archinaut/tenter/palette/DefaultRolePalette : io/archinaut
 	public fun getDefaultBackground ()Lio/archinaut/tenter/palette/PaletteColor;
 }
 
-public abstract interface class io/archinaut/tenter/palette/FixedColorRole : io/archinaut/tenter/palette/ColorRole {
-	public abstract fun getColor ()Lio/archinaut/tenter/palette/PaletteColor;
-}
-
 public final class io/archinaut/tenter/palette/MapRolePalette : io/archinaut/tenter/palette/RolePalette {
 	public fun <init> (Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/AnsiLevel;Lio/archinaut/tenter/palette/PaletteColor;Ljava/util/Map;)V
 	public fun background (Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/palette/PaletteColor;
@@ -190,7 +185,7 @@ public final class io/archinaut/tenter/palette/MapRolePalette : io/archinaut/ten
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract interface class io/archinaut/tenter/palette/PaletteColor {
+public abstract interface class io/archinaut/tenter/palette/PaletteColor : io/archinaut/tenter/palette/ColorRole {
 	public static final field Companion Lio/archinaut/tenter/palette/PaletteColor$Companion;
 }
 

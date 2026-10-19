@@ -21,7 +21,6 @@ public object DefaultRolePalette : RolePalette {
         ChromeRole.INFO -> PaletteColor.Ansi16(96)
         ChromeRole.SUCCESS, ChromeRole.PANEL_BORDER_FOCUSED -> PaletteColor.Ansi16(92)
         ChromeRole.DANGER -> PaletteColor.Ansi16(91)
-        ChromeRole.DRAFT -> PaletteColor.Ansi16(95)
         else -> error("DefaultRolePalette only resolves ChromeRole, got: $role")
     }
 }

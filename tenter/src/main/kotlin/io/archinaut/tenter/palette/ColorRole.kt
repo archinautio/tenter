@@ -4,9 +4,8 @@
 package io.archinaut.tenter.palette
 
 /**
- * A semantic color role. Every role resolves to a concrete color through a [RolePalette].
- * Rendering callers use only roles; concrete RGB, xterm, and SGR values are confined to
- * [RolePalette] implementations.
+ * A color role. A semantic role resolves to a concrete color through a [RolePalette], so a theme
+ * can change it; a [PaletteColor] is a role that resolves to itself, for fixed colors.
  *
  * [ColorRole] is a pure marker — tenter defines no closed set of every role that can exist.
  * [ChromeRole] is the set tenter's own widgets draw with; a host application defines its own
