@@ -1,22 +1,38 @@
 # Content and layouts
 
-Start with `contentWidget { cursor -> ... }` to write flowing text. Use `writeLine`
-for a line and `newLine` for a blank line. A `ContentWidget` can measure itself for
-the available width and can be composed with other content.
+Tenter has two kinds of widget. A `Widget` paints into whatever area it is given, as in
+Ratatui. A `MeasurableWidget` can also measure its height for a width before painting,
+so it can be stacked, placed in columns, and scrolled. Most content is measurable:
+write it row by row with a `TextCursor` and its height follows from what you wrote.
+
+```kotlin
+val greeting = MeasurableWidget { cursor -> cursor.writeLine("Hello") }
+
+class Summary(private val items: List<String>) : MeasurableWidget {
+    override fun write(cursor: TextCursor) {
+        items.forEach { cursor.writeLine(it) }
+    }
+}
+```
+
+Use `writeLine` for a line and `newLine` for a blank line; `cursor.width` is the
+available width. Place a child inside measurable content with `cursor.draw(child)`;
+never call a child's `write` yourself, since it would write into your rows instead of
+its own. `widget.measure(width)` returns the `Size` content takes at a width.
 
 ## Stack content vertically
 
-Use `Stack(listOf(first, second))` to place content one below another. The example's
+Use `Stack(listOf(first, second))` to place measurable widgets one below another. The example's
 [help panel](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt)
 combines a `KeyHelp` with text showing the selected row and checked count.
-A plain `Widget` only renders into an allocated area; if you need to compose one,
-wrap it with `fixedContent(width, height, widget)` using its known dimensions.
+A plain `Widget` cannot measure itself; to stack one, give it a size with
+`widget.fixedSize(width, height)`.
 
 ## Arrange columns
 
-Give each `Columns.Child` a width in terminal cells and a `ContentWidget`. This excerpt
+Give each `Column` a width in terminal cells and a `MeasurableWidget`. This excerpt
 from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
-places selection markers beside rows. `markerColumn` and `rowColumn` are content
+places selection markers beside rows. `markerColumn` and `rowColumn` are measurable
 widgets defined earlier in that file; the widths account for the available space.
 
 ```kotlin
@@ -27,25 +43,27 @@ widgets defined earlier in that file; the widths account for the available space
 between bands. Combine the resulting columns with other content using `Stack`.
 Widths are display cells, so a wide character such as `中` occupies more than one.
 
-## Add padding and borders
+## Add borders and padding
 
-Use the `prepared` factories when padding or borders participate in a stack or
-column layout. This excerpt prepares a bordered label with one cell of padding,
+A `Block` holds borders, a title, and padding, as Ratatui's `Block` does. `Block()` has
+no border and `Block.bordered(...)` draws all four sides; choose sides with `borders`,
+such as `Borders.TOP` for a titled divider. A block without borders adds padding alone.
+
+Surround measurable content with a block using `.block(...)`. The result is still
+measurable. This excerpt frames a label in a bordered block with one cell of padding,
 then measures it for an available width of eight cells:
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt:padding"
 ```
 
-The excerpt uses `Block`, `Padded`, `Padding`, and `contentWidget` from Tenter.
 See the [complete source and imports](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt).
 `markRevealAt(0)` asks an enclosing viewport to keep the marked row visible; omit
-it for a static label. Use the ordinary `Padded` widget and `Block` only when
-rendering into an already allocated area. Like Ratatui's `Block`, a `Block` draws
-only its border and title; render the content into `block.inner(area)`:
+it for a static label. In an allocated area, render the block and then render the
+content into `block.inner(area)`:
 
 ```kotlin
-val block = Block(title = "LOG")
+val block = Block.bordered(title = "LOG")
 frame.renderWidget(block, area)
 frame.renderWidget(content, block.inner(area))
 ```
@@ -94,14 +112,14 @@ a widget, split `canvas.area` and render children into `canvas.region(rect)`.
 
 ## Reuse content safely
 
-Recorded text and placements are snapshots, but raw widgets and color-role objects
-are retained rather than deep-copied. Capture stable frame data in raw widgets when
-you need repeatable output. `fixedContent` uses the dimensions you supply without
-painting to measure; it calls the original widget each time it paints.
+Written text and placements are snapshots, but plain widgets given a size and
+color-role objects are retained rather than deep-copied. Capture stable frame data in
+those widgets when you need repeatable output. `fixedSize` uses the dimensions you
+supply without painting to measure; it calls the original widget each time it paints.
 
 A viewport paints only the rows and children inside its window, so painting costs
 the visible area, not the content length. Preparation still records all logical
 content, so very long content uses proportionally more memory and preparation time;
 limit or page the application data you prepare when working with large datasets.
-A raw widget from `fixedContent` is painted in full once per frame wherever it is
+A plain widget given a size with `fixedSize` is painted in full once per frame wherever it is
 placed, because its reveal request is only known after it paints.

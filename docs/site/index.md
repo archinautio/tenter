@@ -85,10 +85,10 @@ Ratatui, the names map directly:
 | `Canvas` | `Rect` + `Buffer` | The area a widget renders into: clipped, with local coordinates. |
 | `Buffer`, `Cell`, `Style` | `Buffer`, `Cell`, `Style` | The grid of styled cells. |
 | `Layout`, `Constraint` | `Layout`, `Constraint` | Split a `Rect` into smaller rectangles. |
-| `Block`, `Padding` | `Block`, `Padding` | A border with a title, and the space inside it. |
+| `Block`, `Borders`, `Padding` | `Block`, `Borders`, `Padding` | Borders with a title, and the space inside them. |
 
-Tenter adds prepared content (`ContentWidget`) for text that measures itself,
-scrolling viewports, and managed panels on top of these concepts.
+Tenter adds measurable widgets (`MeasurableWidget`) for content that measures its own
+height, scrolling viewports, and managed panels on top of these concepts.
 
 ## Continue with:
 

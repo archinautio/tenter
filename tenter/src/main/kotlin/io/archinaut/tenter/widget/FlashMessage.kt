@@ -16,9 +16,9 @@ public data class FlashMessage(
     val text: String,
     val duration: Duration = 3.seconds,
     val style: Style = Style(ChromeRole.INFO),
-) : ContentWidget {
+) : MeasurableWidget {
 
-    override fun layout(availableWidth: Int): ContentLayout = contentWidget { cursor ->
+    override fun write(cursor: TextCursor) {
         cursor.writeLine(text, style)
-    }.layout(availableWidth)
+    }
 }

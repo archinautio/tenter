@@ -8,7 +8,7 @@ Public API signatures are tracked by `tenter/api/tenter.api`.
 
 `tenter/src/test/kotlin/io/archinaut/tenter/ArchitectureTest.kt` enforces the dependency boundaries below, prevents BattleTech imports, and keeps managed `Panel` mutations behind `PanelSet`.
 
-The packages have distinct jobs: `palette` owns semantic colors; `text` owns display-cell metrics; `screen` owns buffers, cells, styles, canvas painting, and `Layout`/`Constraint` rectangle splitting; `widget` owns the `Widget` and `StatefulWidget` contracts, prepared content, and every widget (blocks, viewports, rows, gauges), with stateful panel composition (the `Panels` widget over its `PanelSet` state) in `widget.panel`; `animation` owns finite frame descriptions and elapsed-time playback; `input` owns key maps and pointer helpers; `terminal` owns the double-buffered `Terminal`, its per-draw `Frame`, diff rendering, terminal event flows, and screen lifecycle.
+The packages have distinct jobs: `palette` owns semantic colors; `text` owns display-cell metrics; `screen` owns buffers, cells, styles, canvas painting, and `Layout`/`Constraint` rectangle splitting; `widget` owns the `Widget`, `MeasurableWidget`, and `StatefulWidget` contracts, the internal recorded layouts behind measurable widgets, and every widget (blocks, viewports, rows, gauges), with stateful panel composition (the `Panels` widget over its `PanelSet` state) in `widget.panel`; `animation` owns finite frame descriptions and elapsed-time playback; `input` owns key maps and pointer helpers; `terminal` owns the double-buffered `Terminal`, its per-draw `Frame`, diff rendering, terminal event flows, and screen lifecycle.
 
 The rendering model follows Ratatui: `Terminal.draw` hands a `Frame` to the caller, widgets render into a `Canvas` clipped to their `Rect`, and the terminal diffs the drawn `Buffer` against the previous one.
 
@@ -26,7 +26,7 @@ buildable both as an ordinary module and as an isolated packaged-jar consumer.
 The public guides own caller-facing contracts. Consult them before changing the
 corresponding implementation; do not maintain a second description here:
 
-- [Content and layouts](site/layouts.md): prepared composition, widgets, frames, layout splitting, snapshots, and memory costs.
+- [Content and layouts](site/layouts.md): measurable widgets, blocks, frames, layout splitting, snapshots, and memory costs.
 - [Scrolling and panels](site/panels.md): state ownership, presentation widths, completed-frame observations, hidden panels, and failed-render recovery.
 - [Input and resizing](site/input.md): key-map validation, event collection, application confinement, and terminal lifetime.
 - [Widgets and styling](site/styling.md): glyph choices, display-cell sizing, and palette requirements.
@@ -40,8 +40,8 @@ corresponding implementation; do not maintain a second description here:
   fixed-width panel ids. Do not expose mutable declaration collections.
 - A panel presentation is evaluated once to supply both content and width preference
   for layout and painting. Keep mode-specific options out of the common render operation.
-- Propagate reveal requests through prepared decorators and resolve them during the
-  actual viewport paint. Commit managed viewport state and hit geometry together
+- Propagate reveal requests through composites such as `Stack`, `Columns`, and `.block()`,
+  and resolve them before the actual viewport paint. Commit managed viewport state and hit geometry together
   only after all panels paint successfully. Expose no provisional or second settled-state read path.
 - Share complete grapheme segmentation and display-width rules across text, wrapping,
   truncation, styled spans, and widgets. Cover combining marks, variation selectors,

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Rect
-import io.archinaut.tenter.widget.contentWidget
+import io.archinaut.tenter.widget.MeasurableWidget
 
 private enum class LayoutPanelId : PanelId { MAIN, A, B, C, FIXED }
 
@@ -23,15 +23,15 @@ internal class PanelLayoutTest {
     ): Panel<LayoutPanelId, Unit> = Panel(
         id = id,
         title = id.name,
-        normal = { Panel.Presentation.fixedWidth(contentWidget { }, width) },
-        minimized = { Panel.Presentation.fixedWidth(contentWidget { }, minimizedWidth) },
-        maximized = { Panel.Presentation.allocated(contentWidget { }) },
+        normal = { Panel.Presentation.fixedWidth(MeasurableWidget { }, width) },
+        minimized = { Panel.Presentation.fixedWidth(MeasurableWidget { }, minimizedWidth) },
+        maximized = { Panel.Presentation.allocated(MeasurableWidget { }) },
     )
 
     private fun main() = Panel<LayoutPanelId, Unit>(
         id = LayoutPanelId.MAIN,
         title = "MAIN",
-        normal = { Panel.Presentation.allocated(contentWidget { }) },
+        normal = { Panel.Presentation.allocated(MeasurableWidget { }) },
     )
 
     private fun widthOf(widths: Map<LayoutPanelId, Int>): (Panel<LayoutPanelId, Unit>) -> Int =

@@ -7,7 +7,7 @@ import io.archinaut.tenter.screen.Rect
 
 /**
  * An immutable observation of a completed viewport frame. [revealed] is in content coordinates;
- * dimensions are in cells and describe the exact prepared content and destination used for the
+ * dimensions are in cells and describe the exact measured content and destination used for the
  * frame.
  */
 public data class ScrollState(

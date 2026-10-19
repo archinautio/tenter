@@ -10,17 +10,15 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 
 /**
- * Recorded dimensions, text, and placements for one frame. Dimensions describe logical content,
- * not the number of nonblank pixels painted into a canvas. The instruction list is immutable,
- * but referenced roles and raw widgets are not deep-copied. In particular, [fixedContent] retains
- * its original [Widget] and invokes it on each paint. Capture stable application data when preparing
- * a frame; repeated paints are allowed and should not change application state.
+ * Recorded dimensions, text, and placements of one [MeasurableWidget] at one width. Dimensions
+ * describe logical content, not the number of nonblank cells painted. The instruction list is
+ * immutable, but raw widgets from [fixedSize] are retained and invoked on each paint. When several
+ * reveal requests are recorded, the last one wins.
  */
-public class ContentLayout internal constructor(
-    public val width: Int,
-    public val height: Int,
+internal class ContentLayout(
+    val width: Int,
+    val height: Int,
     private val instructions: List<Instruction>,
-    private val revealPreference: RevealPreference,
 ) : Widget {
 
     init {
@@ -28,24 +26,26 @@ public class ContentLayout internal constructor(
         require(height >= 0) { "content height must not be negative: $height" }
     }
 
-    /**
-     * The small construction surface for custom prepared composition. Children are already
-     * prepared, so placement never measures by painting them a second time.
-     */
-    public class Builder internal constructor() {
+    /** Placement instructions for the library's composites; children are already prepared. */
+    class Builder {
         private val instructions = mutableListOf<Instruction>()
 
         /** Places [content] at the declared layout coordinate ([x], [y]). */
-        public fun place(x: Int, y: Int, content: ContentLayout) {
+        fun place(x: Int, y: Int, content: ContentLayout) {
             instructions += Instruction.Child(x, y, content)
         }
 
         /** Requests visibility of a layout-local rectangle. Empty rectangles are ignored. */
-        public fun reveal(rect: Rect) {
+        fun reveal(rect: Rect) {
             instructions += Instruction.Reveal(rect)
         }
 
-        internal fun snapshot(): List<Instruction> = instructions.toList()
+        /** Paints [widget] over this layout's whole area, in place; it makes no reveal request. */
+        fun decorate(widget: Widget) {
+            instructions += Instruction.Decoration(widget)
+        }
+
+        fun snapshot(): List<Instruction> = instructions.toList()
     }
 
     override fun render(canvas: Canvas) {
@@ -61,7 +61,7 @@ public class ContentLayout internal constructor(
      * Each raw widget is invoked once per call, even though resolving the request needs its paint:
      * the offscreen result of the reveal pass is reused by the paint pass.
      */
-    internal fun paintAt(canvas: Canvas, origin: (reveal: Rect?) -> Point): Rect? {
+    fun paintAt(canvas: Canvas, origin: (reveal: Rect?) -> Point): Rect? {
         val rendered = IdentityHashMap<Instruction.Raw, Canvas>()
         val reveal = resolveReveal(rendered)
         val at = origin(reveal)
@@ -75,6 +75,7 @@ public class ContentLayout internal constructor(
         for (instruction in instructions) {
             when (instruction) {
                 is Instruction.Text -> Unit
+                is Instruction.Decoration -> Unit
                 is Instruction.Reveal -> clip(instruction.rect, width, height)?.let(requests::add)
                 is Instruction.Child -> {
                     val child = instruction.content
@@ -102,10 +103,7 @@ public class ContentLayout internal constructor(
                 }
             }
         }
-        return when (revealPreference) {
-            RevealPreference.FIRST -> requests.firstOrNull()
-            RevealPreference.LAST -> requests.lastOrNull()
-        }
+        return requests.lastOrNull()
     }
 
     /**
@@ -124,6 +122,7 @@ public class ContentLayout internal constructor(
                     }
                 }
                 is Instruction.Reveal -> Unit
+                is Instruction.Decoration -> instruction.widget.render(canvas)
                 is Instruction.Child -> {
                     val child = instruction.content
                     val rect = Rect(instruction.x, instruction.y, child.width, child.height)
@@ -142,16 +141,12 @@ public class ContentLayout internal constructor(
         }
     }
 
-    internal companion object {
-        fun raw(width: Int, height: Int, widget: Widget): ContentLayout = ContentLayout(
-            width = width,
-            height = height,
-            instructions = listOf(Instruction.Raw(widget)),
-            revealPreference = RevealPreference.LAST,
-        )
+    companion object {
+        fun raw(width: Int, height: Int, widget: Widget): ContentLayout =
+            ContentLayout(width, height, listOf(Instruction.Raw(widget)))
     }
 
-    internal sealed interface Instruction {
+    sealed interface Instruction {
         data class Text(
             val x: Int,
             val y: Int,
@@ -164,6 +159,8 @@ public class ContentLayout internal constructor(
         data class Child(val x: Int, val y: Int, val content: ContentLayout) : Instruction
 
         data class Raw(val widget: Widget) : Instruction
+
+        data class Decoration(val widget: Widget) : Instruction
     }
 
     private fun clip(rect: Rect, boundWidth: Int, boundHeight: Int): Rect? =

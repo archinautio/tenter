@@ -33,9 +33,12 @@ public class TextCursor private constructor(
         writeLine(sectionHeader(label), INFO_STYLE)
     }
 
-    /** Prepares [content] once, places its logical layout at the current row, and advances past it. */
-    public fun draw(content: ContentWidget): Int {
-        val layout = content.layout(width)
+    /**
+     * Writes [content] in its own area starting at the current row, clipped to its measured size,
+     * and advances past it. This is how a measurable widget places a child; returns the rows used.
+     */
+    public fun draw(content: MeasurableWidget): Int {
+        val layout = content.prepare(width)
         sink.place(layout, 0, row)
         repeat(layout.height) { newLine() }
         return layout.height

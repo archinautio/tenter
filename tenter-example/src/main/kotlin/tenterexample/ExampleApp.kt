@@ -13,10 +13,9 @@ import io.archinaut.tenter.widget.panel.Panels
 import io.archinaut.tenter.widget.panel.PanelSet
 import io.archinaut.tenter.widget.panel.PanelMode
 import io.archinaut.tenter.terminal.Frame
-import io.archinaut.tenter.widget.ContentWidget
+import io.archinaut.tenter.widget.MeasurableWidget
 import io.archinaut.tenter.widget.KeyHelp
 import io.archinaut.tenter.widget.Stack
-import io.archinaut.tenter.widget.contentWidget
 
 internal enum class ExampleLayoutMode {
     MAIN_AND_SIDES,
@@ -124,10 +123,10 @@ internal class ExampleApp(
         }
     }
 
-    private fun helpContent(input: ExampleState): ContentWidget = Stack(
+    private fun helpContent(input: ExampleState): MeasurableWidget = Stack(
         listOf(
             KeyHelp(listOf(ExampleKeyMap.map.hints(ExampleContext.LIST))),
-            contentWidget { cursor ->
+            MeasurableWidget { cursor ->
                 cursor.newLine()
                 cursor.writeLine("Selected: row ${input.selectedRow}")
                 cursor.writeLine("Checked: ${input.checkedRows.size}")

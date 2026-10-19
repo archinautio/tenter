@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.screen.Rect
+import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.palette.ChromeRole
 
@@ -20,7 +21,7 @@ internal class BlockTest {
 
     @Test
     fun `renders corners around the whole canvas`() {
-        val widget = Block()
+        val widget = Block.bordered()
 
         val buffer = render(widget, 10, 5)
 
@@ -32,7 +33,7 @@ internal class BlockTest {
 
     @Test
     fun `renders horizontal and vertical borders`() {
-        val widget = Block()
+        val widget = Block.bordered()
 
         val buffer = render(widget, 6, 4)
 
@@ -48,7 +49,7 @@ internal class BlockTest {
 
     @Test
     fun `renders title`() {
-        val widget = Block(title = "TEST")
+        val widget = Block.bordered(title = "TEST")
 
         val buffer = render(widget, 20, 3)
 
@@ -64,7 +65,7 @@ internal class BlockTest {
 
     @Test
     fun `uses specified colors`() {
-        val widget = Block(borderColor = ChromeRole.DANGER, titleColor = ChromeRole.TEXT_PRIMARY)
+        val widget = Block.bordered(borderColor = ChromeRole.DANGER, titleColor = ChromeRole.TEXT_PRIMARY)
 
         val buffer = render(widget, 10, 3)
 
@@ -73,7 +74,7 @@ internal class BlockTest {
 
     @Test
     fun `renders single-char badge title`() {
-        val widget = Block(title = "TEST", badge = "2")
+        val widget = Block.bordered(title = "TEST", badge = "2")
 
         val buffer = render(widget, 20, 3)
 
@@ -92,7 +93,7 @@ internal class BlockTest {
 
     @Test
     fun `renders letter badge title, e g HELP`() {
-        val widget = Block(title = "HELP", badge = "h")
+        val widget = Block.bordered(title = "HELP", badge = "h")
 
         val buffer = render(widget, 20, 3)
 
@@ -111,7 +112,7 @@ internal class BlockTest {
 
     @Test
     fun `skips title when box too narrow`() {
-        val widget = Block(title = "TOOLONG")
+        val widget = Block.bordered(title = "TOOLONG")
 
         val buffer = render(widget, 8, 3)
 
@@ -120,7 +121,7 @@ internal class BlockTest {
 
     @Test
     fun `renders a badge alone, with no title to anchor it to — e g a minimized panel's stub`() {
-        val widget = Block(badge = "0")
+        val widget = Block.bordered(badge = "0")
 
         val buffer = render(widget, 7, 3)
 
@@ -131,7 +132,7 @@ internal class BlockTest {
 
     @Test
     fun `omits a badge that has no room, even alone`() {
-        val widget = Block(badge = "0")
+        val widget = Block.bordered(badge = "0")
 
         val buffer = render(widget, 5, 3)
 
@@ -142,7 +143,7 @@ internal class BlockTest {
     fun `falls back to the badge alone when a title is present but the full run does not fit`() {
         // A title too long to fit as "[badge] title" must not draw nothing — the badge alone is
         // still worth showing (e.g. a minimized panel's stub, too narrow for its full title).
-        val widget = Block(title = "TOOLONGTOFIT", badge = "1")
+        val widget = Block.bordered(title = "TOOLONGTOFIT", badge = "1")
 
         val buffer = render(widget, 7, 3)
 
@@ -159,7 +160,7 @@ internal class BlockTest {
                 canvas.setString(0, 0, "HI")
             }
         }
-        val block = Block(padding = Padding(left = 2, right = 2))
+        val block = Block.bordered(padding = Padding(left = 2, right = 2))
         val buffer = Buffer(20, 5)
         val canvas = Canvas.of(buffer)
 
@@ -172,7 +173,7 @@ internal class BlockTest {
 
     @Test
     fun `content rendered at offset position within parent buffer`() {
-        val block = Block()
+        val block = Block.bordered()
         val buffer = Buffer(40, 20)
         val canvas = Canvas.of(buffer).region(Rect(5, 3, 20, 10))
 
@@ -185,7 +186,7 @@ internal class BlockTest {
 
     // ── scrollbar thumbs, synchronized with a Viewport ─────────────────────────────────────────
 
-    private fun stubContent(lines: Int): ContentWidget = contentWidget { cursor ->
+    private fun stubContent(lines: Int): MeasurableWidget = MeasurableWidget { cursor ->
         repeat(lines) { row -> cursor.writeLine("line$row") }
     }
 
@@ -241,7 +242,7 @@ internal class BlockTest {
 
     @Test
     fun `a plain block never draws a thumb, however tall its content`() {
-        val block = Block()
+        val block = Block.bordered()
         val buffer = Buffer(30, 10)
         val canvas = Canvas.of(buffer)
 
@@ -255,7 +256,7 @@ internal class BlockTest {
 
     @Test
     fun `title placement uses display width rather than UTF-16 length`() {
-        val widget = Block(title = "中")
+        val widget = Block.bordered(title = "中")
 
         val buffer = render(widget, 12, 3)
 
@@ -265,7 +266,7 @@ internal class BlockTest {
 
     @Test
     fun `wide badge leaves the right border intact when shown alone`() {
-        val widget = Block(badge = "中")
+        val widget = Block.bordered(badge = "中")
 
         val buffer = render(widget, 7, 3)
 
@@ -278,9 +279,57 @@ internal class BlockTest {
 
     @Test
     fun `inner removes the border and padding from an area`() {
-        val block = Block(padding = Padding(left = 2, top = 1))
+        val block = Block.bordered(padding = Padding(left = 2, top = 1))
 
         assertEquals(Rect(13, 22, 6, 7), block.inner(Rect(10, 20, 10, 10)))
         assertEquals(Rect(2, 1, 0, 0), block.inner(Rect(0, 0, 2, 1)))
+    }
+
+    @Test
+    fun `a default block draws no border and consumes only its padding`() {
+        val block = Block(padding = Padding.uniform(1))
+
+        val buffer = render(block, 4, 3)
+
+        assertEquals("", buffer.text().trim())
+        assertEquals(Rect(1, 1, 2, 1), block.inner(Rect(0, 0, 4, 3)))
+    }
+
+    @Test
+    fun `a top border with a title draws a titled divider and keeps the sides open`() {
+        val block = Block(title = "KEYS", borders = Borders.TOP)
+
+        val buffer = render(block, 12, 3)
+
+        assertEquals("─── KEYS ───", buffer.line(0))
+        assertEquals("", buffer.line(1))
+        assertEquals(Rect(0, 1, 12, 2), block.inner(Rect(0, 0, 12, 3)))
+    }
+
+    @Test
+    fun `a title without a top border still takes the top row`() {
+        val block = Block(title = "T")
+
+        assertEquals(Rect(0, 1, 5, 2), block.inner(Rect(0, 0, 5, 3)))
+    }
+
+    @Test
+    fun `combined sides draw only those sides and their shared corners`() {
+        val block = Block(borders = Borders.LEFT + Borders.BOTTOM)
+
+        val buffer = render(block, 3, 2)
+
+        assertEquals("│", buffer.line(0))
+        assertEquals("╰──", buffer.line(1))
+        assertEquals(Rect(1, 0, 2, 1), block.inner(Rect(0, 0, 3, 2)))
+        assertEquals(Borders.LEFT + Borders.BOTTOM, Borders.BOTTOM + Borders.LEFT)
+    }
+
+    @Test
+    fun `a block around measurable content adds its sides to the measured size`() {
+        val content = MeasurableWidget { it.writeLine("X") }
+
+        assertEquals(Size(8, 3), content.block(Block.bordered()).measure(8))
+        assertEquals(Size(8, 1), content.measure(8))
     }
 }

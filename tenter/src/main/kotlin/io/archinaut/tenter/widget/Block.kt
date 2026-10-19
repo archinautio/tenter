@@ -13,55 +13,66 @@ import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
 
 /**
- * A box border with an optional title/badge in the top border, in the manner of Ratatui's
- * `Block`. A block paints only its own chrome: render the content separately into [inner].
- * Scrollbar thumbs are a scrolling-panel concern and are painted by [ScrollingPanel] from its
- * settled [ScrollState], so a reusable border has no scrolling knowledge.
- * [padding] is extra space consumed between the border and the content, beyond the 1-cell border
- * itself (e.g. the horizontal breathing room a scrolling panel's viewport wants); pass
- * [Padding.ZERO] for a border with nothing but the border between it and content.
+ * Borders, an optional title/badge on the top row, and padding, in the manner of Ratatui's
+ * `Block`. `Block()` has no border; [bordered] draws all four sides. A block without borders is how
+ * content gets padding alone.
+ *
+ * A block paints only its own chrome. In an allocated area, render it and then render the content
+ * into [inner]; around measurable content, use [MeasurableWidget.block]. The title sits on the top
+ * border, or on its own top row when there is no top border. [padding] is space between the
+ * borders and the content.
  *
  * The single place every framed widget gets its box from — no widget should draw its own border.
+ * Scrollbar thumbs are painted by [ScrollingPanel] from its settled [ScrollState].
  */
 public class Block(
     private val title: String = "",
     private val badge: String? = null,
+    private val borders: Borders = Borders.NONE,
     private val padding: Padding = Padding.ZERO,
     private val borderColor: ColorRole = ChromeRole.PANEL_BORDER,
     private val titleColor: ColorRole = ChromeRole.ACCENT,
 ) : Widget {
 
-    /** The content area of a block rendered into [area]: [area] minus the border and [padding]. */
-    public fun inner(area: Rect): Rect = area.inner(BORDER + padding)
+    /** Everything this block consumes on each side: borders (or the title row) plus [padding]. */
+    internal val insets: Padding = Padding(
+        left = if (borders.left) 1 else 0,
+        top = if (borders.top || title.isNotEmpty() || badge != null) 1 else 0,
+        right = if (borders.right) 1 else 0,
+        bottom = if (borders.bottom) 1 else 0,
+    ) + padding
 
-    /** The content canvas of a block rendered into [canvas]: minus the border and [padding]. */
-    public fun inner(canvas: Canvas): Canvas = canvas.inner(BORDER + padding)
+    /** The content area of a block rendered into [area]: [area] minus the borders and [padding]. */
+    public fun inner(area: Rect): Rect = area.inner(insets)
+
+    /** The content canvas of a block rendered into [canvas]: minus the borders and [padding]. */
+    public fun inner(canvas: Canvas): Canvas = canvas.inner(insets)
 
     public override fun render(canvas: Canvas) {
-        drawBorder(canvas)
-    }
-
-    /** No-op below 2x2. */
-    private fun drawBorder(canvas: Canvas) {
         val width = canvas.width
         val height = canvas.height
-        if (width < 2 || height < 2) return
+        if (width == 0 || height == 0) return
+        if ((borders.left && borders.right && width < 2) || (borders.top && borders.bottom && height < 2)) return
 
-        canvas.set(0, 0, Cell("╭", Style(borderColor)))
-        canvas.set(width - 1, 0, Cell("╮", Style(borderColor)))
-        canvas.set(0, height - 1, Cell("╰", Style(borderColor)))
-        canvas.set(width - 1, height - 1, Cell("╯", Style(borderColor)))
-
-        for (i in 1 until width - 1) {
-            canvas.set(i, 0, Cell("─", Style(borderColor)))
-            canvas.set(i, height - 1, Cell("─", Style(borderColor)))
+        val style = Style(borderColor)
+        for (i in 0 until width) {
+            if (borders.top) canvas.set(i, 0, Cell("─", style))
+            if (borders.bottom) canvas.set(i, height - 1, Cell("─", style))
         }
-
-        for (i in 1 until height - 1) {
-            canvas.set(0, i, Cell("│", Style(borderColor)))
-            canvas.set(width - 1, i, Cell("│", Style(borderColor)))
+        for (i in 0 until height) {
+            if (borders.left) canvas.set(0, i, Cell("│", style))
+            if (borders.right) canvas.set(width - 1, i, Cell("│", style))
         }
+        if (borders.top && borders.left) canvas.set(0, 0, Cell("╭", style))
+        if (borders.top && borders.right) canvas.set(width - 1, 0, Cell("╮", style))
+        if (borders.bottom && borders.left) canvas.set(0, height - 1, Cell("╰", style))
+        if (borders.bottom && borders.right) canvas.set(width - 1, height - 1, Cell("╯", style))
 
+        drawTitle(canvas)
+    }
+
+    private fun drawTitle(canvas: Canvas) {
+        val width = canvas.width
         val titleWidth = CellWidth.of(title)
         val badgeWidth = badge?.let(CellWidth::of) ?: 0
         val badgeRunWidth = badge?.let { CellWidth.of("[$it]") } ?: 0
@@ -90,9 +101,8 @@ public class Block(
      * values and this box's own viewport size — the same region [inner] gives the content.
      */
     internal fun drawThumbs(canvas: Canvas, scroll: ScrollState) {
-        val inset = BORDER + padding
-        val viewportWidth = canvas.width - inset.left - inset.right
-        val viewportHeight = canvas.height - inset.top - inset.bottom
+        val viewportWidth = canvas.width - insets.left - insets.right
+        val viewportHeight = canvas.height - insets.top - insets.bottom
 
         val thumbStyle = Style(borderColor)
 
@@ -101,47 +111,28 @@ public class Block(
             contentLength = scroll.maxOffset.y + viewportHeight,
             viewportLength = viewportHeight,
             offset = scroll.offset.y,
-        )?.forEach { i -> canvas.set(canvas.width - 1, inset.top + i, Cell("▐", thumbStyle)) }
+        )?.forEach { i -> canvas.set(canvas.width - 1, insets.top + i, Cell("▐", thumbStyle)) }
 
         ScrollGeometry.thumb(
             track = viewportWidth,
             contentLength = scroll.maxOffset.x + viewportWidth,
             viewportLength = viewportWidth,
             offset = scroll.offset.x,
-        )?.forEach { i -> canvas.set(inset.left + i, canvas.height - 1, Cell("▬", thumbStyle)) }
+        )?.forEach { i -> canvas.set(insets.left + i, canvas.height - 1, Cell("▬", thumbStyle)) }
     }
 
     public companion object {
-        /** Composes an intrinsic border around prepared content; [Block] itself paints an allocated canvas. */
-        public fun prepared(
-            content: ContentWidget,
+        /** A block with all four borders, in the manner of Ratatui's `Block::bordered`. */
+        public fun bordered(
             title: String = "",
             badge: String? = null,
             padding: Padding = Padding.ZERO,
             borderColor: ColorRole = ChromeRole.PANEL_BORDER,
             titleColor: ColorRole = ChromeRole.ACCENT,
-        ): ContentWidget = object : ContentWidget {
-            public override fun layout(availableWidth: Int): ContentLayout {
-                require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
-                val outer = BORDER + padding
-                val innerWidth = (availableWidth.toLong() - outer.left - outer.right).coerceAtLeast(0).toInt()
-                val child = content.layout(innerWidth)
-                val width = checkedAdd(checkedAdd(child.width, outer.left, BLOCK_SIZE), outer.right, BLOCK_SIZE)
-                val height = checkedAdd(checkedAdd(child.height, outer.top, BLOCK_SIZE), outer.bottom, BLOCK_SIZE)
-                val block = Block(title, badge, padding, borderColor, titleColor)
-                return ContentLayout.raw(width, height, object : Widget {
-                    override fun render(canvas: Canvas) {
-                        block.render(canvas)
-                        child.render(block.inner(canvas))
-                    }
-                })
-            }
-        }
+        ): Block = Block(title, badge, Borders.ALL, padding, borderColor, titleColor)
 
-        private const val BLOCK_SIZE: String = "block size"
-
-        /** One cell on each side, consumed by every [Block] box. */
-        public val BORDER: Padding = Padding.uniform(1)
+        /** One cell on each side, consumed by every bordered [Block] box. */
+        internal val BORDER: Padding = Padding.uniform(1)
 
         /**
          * Breathing room between the border and the content. `top = 1` is the blank spacer row
@@ -164,3 +155,28 @@ public class Block(
         internal val VIEWPORT_INSET: Padding = BORDER + PADDING.horizontalEdges()
     }
 }
+
+/**
+ * This content surrounded by [block]'s borders, title, and padding, in the manner of Ratatui's
+ * `.block()`. The result is measurable: its width is the content's plus the block's sides, its
+ * height the content's plus the block's top and bottom.
+ */
+public fun MeasurableWidget.block(block: Block): MeasurableWidget {
+    val content = this
+    return object : LayoutWidget {
+        override fun layout(availableWidth: Int): ContentLayout {
+            require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
+            val insets = block.insets
+            val innerWidth = (availableWidth.toLong() - insets.left - insets.right).coerceAtLeast(0).toInt()
+            val child = content.prepare(innerWidth)
+            val width = checkedAdd(checkedAdd(child.width, insets.left, BLOCK_SIZE), insets.right, BLOCK_SIZE)
+            val height = checkedAdd(checkedAdd(child.height, insets.top, BLOCK_SIZE), insets.bottom, BLOCK_SIZE)
+            return contentLayout(width, height) {
+                decorate(block)
+                place(insets.left, insets.top, child)
+            }
+        }
+    }
+}
+
+private const val BLOCK_SIZE: String = "block size"

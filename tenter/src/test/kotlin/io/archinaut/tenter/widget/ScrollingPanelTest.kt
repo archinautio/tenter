@@ -16,11 +16,11 @@ import org.junit.jupiter.api.Test
  */
 internal class ScrollingPanelTest {
 
-    private fun stubContent(lines: Int): ContentWidget = contentWidget { cursor ->
+    private fun stubContent(lines: Int): MeasurableWidget = MeasurableWidget { cursor ->
         repeat(lines) { row -> cursor.writeLine("line$row") }
     }
 
-    private fun panel(content: ContentWidget, scrollOffset: Int? = 0, state: ViewportState = ViewportState(
+    private fun panel(content: MeasurableWidget, scrollOffset: Int? = 0, state: ViewportState = ViewportState(
         scrollOffset?.let { ScrollOffset(y = it) } ?: ScrollOffset.ZERO,
     )): Widget = ScrollingPanel(title = "T", badge = "0", content = content).bind(state)
 

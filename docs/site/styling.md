@@ -5,8 +5,8 @@
 `SelectableRow` is a content widget that combines a label, optional check state, and
 selection highlighting. A selected row requests visibility, so an enclosing viewport
 follows it. This excerpt from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
-is inside a `contentWidget` loop and draws each row with the text cursor `cursor`; `index`, `label`, and
-`state` describe the row currently being drawn.
+is inside a measurable widget's loop and draws each row with its text cursor
+`column`; `index`, `label`, and `state` describe the row currently being drawn.
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt:rows"

@@ -5,14 +5,14 @@ package io.archinaut.tenter.widget.panel
 
 import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.widget.ContentWidget
+import io.archinaut.tenter.widget.MeasurableWidget
 import io.archinaut.tenter.widget.ViewportState
 import io.archinaut.tenter.widget.ScrollingPanel
 
 /**
  * One stateful panel declaration. A panel owns its current state, restore state, attachment, and
  * viewport state; [PanelSet] is the only public module that may mutate those values. Each state
- * builder returns a [Presentation], keeping the prepared content and the width that belongs to it
+ * builder returns a [Presentation], keeping the content and the width that belongs to it
  * together for one frame.
  *
  * Visibility is still the host application's decision. A declared builder must always return a
@@ -28,7 +28,7 @@ public class Panel<K : PanelId, I>(
 ) {
     /** Prepared content and its sizing preference for one rendered state. */
     public class Presentation private constructor(
-        public val content: ContentWidget,
+        public val content: MeasurableWidget,
         private val preferredWidth: Int?,
     ) {
         internal fun requiredWidth(): Int = requireNotNull(preferredWidth) {
@@ -37,14 +37,14 @@ public class Panel<K : PanelId, I>(
 
         public companion object {
             /** Uses the space assigned to a main, proportional, or maximized panel. */
-            public fun allocated(content: ContentWidget): Presentation = Presentation(content, null)
+            public fun allocated(content: MeasurableWidget): Presentation = Presentation(content, null)
 
             /**
              * Preferred outer width for a side, minimized, or configured fixed-width panel.
              * Clipped to available space. Main, proportional, and maximized slots always use
              * their allocated width, allowing a declaration to be reused across layout modes.
              */
-            public fun fixedWidth(content: ContentWidget, width: Int): Presentation {
+            public fun fixedWidth(content: MeasurableWidget, width: Int): Presentation {
                 require(width > 0) { "Panel presentation width must be positive: $width" }
                 return Presentation(content, width)
             }

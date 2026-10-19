@@ -61,7 +61,7 @@ internal class SelectableRowTest {
 
     @Test
     fun `a selected row deep in a list is followed by the enclosing viewport`() {
-        val rows = contentWidget { cursor ->
+        val rows = MeasurableWidget { cursor ->
             repeat(50) { index ->
                 cursor.draw(SelectableRow(label = "row $index", checkState = CheckState.UNCHECKED, selected = index == 40))
             }

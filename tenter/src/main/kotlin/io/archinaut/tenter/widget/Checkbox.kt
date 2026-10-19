@@ -57,11 +57,11 @@ public class Checkbox(
     private val state: CheckState,
     private val color: ColorRole = intrinsicColor(state),
     private val glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
-) : ContentWidget {
+) : MeasurableWidget {
 
-    override fun layout(availableWidth: Int): ContentLayout = contentWidget { content ->
-        content.write(0, checkboxIcon(state, glyphs), Style(color))
-    }.layout(1)
+    override fun write(cursor: TextCursor) {
+        cursor.write(0, checkboxIcon(state, glyphs), Style(color))
+    }
 
     public companion object {
         /** Default per-state color when the surrounding row does not override it. */

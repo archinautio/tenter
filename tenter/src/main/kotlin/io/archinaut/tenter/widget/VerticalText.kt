@@ -15,13 +15,13 @@ import io.archinaut.tenter.text.textClusters
 public class VerticalText(
     private val text: String,
     private val style: Style = Style(ChromeRole.TEXT_PRIMARY),
-) : ContentWidget {
+) : MeasurableWidget {
 
-    override fun layout(availableWidth: Int): ContentLayout = contentWidget { cursor ->
+    override fun write(cursor: TextCursor) {
         for (cluster in textClusters(text)) {
             if (cluster.width == 0) continue
             cursor.write(cursor.width / 2, cluster.drawableText, style)
             cursor.newLine()
         }
-    }.layout(availableWidth)
+    }
 }

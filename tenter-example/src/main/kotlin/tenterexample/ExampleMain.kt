@@ -21,27 +21,29 @@ import io.archinaut.tenter.terminal.inputEvents
 import io.archinaut.tenter.terminal.resizeEvents
 import io.archinaut.tenter.terminal.withScreen
 import io.archinaut.tenter.widget.Block
-import io.archinaut.tenter.widget.Padded
 import io.archinaut.tenter.widget.Widget
-import io.archinaut.tenter.widget.contentWidget
+import io.archinaut.tenter.widget.MeasurableWidget
+import io.archinaut.tenter.widget.block
+import io.archinaut.tenter.widget.measure
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
 /**
  * Runs the separate-consumer smoke scenario without raw input or terminal lifecycle escapes.
- * It exercises long prepared content, composition, settled hit-testing, both layout factories,
+ * It exercises long measured content, composition, settled hit-testing, both layout factories,
  * widget glyphs, keymap dispatch, scrolling, reveal following, panel states, and animation.
  */
 public fun runHeadlessSmoke(): SmokeResult {
     // --8<-- [start:padding]
-    val framed = Block.prepared(Padded.prepared(Padding.uniform(1), contentWidget { cursor ->
+    val framed = MeasurableWidget { cursor ->
         cursor.writeLine("OK")
         cursor.markRevealAt(0)
-    })).layout(8)
+    }.block(Block.bordered(padding = Padding.uniform(1)))
+    val size = framed.measure(8)
     // --8<-- [end:padding]
-    val framedCanvas = Canvas.offscreen(framed.width, framed.height)
+    val framedCanvas = Canvas.offscreen(size.width, size.height)
     framed.render(framedCanvas)
-    check(framed.height == 5 && framedCanvas.get(2, 2).symbol == "O")
-    check(framedCanvas.revealRect()?.y == 2) { "prepared decorators lost the child's reveal" }
+    check(size.height == 5 && framedCanvas.get(2, 2).symbol == "O")
+    check(framedCanvas.revealRect()?.y == 2) { "the block lost the child's reveal" }
 
     val app = ExampleApp(ExampleLayoutMode.MAIN_AND_SIDES)
     val terminal = headlessTerminal(width = 80, height = 12)

@@ -11,13 +11,13 @@ import io.archinaut.tenter.screen.Buffer
 internal class ColumnsTest {
 
     /** A [width]x[height] block of [rows] rows, each filled with [char] repeated. */
-    private fun block(width: Int, height: Int, char: String): ContentWidget = fixedContent(width, height, object : Widget {
+    private fun block(width: Int, height: Int, char: String): MeasurableWidget = object : Widget {
         override fun render(canvas: Canvas) {
             for (row in 0 until height) canvas.setString(0, row, char.repeat(width))
         }
-    })
+    }.fixedSize(width, height)
 
-    private fun render(columns: Columns, width: Int, height: Int = 10): Buffer {
+    private fun render(columns: MeasurableWidget, width: Int, height: Int = 10): Buffer {
         val buffer = Buffer(width, height)
         columns.render(Canvas.of(buffer))
         return buffer
@@ -26,7 +26,7 @@ internal class ColumnsTest {
     @Test
     fun `places two children side by side, gutter-separated`() {
         val columns = Columns(
-            listOf(Columns.Child(5, block(5, 2, "A")), Columns.Child(4, block(4, 2, "B"))),
+            listOf(Column(5, block(5, 2, "A")), Column(4, block(4, 2, "B"))),
             gutter = 2,
         )
 
@@ -38,7 +38,7 @@ internal class ColumnsTest {
     @Test
     fun `wraps a child that would not fit to a new band`() {
         val columns = Columns(
-            listOf(Columns.Child(6, block(6, 2, "A")), Columns.Child(6, block(6, 3, "B"))),
+            listOf(Column(6, block(6, 2, "A")), Column(6, block(6, 3, "B"))),
             gutter = 2,
         )
 
@@ -55,9 +55,9 @@ internal class ColumnsTest {
     fun `bands stack below the tallest child in the previous band`() {
         val columns = Columns(
             listOf(
-                Columns.Child(4, block(4, 5, "A")),
-                Columns.Child(4, block(4, 2, "B")),
-                Columns.Child(20, block(20, 1, "C")),
+                Column(4, block(4, 5, "A")),
+                Column(4, block(4, 2, "B")),
+                Column(20, block(20, 1, "C")),
             ),
             gutter = 1,
         )
@@ -76,18 +76,18 @@ internal class ColumnsTest {
     fun `wrapped bands keep one blank row even with no column gutter`() {
         val layout = Columns(
             listOf(
-                Columns.Child(4, block(4, 2, "A")),
-                Columns.Child(4, block(4, 1, "B")),
+                Column(4, block(4, 2, "A")),
+                Column(4, block(4, 1, "B")),
             ),
             gutter = 0,
-        ).layout(availableWidth = 4)
+        ).prepare(availableWidth = 4)
 
         assertEquals(4, layout.height)
     }
 
     @Test
     fun `a child wider than the canvas is clipped, not widened`() {
-        val columns = Columns(listOf(Columns.Child(20, block(20, 1, "A"))))
+        val columns = Columns(listOf(Column(20, block(20, 1, "A"))))
 
         val buffer = render(columns, width = 8)
 
@@ -96,7 +96,7 @@ internal class ColumnsTest {
 
     @Test
     fun `a single child measures to its own content height`() {
-        val columns = Columns(listOf(Columns.Child(4, block(4, 3, "A"))))
+        val columns = Columns(listOf(Column(4, block(4, 3, "A"))))
 
         val buffer = render(columns, width = 10, height = 10)
 

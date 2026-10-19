@@ -8,12 +8,12 @@ import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
 
 /**
- * Scrolls prepared content, painting only the part inside the viewport. The caller owns the
+ * Scrolls a [MeasurableWidget], painting only the part inside the viewport. The caller owns the
  * [ViewportState] and passes it to every render; read the completed frame from
  * [ViewportState.settled].
  */
 public class Viewport(
-    private val content: ContentWidget,
+    private val content: MeasurableWidget,
 ) : StatefulWidget<ViewportState> {
 
     override fun render(canvas: Canvas, state: ViewportState) {
@@ -23,7 +23,7 @@ public class Viewport(
     private fun drawPrepared(canvas: Canvas, viewportState: ViewportState) {
         if (canvas.width <= 0 || canvas.height <= 0) return
 
-        val layout = content.layout(canvas.width)
+        val layout = content.prepare(canvas.width)
         val maxOffsetX = (layout.width - canvas.width).coerceAtLeast(0)
         val maxOffsetY = (layout.height - canvas.height).coerceAtLeast(0)
         var offset = ScrollOffset.ZERO

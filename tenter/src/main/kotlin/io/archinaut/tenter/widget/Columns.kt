@@ -3,32 +3,38 @@
 
 package io.archinaut.tenter.widget
 
-/**
- * Packs prepared children left-to-right, wrapping at [availableWidth]. Each [Child.width] is the
- * declared column width; band height comes from the children's logical layout heights. A child
- * wider than the available space retains that declared width and is clipped only when painted.
- * Wrap raw painting in [fixedContent] before inserting it into a column.
- * [gutter] separates columns within a band; wrapped bands are separated by one blank row.
- */
-public class Columns(
-    private val children: List<Child>,
-    private val gutter: Int = 2,
-) : ContentWidget {
-
+/** One column of [Columns]: [content] laid out at its declared [width] in cells. */
+public data class Column(
+    public val width: Int,
+    public val content: MeasurableWidget,
+) {
     init {
-        require(gutter >= 0) { "gutter must not be negative: $gutter" }
-        children.forEach { require(it.width >= 0) { "column width must not be negative: ${it.width}" } }
+        require(width >= 0) { "column width must not be negative: $width" }
     }
+}
 
-    public data class Child(
-        public val width: Int,
-        public val content: ContentWidget,
-    )
+/**
+ * Packs [children] left-to-right, wrapping to a new band when the next one does not fit the
+ * available width. Each [Column.width] is the declared column width; band height comes from the
+ * children's measured heights. A child wider than the available space retains that declared width
+ * and is clipped only when painted. Give a plain widget a size with [fixedSize] to place it in a
+ * column. [gutter] separates columns within a band; wrapped bands are separated by one blank row.
+ */
+@Suppress("FunctionName") // A factory named like the widget it builds, as Kotlin's List() is.
+public fun Columns(children: List<Column>, gutter: Int = 2): MeasurableWidget {
+    require(gutter >= 0) { "gutter must not be negative: $gutter" }
+    return ColumnsLayout(children.toList(), gutter)
+}
 
-    public override fun layout(availableWidth: Int): ContentLayout {
+private class ColumnsLayout(
+    private val children: List<Column>,
+    private val gutter: Int,
+) : LayoutWidget {
+
+    override fun layout(availableWidth: Int): ContentLayout {
         require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
         val prepared = children.map { child ->
-            child to child.content.layout(child.width)
+            child to child.content.prepare(child.width)
         }
 
         var x = 0

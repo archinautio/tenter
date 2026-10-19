@@ -16,15 +16,15 @@ internal class TextCursorTest {
     @Test
     fun `immediate and prepared child insertion retain the last nonempty visible reveal`() {
         val cases = listOf(
-            fixedContent(4, 1, EmptyWidget) to Rect(0, 0, 4, 1),
-            fixedContent(0, 0, EmptyWidget) to Rect(0, 0, 4, 1),
-            contentWidget { it.writeLine("child"); it.markRevealAt(0) } to Rect(0, 1, 4, 1),
-            fixedContent(4, 1, object : Widget {
+            EmptyWidget.fixedSize(4, 1) to Rect(0, 0, 4, 1),
+            EmptyWidget.fixedSize(0, 0) to Rect(0, 0, 4, 1),
+            MeasurableWidget { it.writeLine("child"); it.markRevealAt(0) } to Rect(0, 1, 4, 1),
+            object : Widget {
                 override fun render(canvas: Canvas) { canvas.markReveal(Rect(-2, 0, 3, 1)) }
-            }) to Rect(0, 1, 1, 1),
-            fixedContent(4, 1, object : Widget {
+            }.fixedSize(4, 1) to Rect(0, 1, 1, 1),
+            object : Widget {
                 override fun render(canvas: Canvas) { canvas.markReveal(Rect(8, 0, 1, 1)) }
-            }) to Rect(0, 0, 4, 1),
+            }.fixedSize(4, 1) to Rect(0, 0, 4, 1),
         )
         for ((child, expected) in cases) {
             val instructions: (TextCursor) -> Unit = { cursor ->
@@ -36,7 +36,7 @@ internal class TextCursorTest {
             val prepared = Canvas.offscreen(4, 3)
 
             instructions(TextCursor(immediate))
-            contentWidget(instructions).render(prepared)
+            MeasurableWidget { instructions(it) }.render(prepared)
 
             assertEquals(expected, immediate.revealRect())
             assertEquals(expected, prepared.revealRect())
@@ -50,7 +50,7 @@ internal class TextCursorTest {
         cursor.writeLine("parent")
         cursor.markRevealAt(0)
 
-        cursor.draw(contentWidget { it.writeLine("child"); it.markRevealAt(0) })
+        cursor.draw(MeasurableWidget { it.writeLine("child"); it.markRevealAt(0) })
 
         assertEquals(Rect(0, 0, 4, 1), canvas.revealRect())
     }

@@ -25,13 +25,13 @@ public class PipTrack(
     private val usedStyle: Style,
     private val emptyStyle: Style,
     private val spacing: Int = 1,
-) : ContentWidget {
+) : MeasurableWidget {
     init {
         require(perRow > 0) { "perRow must be positive, was $perRow" }
         require(spacing >= 0) { "spacing must not be negative, was $spacing" }
     }
 
-    override fun layout(availableWidth: Int): ContentLayout = contentWidget { content ->
+    override fun write(cursor: TextCursor) {
         val filledCount = used.coerceIn(0, capacity)
         val stride = maxOf(CellWidth.of(filled), CellWidth.of(empty)) + spacing
 
@@ -39,11 +39,11 @@ public class PipTrack(
             val row = i / perRow
             val column = (i % perRow) * stride
             if (i < filledCount) {
-                content.writeAt(column, row, filled, usedStyle)
+                cursor.writeAt(column, row, filled, usedStyle)
             } else {
-                content.writeAt(column, row, empty, emptyStyle)
+                cursor.writeAt(column, row, empty, emptyStyle)
             }
         }
-        repeat(((capacity - 1).coerceAtLeast(0) / perRow) + 1) { content.newLine() }
-    }.layout(availableWidth)
+        repeat(((capacity - 1).coerceAtLeast(0) / perRow) + 1) { cursor.newLine() }
+    }
 }

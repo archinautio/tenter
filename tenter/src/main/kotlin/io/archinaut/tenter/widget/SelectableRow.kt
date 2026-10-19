@@ -23,18 +23,18 @@ public class SelectableRow(
     private val textColor: ColorRole = ChromeRole.TEXT_PRIMARY,
     private val checkboxColor: ColorRole? = null,
     private val glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
-) : ContentWidget {
+) : MeasurableWidget {
 
-    override fun layout(availableWidth: Int): ContentLayout = contentWidget { content ->
-        if (selected) content.markReveal()
+    override fun write(cursor: TextCursor) {
+        if (selected) cursor.markReveal()
 
         val color = if (selected) ChromeRole.ACCENT else textColor
         val marker = if (selected) "▶" else " "
         val left = "$marker   $label"
         if (right == null) {
-            content.writeLine(left, Style(color))
+            cursor.writeLine(left, Style(color))
         } else {
-            content.draw(ValueRow(left, right, color, subLines))
+            cursor.draw(ValueRow(left, right, color, subLines))
         }
 
         val resolvedCheckboxColor = when {
@@ -42,8 +42,8 @@ public class SelectableRow(
             checkboxColor != null -> checkboxColor
             else -> Checkbox.intrinsicColor(checkState)
         }
-        content.writeAt(CHECKBOX_COLUMN, 0, checkboxIcon(checkState, glyphs), Style(resolvedCheckboxColor))
-    }.layout(availableWidth)
+        cursor.writeAt(CHECKBOX_COLUMN, 0, checkboxIcon(checkState, glyphs), Style(resolvedCheckboxColor))
+    }
 
     private companion object {
         const val CHECKBOX_COLUMN = 2

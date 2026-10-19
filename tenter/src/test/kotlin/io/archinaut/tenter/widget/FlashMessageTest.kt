@@ -15,7 +15,7 @@ internal class FlashMessageTest {
 
         val buffer = render(message, 10, 2)
 
-        assertEquals(1, message.layout(10).height)
+        assertEquals(1, message.measure(10).height)
         assertEquals("saved all…", buffer.line(0))
         assertEquals(ChromeRole.INFO, buffer.get(0, 0).style.fg)
     }

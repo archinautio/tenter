@@ -22,7 +22,7 @@ public fun <S> render(widget: StatefulWidget<S>, width: Int, height: Int, state:
 
 /** Renders [content] inside the real [ScrollingPanel] chrome — the pixel-parity regression guard. */
 public fun renderInPanel(
-    content: ContentWidget,
+    content: MeasurableWidget,
     badge: Char = '0',
     title: String = "T",
     width: Int = 28,

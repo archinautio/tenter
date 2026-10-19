@@ -54,7 +54,7 @@ internal class GaugeTest {
         val gauge = Gauge(value = 0, maxValue = 30, barWidth = 20)
         val cursor = TextCursor(Canvas.of(Buffer(28, 5)))
 
-        assertEquals(2, gauge.layout(28).height)
+        assertEquals(2, gauge.measure(28).height)
         assertEquals(2, cursor.draw(gauge))
         assertEquals(2, cursor.row)
     }

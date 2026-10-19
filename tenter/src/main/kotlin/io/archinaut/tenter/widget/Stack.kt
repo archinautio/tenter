@@ -4,23 +4,24 @@
 package io.archinaut.tenter.widget
 
 /**
- * Stacks prepared [ContentWidget] children without painting them to discover their sizes. The
- * intrinsic layout includes each child's logical height and gutters between children only.
- * Wrap raw painting in [fixedContent] before inserting it into a stack.
+ * Stacks [children] top to bottom, each at its measured height, with [gutter] blank rows between
+ * them. Give a plain widget a size with [fixedSize] to stack it.
  */
-public class Stack(
-    private val children: List<ContentWidget>,
-    private val gutter: Int = 1,
-) : ContentWidget {
+@Suppress("FunctionName") // A factory named like the widget it builds, as Kotlin's List() is.
+public fun Stack(children: List<MeasurableWidget>, gutter: Int = 1): MeasurableWidget {
+    require(gutter >= 0) { "gutter must not be negative: $gutter" }
+    return StackLayout(children.toList(), gutter)
+}
 
-    init {
-        require(gutter >= 0) { "gutter must not be negative: $gutter" }
-    }
+private class StackLayout(
+    private val children: List<MeasurableWidget>,
+    private val gutter: Int,
+) : LayoutWidget {
 
-    public override fun layout(availableWidth: Int): ContentLayout {
+    override fun layout(availableWidth: Int): ContentLayout {
         require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
         val prepared = children.map { child ->
-            child.layout(availableWidth)
+            child.prepare(availableWidth)
         }
         val width = prepared.maxOfOrNull { it.width } ?: 0
         val height = prepared.foldIndexed(0) { index, total, child ->

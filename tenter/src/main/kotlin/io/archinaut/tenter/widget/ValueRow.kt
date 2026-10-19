@@ -12,10 +12,10 @@ public class ValueRow(
     private val right: String,
     private val color: ColorRole,
     private val subLines: List<String> = emptyList(),
-) : ContentWidget {
+) : MeasurableWidget {
 
-    override fun layout(availableWidth: Int): ContentLayout = contentWidget { content ->
-        content.writeRow(left, right, Style(color))
-        subLines.forEach { content.writeLine("    $it", Style(color)) }
-    }.layout(availableWidth)
+    override fun write(cursor: TextCursor) {
+        cursor.writeRow(left, right, Style(color))
+        subLines.forEach { cursor.writeLine("    $it", Style(color)) }
+    }
 }

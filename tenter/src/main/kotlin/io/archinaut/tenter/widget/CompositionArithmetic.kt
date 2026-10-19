@@ -5,7 +5,7 @@ package io.archinaut.tenter.widget
 
 /**
  * Adds two composition dimensions, failing with a named error instead of wrapping into a negative
- * size. Every prepared composition ([Stack], [Columns], [Padded.prepared], [Block.prepared])
+ * size. Every composite ([Stack], [Columns], [block])
  * derives its dimensions this way, so an overflow reports which composition produced it rather
  * than surfacing later as a `ContentLayout` size assertion.
  */

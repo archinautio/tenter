@@ -11,13 +11,13 @@ import io.archinaut.tenter.screen.Buffer
 internal class StackTest {
 
     /** A [width]x[height] block of rows, each filled with [char] repeated. */
-    private fun block(width: Int, height: Int, char: String): ContentWidget = fixedContent(width, height, object : Widget {
+    private fun block(width: Int, height: Int, char: String): MeasurableWidget = object : Widget {
         override fun render(canvas: Canvas) {
             for (row in 0 until height) canvas.setString(0, row, char.repeat(width))
         }
-    })
+    }.fixedSize(width, height)
 
-    private fun render(stack: Stack, width: Int, height: Int = 20): Buffer {
+    private fun render(stack: MeasurableWidget, width: Int, height: Int = 20): Buffer {
         val buffer = Buffer(width, height)
         stack.render(Canvas.of(buffer))
         return buffer

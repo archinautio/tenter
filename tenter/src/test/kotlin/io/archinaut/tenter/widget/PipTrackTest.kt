@@ -28,7 +28,7 @@ internal class PipTrackTest {
         spacing = spacing,
     )
 
-    private fun paint(content: ContentWidget): Buffer = render(content, 40, 10)
+    private fun paint(content: MeasurableWidget): Buffer = render(content, 40, 10)
 
     @Test
     fun `draws used pips filled and the remainder empty`() {
@@ -63,9 +63,9 @@ internal class PipTrackTest {
 
     @Test
     fun `height is the rows its capacity occupies, at least one`() {
-        assertEquals(3, track(used = 0, capacity = 7, perRow = 3).layout(40).height)
-        assertEquals(1, track(used = 0, capacity = 3, perRow = 3).layout(40).height)
-        assertEquals(1, track(used = 0, capacity = 0, perRow = 3).layout(40).height)
+        assertEquals(3, track(used = 0, capacity = 7, perRow = 3).measure(40).height)
+        assertEquals(1, track(used = 0, capacity = 3, perRow = 3).measure(40).height)
+        assertEquals(1, track(used = 0, capacity = 0, perRow = 3).measure(40).height)
     }
 
     @Test
@@ -83,7 +83,7 @@ internal class PipTrackTest {
 
     @Test
     fun `offsets pips with padding`() {
-        val buffer = paint(Padded.prepared(Padding(left = 5), track(used = 1, capacity = 1)))
+        val buffer = paint(track(used = 1, capacity = 1).block(Block(padding = Padding(left = 5))))
 
         assertEquals("     F", buffer.line(0))
     }
@@ -93,8 +93,8 @@ internal class PipTrackTest {
         val buffer = paint(
             Columns(
                 children = listOf(
-                    Columns.Child(1, track(used = 1, capacity = 1)),
-                    Columns.Child(1, track(used = 1, capacity = 1)),
+                    Column(1, track(used = 1, capacity = 1)),
+                    Column(1, track(used = 1, capacity = 1)),
                 ),
                 gutter = 3,
             ),

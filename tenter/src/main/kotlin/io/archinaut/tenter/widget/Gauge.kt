@@ -18,13 +18,13 @@ public class Gauge(
     private val barWidth: Int,
     private val suffix: String = maxValue.toString(),
     private val colorFor: (value: Int) -> ColorRole = { value -> defaultColor(value, maxValue) },
-) : ContentWidget {
+) : MeasurableWidget {
     init {
         require(barWidth >= 0) { "barWidth must not be negative, was $barWidth" }
         require(maxValue >= 0) { "maxValue must not be negative, was $maxValue" }
     }
 
-    override fun layout(availableWidth: Int): ContentLayout = contentWidget { content ->
+    override fun write(cursor: TextCursor) {
         // maxValue <= 0 guard prevents division by zero. When maxValue == 0 the bar is all empty.
         // The bar is proportionally scaled: a fixed barWidth-cell bar spans the whole 0–maxValue
         // range (each block ≈ maxValue/barWidth units). The max sits inline after "]".
@@ -33,15 +33,15 @@ public class Gauge(
         }
         val bar = "█".repeat(filled) + "░".repeat(barWidth - filled)
         val style = Style(colorFor(value))
-        content.write(0, "[$bar]$suffix", style)
-        content.newLine()
+        cursor.write(0, "[$bar]$suffix", style)
+        cursor.newLine()
         val valueStr = value.toString()
         // First bar cell is at column 1 (the "[" prefix). Anchor on the last filled cell,
         // or the first cell when empty, then right-align the number to it.
         val anchorCol = filled.coerceAtLeast(1)
-        content.write(anchorCol - CellWidth.of(valueStr) + 1, valueStr, style)
-        content.newLine()
-    }.layout(availableWidth)
+        cursor.write(anchorCol - CellWidth.of(valueStr) + 1, valueStr, style)
+        cursor.newLine()
+    }
 
     private companion object {
         fun defaultColor(value: Int, maxValue: Int): ChromeRole = when {

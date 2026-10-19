@@ -20,12 +20,12 @@ internal class ContentLayoutTest {
     fun `raw layouts retain the widget while captured frame data stays repeatable`() {
         var label = "before"
         val captured = label
-        val snapshot = fixedContent(8, 1, object : Widget {
+        val snapshot = object : Widget {
             public override fun render(canvas: Canvas) { canvas.setString(0, 0, captured) }
-        }).layout(8)
-        val live = fixedContent(8, 1, object : Widget {
+        }.fixedSize(8, 1).prepare(8)
+        val live = object : Widget {
             public override fun render(canvas: Canvas) { canvas.setString(0, 0, label) }
-        }).layout(8)
+        }.fixedSize(8, 1).prepare(8)
         label = "after"
 
         repeat(2) {
@@ -40,30 +40,30 @@ internal class ContentLayoutTest {
 
     @Test
     fun `flowing content counts trailing blank rows and blank-only content`() {
-        val content = contentWidget { cursor ->
+        val content = MeasurableWidget { cursor ->
             cursor.writeLine("line")
             cursor.newLine()
             cursor.newLine()
         }
 
-        val layout = content.layout(12)
+        val layout = content.prepare(12)
 
         assertEquals(12, layout.width)
         assertEquals(3, layout.height)
-        assertEquals(1, contentWidget { it.newLine() }.layout(12).height)
+        assertEquals(1, MeasurableWidget { it.newLine() }.measure(12).height)
         assertEquals(
             6,
-            contentWidget { cursor -> cursor.writeAt(column = 0, atRow = 5, text = "overlay") }.layout(12).height,
+            MeasurableWidget { cursor -> cursor.writeAt(column = 0, atRow = 5, text = "overlay") }.measure(12).height,
         )
     }
 
     @Test
     fun `flowing content prepares a thousand rows without a height ceiling`() {
-        val content = contentWidget { cursor ->
+        val content = MeasurableWidget { cursor ->
             repeat(1_000) { row -> cursor.writeLine("row$row") }
         }
 
-        val layout = content.layout(20)
+        val layout = content.prepare(20)
         val buffer = Buffer(layout.width, layout.height)
         layout.render(Canvas.of(buffer))
 
@@ -73,21 +73,21 @@ internal class ContentLayoutTest {
 
     @Test
     fun `zero available width remains valid and fixed content keeps its declared width`() {
-        val flowing = contentWidget { cursor -> cursor.writeLine("ignored") }
-        val fixed = fixedContent(width = 20, height = 4, widget = EmptyWidget)
+        val flowing = MeasurableWidget { cursor -> cursor.writeLine("ignored") }
+        val fixed = EmptyWidget.fixedSize(20, 4)
 
-        assertEquals(0, flowing.layout(0).width)
-        assertEquals(1, flowing.layout(0).height)
-        assertEquals(20, fixed.layout(0).width)
-        assertEquals(4, fixed.layout(0).height)
+        assertEquals(0, flowing.measure(0).width)
+        assertEquals(1, flowing.measure(0).height)
+        assertEquals(20, fixed.measure(0).width)
+        assertEquals(4, fixed.measure(0).height)
     }
 
     @Test
     fun `prepared text paints immutable recorded values`() {
         var label = "before"
-        val content = contentWidget { cursor -> cursor.writeLine(label) }
+        val content = MeasurableWidget { cursor -> cursor.writeLine(label) }
 
-        val layout = content.layout(20)
+        val layout = content.prepare(20)
         label = "after"
         val buffer = Buffer(20, 1)
         layout.render(Canvas.of(buffer))
@@ -119,9 +119,9 @@ internal class ContentLayoutTest {
                 canvas.setString(0, 0, "raw")
             }
         }
-        val content = fixedContent(width = 8, height = 3, widget = raw)
+        val content = raw.fixedSize(8, 3)
 
-        val layout = content.layout(2)
+        val layout = content.prepare(2)
 
         assertEquals(0, drawCount)
         assertEquals(8, layout.width)
@@ -135,15 +135,13 @@ internal class ContentLayoutTest {
     @Test
     fun `prepared child is painted once per layout paint and does not append during painting`() {
         var prepareCount = 0
-        val child = object : ContentWidget {
-            override fun layout(availableWidth: Int): ContentLayout {
-                prepareCount++
-                return contentLayout(availableWidth, 1) { reveal(Rect(0, 0, 1, 1)) }
-            }
+        val child = MeasurableWidget { cursor ->
+            prepareCount++
+            cursor.markReveal()
         }
-        val parent = contentWidget { cursor -> cursor.draw(child) }
+        val parent = MeasurableWidget { cursor -> cursor.draw(child) }
 
-        val layout = parent.layout(10)
+        val layout = parent.prepare(10)
         assertEquals(1, prepareCount)
 
         layout.render(Canvas.offscreen(10, 1))
@@ -156,7 +154,7 @@ internal class ContentLayoutTest {
     fun `text cursor draw content uses the prepared logical height`() {
         val canvas = Canvas.offscreen(10, 5)
         val cursor = TextCursor(canvas)
-        val child = contentWidget { content ->
+        val child = MeasurableWidget { content ->
             content.writeLine("A")
             content.newLine()
         }
@@ -172,7 +170,7 @@ internal class ContentLayoutTest {
     fun `custom layout places child and clips translated reveal to both rectangles`() {
         val child = contentLayout(5, 4) {
             reveal(Rect(x = -2, y = 1, width = 6, height = 3))
-            place(x = 0, y = 0, content = contentWidget { it.writeLine("child") }.layout(5))
+            place(x = 0, y = 0, content = MeasurableWidget { it.writeLine("child") }.prepare(5))
         }
         val parent = contentLayout(4, 3) {
             place(x = -1, y = 1, content = child)
@@ -187,73 +185,38 @@ internal class ContentLayoutTest {
     }
 
     @Test
-    fun `last and first preferences resolve prepared and raw requests in declaration order`() {
+    fun `the last reveal request wins across prepared and raw children in declaration order`() {
         val prepared = contentLayout(4, 2) { reveal(Rect(0, 0, 4, 1)) }
-        val raw = fixedContent(
-            width = 4,
-            height = 2,
-            widget = object : Widget {
-                override fun render(canvas: Canvas) {
-                    canvas.markReveal(Rect(0, 1, 4, 1))
-                }
-            },
-        ).layout(4)
+        val raw = object : Widget {
+            override fun render(canvas: Canvas) {
+                canvas.markReveal(Rect(0, 1, 4, 1))
+            }
+        }.fixedSize(4, 2).prepare(4)
 
-        val last = contentLayout(4, 2, RevealPreference.LAST) {
+        val rawLast = contentLayout(4, 2) {
             place(0, 0, prepared)
             place(0, 0, raw)
         }
-        val first = contentLayout(4, 2, RevealPreference.FIRST) {
-            place(0, 0, prepared)
-            place(0, 0, raw)
-        }
-
-        val lastCanvas = Canvas.offscreen(4, 2)
-        val firstCanvas = Canvas.offscreen(4, 2)
-        last.render(lastCanvas)
-        first.render(firstCanvas)
-
-        assertEquals(Rect(0, 1, 4, 1), lastCanvas.revealRect())
-        assertEquals(Rect(0, 0, 4, 1), firstCanvas.revealRect())
-
-        val reverseLast = contentLayout(4, 2, RevealPreference.LAST) {
+        val preparedLast = contentLayout(4, 2) {
             place(0, 0, raw)
             place(0, 0, prepared)
         }
-        val reverseFirst = contentLayout(4, 2, RevealPreference.FIRST) {
-            place(0, 0, raw)
-            place(0, 0, prepared)
-        }
-        val reverseLastCanvas = Canvas.offscreen(4, 2)
-        val reverseFirstCanvas = Canvas.offscreen(4, 2)
-        reverseLast.render(reverseLastCanvas)
-        reverseFirst.render(reverseFirstCanvas)
+        val rawLastCanvas = Canvas.offscreen(4, 2)
+        val preparedLastCanvas = Canvas.offscreen(4, 2)
+        rawLast.render(rawLastCanvas)
+        preparedLast.render(preparedLastCanvas)
 
-        assertEquals(Rect(0, 0, 4, 1), reverseLastCanvas.revealRect())
-        assertEquals(Rect(0, 1, 4, 1), reverseFirstCanvas.revealRect())
+        assertEquals(Rect(0, 1, 4, 1), rawLastCanvas.revealRect())
+        assertEquals(Rect(0, 0, 4, 1), preparedLastCanvas.revealRect())
     }
 
     @Test
-    fun `nested preference resolves inside the child before parent composition`() {
-        val child = contentLayout(4, 3, RevealPreference.FIRST) {
-            reveal(Rect(0, 0, 4, 1))
-            reveal(Rect(0, 2, 4, 1))
-        }
-        val parent = contentLayout(4, 3) { place(0, 0, child) }
-        val canvas = Canvas.offscreen(4, 3)
-
-        parent.render(canvas)
-
-        assertEquals(Rect(0, 0, 4, 1), canvas.revealRect())
-    }
-
-    @Test
-    fun `first preference falls back when the first child has no target`() {
-        val noTarget = contentLayout(4, 1) { }
+    fun `a later child without a request keeps the earlier child's request`() {
         val target = contentLayout(4, 1) { reveal(Rect(0, 0, 4, 1)) }
-        val parent = contentLayout(4, 1, RevealPreference.FIRST) {
-            place(0, 0, noTarget)
+        val noTarget = contentLayout(4, 1) { }
+        val parent = contentLayout(4, 1) {
             place(0, 0, target)
+            place(0, 0, noTarget)
         }
         val canvas = Canvas.offscreen(4, 1)
 
@@ -278,16 +241,12 @@ internal class ContentLayoutTest {
 
     @Test
     fun `fixed content preserves raw paint order and reveal`() {
-        val content = fixedContent(
-            width = 5,
-            height = 1,
-            widget = object : Widget {
+        val content = object : Widget {
                 override fun render(canvas: Canvas) {
                     canvas.set(0, 0, Cell("X", Style(fg = ChromeRole.SUCCESS)))
                     canvas.markReveal(Rect(0, 0, 1, 1))
                 }
-            },
-        )
+            }.fixedSize(5, 1)
         val canvas = Canvas.offscreen(5, 1)
 
         content.render(canvas)
@@ -300,8 +259,8 @@ internal class ContentLayoutTest {
     fun `a child's wide glyph is clipped at its own edge without touching its neighbour`() {
         val columns = Columns(
             children = listOf(
-                Columns.Child(3, contentWidget { it.write(0, "ab中") }),
-                Columns.Child(1, contentWidget { it.writeLine("z") }),
+                Column(3, MeasurableWidget { it.write(0, "ab中") }),
+                Column(1, MeasurableWidget { it.writeLine("z") }),
             ),
             gutter = 0,
         )
@@ -315,7 +274,7 @@ internal class ContentLayoutTest {
         val cursor = TextCursor(canvas)
 
         cursor.markReveal()
-        cursor.draw(contentWidget { it.writeLine("child") })
+        cursor.draw(MeasurableWidget { it.writeLine("child") })
 
         assertEquals(Rect(0, 0, 6, 1), canvas.revealRect())
         assertEquals("child", (0 until 5).joinToString("") { canvas.get(it, 0).symbol })
@@ -324,13 +283,13 @@ internal class ContentLayoutTest {
     @Test
     fun `a viewport invokes a raw widget once per frame and follows its reveal`() {
         var paints = 0
-        val raw = fixedContent(5, 20, object : Widget {
+        val raw = object : Widget {
             override fun render(canvas: Canvas) {
                 paints++
                 canvas.setString(0, 15, "here")
                 canvas.markReveal(Rect(0, 15, 5, 1))
             }
-        })
+        }.fixedSize(5, 20)
         val state = ViewportState()
 
         val buffer = render(Viewport(raw), 5, 4, state)

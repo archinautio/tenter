@@ -14,7 +14,7 @@ internal class ViewportTest {
     private val viewportWidth = 26
     private val viewportHeight = 8
 
-    private fun content(lines: Int, revealRow: Int? = null): ContentWidget = contentWidget {
+    private fun content(lines: Int, revealRow: Int? = null): MeasurableWidget = MeasurableWidget {
         repeat(lines) { row ->
             it.writeLine("line$row")
             if (row == revealRow) it.markRevealAt(row)
@@ -57,7 +57,7 @@ internal class ViewportTest {
     @Test
     fun `fixed content preserves horizontal and vertical dimensions`() {
         val state = ViewportState()
-        Viewport(fixedContent(50, 40, EmptyWidget)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        Viewport(EmptyWidget.fixedSize(50, 40)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
 
         assertEquals(24, state.frame().maxOffset.x)
         assertEquals(32, state.frame().maxOffset.y)
@@ -85,8 +85,8 @@ internal class ViewportTest {
     @Test
     fun `moved reveal target follows from the current offset`() {
         var revealRow = 19
-        val widget = object : ContentWidget {
-            override fun layout(availableWidth: Int): ContentLayout = content(40, revealRow).layout(availableWidth)
+        val widget = object : LayoutWidget {
+            override fun layout(availableWidth: Int): ContentLayout = content(40, revealRow).prepare(availableWidth)
         }
         val state = ViewportState()
         val viewport = Viewport(widget)
