@@ -57,8 +57,8 @@ internal class ExampleApp(
                 panels.cycleFocusedMode(1)
             }
             ExampleAction.QUIT -> running = false
-            is ScrollAction.Lines -> panels.scrollFocused(0, action.delta)
-            is ScrollAction.Pages -> panels.pageFocused(action.delta)
+            is ScrollAction.Lines -> panels.scroll(panels.focused, 0, action.delta)
+            is ScrollAction.Pages -> panels.page(panels.focused, action.delta)
             null -> Unit
         }
     }
@@ -105,22 +105,21 @@ internal class ExampleApp(
             id = ExamplePanelId.ROWS,
             title = "CATALOG",
             badge = "R",
-            normal = { input -> Panel.Presentation.allocated(ExampleListView(EXAMPLE_ROW_COUNT, input)) },
+            normal = { input -> ExampleListView(EXAMPLE_ROW_COUNT, input) },
         )
         val help = Panel<ExamplePanelId, ExampleState>(
             id = ExamplePanelId.HELP,
             title = "HELP",
             badge = "H",
-            normal = { input -> Panel.Presentation.fixedWidth(helpContent(input), width = HELP_WIDTH) },
-            minimized = { input -> Panel.Presentation.fixedWidth(helpContent(input), width = Panel.MINIMIZED_WIDTH) },
-            maximized = { input -> Panel.Presentation.allocated(helpContent(input)) },
+            width = HELP_WIDTH,
+            normal = { input -> helpContent(input) },
+            minimized = { input -> helpContent(input) },
+            maximized = { input -> helpContent(input) },
         )
         // --8<-- [end:panels]
         return when (mode) {
             ExampleLayoutMode.MAIN_AND_SIDES -> PanelSet.mainAndSides(rows, listOf(help))
-            ExampleLayoutMode.UNIFORM -> PanelSet.uniform(
-                listOf(rows, help), reservedColumns = 2, fixedWidthPanels = setOf(ExamplePanelId.HELP),
-            )
+            ExampleLayoutMode.UNIFORM -> PanelSet.uniform(listOf(rows, help), reservedColumns = 2)
         }
     }
 

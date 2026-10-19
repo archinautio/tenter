@@ -13,45 +13,31 @@ import io.archinaut.tenter.widget.Viewport
 import io.archinaut.tenter.widget.block
 
 /**
- * One stateful panel declaration. A panel owns its current state, restore state, attachment, and
- * viewport state; [PanelSet] is the only public module that may mutate those values. Each state
- * builder returns a [Presentation], keeping the content and the width that belongs to it
- * together for one frame.
+ * One stateful panel declaration. A panel owns its current mode, restore mode, attachment, and
+ * viewport state; [PanelSet] is the only public module that may mutate those values. Each mode's
+ * builder returns the panel's content for one frame; its width comes from this declaration.
  *
- * Visibility is still the host application's decision. A declared builder must always return a
- * presentation, while a host chooses which panels to include in a [Panels] frame.
+ * [width] is the panel's outer width in its normal mode, or null to share the space the layout
+ * allocates (the main panel of [PanelSet.mainAndSides], or a proportional column of
+ * [PanelSet.uniform]). A minimized panel is [minimizedWidth] wide; a maximized panel takes the
+ * whole area. Widths are clipped to the available space.
+ *
+ * Visibility is still the host application's decision: a host chooses which panels to include in
+ * a [Panels] frame.
  */
 public class Panel<K : PanelId, I>(
     internal val id: K,
     private val title: String,
     private val badge: String? = null,
-    private val normal: (I) -> Presentation,
-    private val minimized: ((I) -> Presentation)? = null,
-    private val maximized: ((I) -> Presentation)? = null,
+    internal val width: Int? = null,
+    private val minimizedWidth: Int = MINIMIZED_WIDTH,
+    private val normal: (I) -> MeasurableWidget,
+    private val minimized: ((I) -> MeasurableWidget)? = null,
+    private val maximized: ((I) -> MeasurableWidget)? = null,
 ) {
-    /** Prepared content and its sizing preference for one rendered state. */
-    public class Presentation private constructor(
-        public val content: MeasurableWidget,
-        private val preferredWidth: Int?,
-    ) {
-        internal fun requiredWidth(): Int = requireNotNull(preferredWidth) {
-            "A side, minimized, or configured fixed-width panel requires Presentation.fixedWidth"
-        }
-
-        public companion object {
-            /** Uses the space assigned to a main, proportional, or maximized panel. */
-            public fun allocated(content: MeasurableWidget): Presentation = Presentation(content, null)
-
-            /**
-             * Preferred outer width for a side, minimized, or configured fixed-width panel.
-             * Clipped to available space. Main, proportional, and maximized slots always use
-             * their allocated width, allowing a declaration to be reused across layout modes.
-             */
-            public fun fixedWidth(content: MeasurableWidget, width: Int): Presentation {
-                require(width > 0) { "Panel presentation width must be positive: $width" }
-                return Presentation(content, width)
-            }
-        }
+    init {
+        require(width == null || width > 0) { "Panel $id width must be positive: $width" }
+        require(minimizedWidth > 0) { "Panel $id minimized width must be positive: $minimizedWidth" }
     }
 
     private val viewportState: ViewportState = ViewportState()
@@ -89,11 +75,20 @@ public class Panel<K : PanelId, I>(
         viewportState.requestRecenter()
     }
 
-    internal fun presentation(inputs: I): Presentation = when (mode) {
-        PanelMode.MINIMIZED -> minimized ?: error("Panel $id is in MINIMIZED mode but declares no minimized presentation")
+    internal fun content(inputs: I): MeasurableWidget = when (mode) {
+        PanelMode.MINIMIZED -> minimized ?: error("Panel $id is in MINIMIZED mode but declares no minimized content")
         PanelMode.NORMAL -> normal
-        PanelMode.MAXIMIZED -> maximized ?: error("Panel $id is in MAXIMIZED mode but declares no maximized presentation")
+        PanelMode.MAXIMIZED -> maximized ?: error("Panel $id is in MAXIMIZED mode but declares no maximized content")
     }.invoke(inputs)
+
+    /** Whether this panel takes a fixed-width slot right now: it declares a [width], or is minimized. */
+    internal val isFixed: Boolean get() = width != null || mode == PanelMode.MINIMIZED
+
+    /** The outer width of this panel's fixed slot in its current mode. */
+    internal fun fixedWidth(): Int = when (mode) {
+        PanelMode.MINIMIZED -> minimizedWidth
+        else -> checkNotNull(width) { "Panel $id has no fixed width in $mode mode" }
+    }
 
     internal fun claimAttachment() {
         require(!attached) { "Panel $id is already attached to a PanelSet" }
@@ -105,17 +100,17 @@ public class Panel<K : PanelId, I>(
     }
 
     /**
-     * Renders the already-selected [presentation] into [canvas]. Selection happens in
-     * [PanelSet] so the application builder runs exactly once per rendered presentation.
+     * Renders the already-built [content] into [canvas]. Building happens in [PanelSet] so the
+     * application builder runs exactly once per rendered frame.
      */
     internal fun render(
         canvas: Canvas,
-        presentation: Presentation,
+        content: MeasurableWidget,
         focused: Boolean,
     ): ViewportState {
         val candidate = viewportState.fork()
         val role = if (focused) ChromeRole.PANEL_BORDER_FOCUSED else ChromeRole.PANEL_BORDER
-        panelViewport(presentation.content, title, badge, borderColor = role, titleColor = role).render(canvas, candidate)
+        panelViewport(content, title, badge, borderColor = role, titleColor = role).render(canvas, candidate)
         return candidate
     }
 

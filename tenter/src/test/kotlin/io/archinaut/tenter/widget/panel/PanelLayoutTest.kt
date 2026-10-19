@@ -23,15 +23,17 @@ internal class PanelLayoutTest {
     ): Panel<LayoutPanelId, Unit> = Panel(
         id = id,
         title = id.name,
-        normal = { Panel.Presentation.fixedWidth(MeasurableWidget { }, width) },
-        minimized = { Panel.Presentation.fixedWidth(MeasurableWidget { }, minimizedWidth) },
-        maximized = { Panel.Presentation.allocated(MeasurableWidget { }) },
+        width = width,
+        minimizedWidth = minimizedWidth,
+        normal = { MeasurableWidget { } },
+        minimized = { MeasurableWidget { } },
+        maximized = { MeasurableWidget { } },
     )
 
     private fun main() = Panel<LayoutPanelId, Unit>(
         id = LayoutPanelId.MAIN,
         title = "MAIN",
-        normal = { Panel.Presentation.allocated(MeasurableWidget { }) },
+        normal = { MeasurableWidget { } },
     )
 
     private fun widthOf(widths: Map<LayoutPanelId, Int>): (Panel<LayoutPanelId, Unit>) -> Int =

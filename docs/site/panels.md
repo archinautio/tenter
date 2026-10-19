@@ -33,14 +33,17 @@ creates a catalog and a help panel. `ExamplePanelId` identifies each panel;
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt:panels"
 ```
 
-Use `PanelSet.mainAndSides(rows, listOf(help))` for a main area with a side panel.
-Use `PanelSet.uniform(listOf(rows, help), fixedWidthPanels = setOf(ExamplePanelId.HELP))`
-for a uniform arrangement with a fixed-width help panel.
+Each mode's builder returns the panel's content; the width belongs to the panel. Give
+a panel a `width` for a fixed-width slot, or leave it null to share the space the layout
+allocates. A minimized panel is `minimizedWidth` wide (`Panel.MINIMIZED_WIDTH` by
+default), and a maximized one takes the whole area. Widths are outer widths, including
+borders and padding.
 
-Choose `Presentation.allocated(content)` when the layout assigns the panel's width.
-Use `Presentation.fixedWidth(content, width)` for side or minimized presentations;
-the positive width includes borders and padding. Create fresh panels for independent
-sets: a panel instance belongs to one set.
+Use `PanelSet.mainAndSides(rows, listOf(help))` for a main area with side panels: the
+main panel declares no width and every side declares one. Use
+`PanelSet.uniform(listOf(rows, help))` for proportional columns, where panels with a
+width form a trailing fixed group. Both check widths when the set is built. Create fresh
+panels for independent sets: a panel instance belongs to one set.
 
 ## Render and control panels
 
@@ -54,8 +57,10 @@ frame with the set as its state:
 
 `visible` contains the ids to display. Render into any `Rect`; split the frame with
 `Layout` to leave room for a header or status line. Focus a declared id with `panels.focus(id)`.
-Use `scrollFocused(0, 1)` to scroll a row, `pageFocused(1)` to scroll a page, and
-`cycleFocusedMode(1)` to cycle through the panel's available presentations.
+Use `scroll(panels.focused, 0, 1)` to scroll the focused panel a row and
+`page(panels.focused, 1)` to scroll it a page; pass another id, such as the panel under
+the mouse, to scroll that one. `cycleFocusedMode(1)` cycles the focused panel through its
+declared modes.
 Repaint after changing state or issuing a command. Use ids declared by the set;
 unknown ids throw `IllegalArgumentException`.
 
@@ -87,12 +92,8 @@ See [input and resizing](input.md) for collecting events and repainting.
 
 By default, visible proportional panels share the remaining width. Set
 `reservedColumns` when hidden proportional panels should keep their slots. Visible
-minimized proportional panels reclaim their reserved slot. Fixed-width panels form
-a trailing group. An empty visible set is valid, and small screens clip panel areas.
-
-A fixed-width presentation's preference is ignored in an allocated slot. An
-allocated presentation in a fixed-width slot is rejected; provide a fixed-width
-presentation for that state instead.
+minimized proportional panels reclaim their reserved slot. Panels that declare a width
+form a trailing group. An empty visible set is valid, and small screens clip panel areas.
 
 ## Recover from a failed render
 

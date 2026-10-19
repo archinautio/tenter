@@ -10,7 +10,7 @@ import io.archinaut.tenter.text.textClusters
 /**
  * [text], one grapheme per row, centered horizontally in whatever width it is given — content
  * only, no border. Suits a minimized panel's stub, which [io.archinaut.tenter.widget.panel.Panels]
- * wraps in its own chrome like every other presentation.
+ * wraps in its own chrome like every other panel content.
  */
 public class VerticalText(
     private val text: String,

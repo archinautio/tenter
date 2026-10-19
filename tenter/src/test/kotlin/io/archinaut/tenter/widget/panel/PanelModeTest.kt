@@ -17,9 +17,10 @@ internal class PanelModeTest {
     ): Panel<TestPanelId, Unit> = Panel(
         id = TestPanelId.A,
         title = "T",
-        normal = { Panel.Presentation.fixedWidth(MeasurableWidget { }, 20) },
-        minimized = if (minimized) ({ Panel.Presentation.fixedWidth(MeasurableWidget { }, Panel.MINIMIZED_WIDTH) }) else null,
-        maximized = if (maximized) ({ Panel.Presentation.allocated(MeasurableWidget { }) }) else null,
+        width = 20,
+        normal = { MeasurableWidget { } },
+        minimized = if (minimized) ({ MeasurableWidget { } }) else null,
+        maximized = if (maximized) ({ MeasurableWidget { } }) else null,
     )
 
     @Test
@@ -54,7 +55,8 @@ internal class PanelModeTest {
         val b = Panel<TestPanelId, Unit>(
             id = TestPanelId.B,
             title = "B",
-            normal = { Panel.Presentation.fixedWidth(MeasurableWidget { }, 20) },
+            width = 20,
+            normal = { MeasurableWidget { } },
         )
         val set = PanelSet.uniform(listOf(a, b))
         set.cycleFocusedMode(-1)
@@ -65,10 +67,13 @@ internal class PanelModeTest {
     }
 
     @Test
-    fun `fixed presentation rejects nonpositive widths`() {
+    fun `a panel rejects nonpositive widths`() {
         for (width in listOf(-1, 0)) {
             org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
-                Panel.Presentation.fixedWidth(MeasurableWidget { }, width)
+                Panel<TestPanelId, Unit>(TestPanelId.A, "T", width = width, normal = { MeasurableWidget { } })
+            }
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
+                Panel<TestPanelId, Unit>(TestPanelId.A, "T", minimizedWidth = width, normal = { MeasurableWidget { } })
             }
         }
     }

@@ -61,7 +61,7 @@ internal class ExampleSmokeTest {
         val shared = Panel<ExamplePanelId, ExampleState>(
             id = ExamplePanelId.ROWS,
             title = "CATALOG",
-            normal = { input -> Panel.Presentation.allocated(ExampleListView(1, input)) },
+            normal = { input -> ExampleListView(1, input) },
         )
         PanelSet.uniform(listOf(shared))
 

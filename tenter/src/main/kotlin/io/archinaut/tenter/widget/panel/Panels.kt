@@ -8,7 +8,7 @@ import io.archinaut.tenter.widget.StatefulWidget
 
 /**
  * Draws the [visible] panels of a [PanelSet] into the whole canvas, building each panel's
- * presentation from [inputs], in the manner of a Ratatui `StatefulWidget` over its state.
+ * content from [inputs], in the manner of a Ratatui `StatefulWidget` over its state.
  * Read the completed frame's geometry from [PanelSet.layout] afterwards.
  *
  * Managed offsets and hit geometry publish together only after every slot paints successfully.

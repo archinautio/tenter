@@ -35,7 +35,7 @@ public class PanelLayout<K : PanelId> private constructor(
     )
 
     /** The panel whose painted outer rectangle contains ([x], [y]), or null. */
-    public fun panelAt(x: Int, y: Int): Slot<K>? = buildList {
+    internal fun panelAt(x: Int, y: Int): Slot<K>? = buildList {
         main?.let(::add)
         addAll(sides)
     }.firstOrNull { it.outer.contains(x, y) }

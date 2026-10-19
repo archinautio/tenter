@@ -924,21 +924,11 @@ public abstract interface class io/archinaut/tenter/widget/Widget {
 public final class io/archinaut/tenter/widget/panel/Panel {
 	public static final field Companion Lio/archinaut/tenter/widget/panel/Panel$Companion;
 	public static final field MINIMIZED_WIDTH I
-	public fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class io/archinaut/tenter/widget/panel/Panel$Companion {
-}
-
-public final class io/archinaut/tenter/widget/panel/Panel$Presentation {
-	public static final field Companion Lio/archinaut/tenter/widget/panel/Panel$Presentation$Companion;
-	public final fun getContent ()Lio/archinaut/tenter/widget/MeasurableWidget;
-}
-
-public final class io/archinaut/tenter/widget/panel/Panel$Presentation$Companion {
-	public final fun allocated (Lio/archinaut/tenter/widget/MeasurableWidget;)Lio/archinaut/tenter/widget/panel/Panel$Presentation;
-	public final fun fixedWidth (Lio/archinaut/tenter/widget/MeasurableWidget;I)Lio/archinaut/tenter/widget/panel/Panel$Presentation;
 }
 
 public final class io/archinaut/tenter/widget/panel/PanelHit {
@@ -962,7 +952,6 @@ public final class io/archinaut/tenter/widget/panel/PanelLayout {
 	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
 	public final fun getMain ()Lio/archinaut/tenter/widget/panel/PanelLayout$Slot;
 	public final fun getSides ()Ljava/util/List;
-	public final fun panelAt (II)Lio/archinaut/tenter/widget/panel/PanelLayout$Slot;
 }
 
 public final class io/archinaut/tenter/widget/panel/PanelLayout$Companion {
@@ -998,22 +987,19 @@ public final class io/archinaut/tenter/widget/panel/PanelSet {
 	public static final field Companion Lio/archinaut/tenter/widget/panel/PanelSet$Companion;
 	public final fun cycleFocusedMode (I)V
 	public final fun focus (Lio/archinaut/tenter/widget/panel/PanelId;)V
-	public final fun focusOrCycle (Lio/archinaut/tenter/widget/panel/PanelId;)V
 	public final fun getFocused ()Lio/archinaut/tenter/widget/panel/PanelId;
 	public final fun getLayout ()Lio/archinaut/tenter/widget/panel/PanelLayout;
 	public final fun hitTest (II)Lio/archinaut/tenter/widget/panel/PanelHit;
 	public final fun modeOf (Lio/archinaut/tenter/widget/panel/PanelId;)Lio/archinaut/tenter/widget/panel/PanelMode;
-	public final fun pageFocused (I)V
-	public final fun panelAt (II)Lio/archinaut/tenter/widget/panel/PanelId;
+	public final fun page (Lio/archinaut/tenter/widget/panel/PanelId;I)V
 	public final fun requestRecenter (Lio/archinaut/tenter/widget/panel/PanelId;)V
 	public final fun scroll (Lio/archinaut/tenter/widget/panel/PanelId;II)V
-	public final fun scrollFocused (II)V
 }
 
 public final class io/archinaut/tenter/widget/panel/PanelSet$Companion {
 	public final fun mainAndSides (Lio/archinaut/tenter/widget/panel/Panel;Ljava/util/List;)Lio/archinaut/tenter/widget/panel/PanelSet;
-	public final fun uniform (Ljava/util/List;Ljava/lang/Integer;Ljava/util/Set;)Lio/archinaut/tenter/widget/panel/PanelSet;
-	public static synthetic fun uniform$default (Lio/archinaut/tenter/widget/panel/PanelSet$Companion;Ljava/util/List;Ljava/lang/Integer;Ljava/util/Set;ILjava/lang/Object;)Lio/archinaut/tenter/widget/panel/PanelSet;
+	public final fun uniform (Ljava/util/List;Ljava/lang/Integer;)Lio/archinaut/tenter/widget/panel/PanelSet;
+	public static synthetic fun uniform$default (Lio/archinaut/tenter/widget/panel/PanelSet$Companion;Ljava/util/List;Ljava/lang/Integer;ILjava/lang/Object;)Lio/archinaut/tenter/widget/panel/PanelSet;
 }
 
 public final class io/archinaut/tenter/widget/panel/Panels : io/archinaut/tenter/widget/StatefulWidget {
