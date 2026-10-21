@@ -4,8 +4,8 @@
 package io.archinaut.tenter.widget
 
 /**
- * Which sides of a [Block] draw a border, in the manner of Ratatui's `Borders`. Combine sides with
- * `+`, e.g. `Borders.TOP + Borders.BOTTOM`.
+ * Which sides of a [Block] draw a border. Combine sides with `+`, e.g.
+ * `Borders.TOP + Borders.BOTTOM`.
  */
 public class Borders private constructor(private val sides: Int) {
 

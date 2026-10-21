@@ -14,7 +14,7 @@ import io.archinaut.tenter.text.TextTruncation
  * the widget's top; the widget's height is the furthest row written. Lines are ellipsized to the
  * width, so a caller never computes where text must stop.
  */
-public class TextCursor internal constructor(
+public class RowWriter internal constructor(
     private val sink: RecordingTextSink,
 ) {
 
@@ -30,6 +30,8 @@ public class TextCursor internal constructor(
     /**
      * Writes [content] in its own area starting at the current row, clipped to its measured size,
      * and advances past it. This is how a measurable widget places a child; returns the rows used.
+     * A child measured wider than [width] widens this widget too, as it would a [Stack], so an
+     * enclosing [Viewport] can scroll to it.
      */
     public fun draw(content: MeasurableWidget): Int {
         val layout = content.prepare(width)

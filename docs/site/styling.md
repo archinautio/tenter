@@ -5,7 +5,7 @@
 `SelectableRow` is a content widget that combines a label, optional check state, and
 selection highlighting. A selected row requests visibility, so an enclosing viewport
 follows it. This excerpt from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
-is inside a measurable widget's loop and draws each row with its text cursor
+is inside a measurable widget's loop and draws each row with its row writer
 `column`; `index`, `label`, and `state` describe the row currently being drawn.
 
 ```kotlin
@@ -30,8 +30,19 @@ length when allocating widths.
 
 Start with `DefaultRolePalette` in `backend.withScreen(DefaultRolePalette)`.
 Use `Style(ChromeRole.ACCENT)` when writing highlighted text, for example as
-the second argument to `cursor.writeLine`. The default palette supplies the toolkit's
+the second argument to `writer.writeLine`. The default palette supplies the toolkit's
 `ChromeRole` colors using the terminal's ANSI-16 palette.
+
+A style sets only the channels you give it. Writing `Style(fg = ChromeRole.DANGER)` over
+an already painted cell changes its glyph and foreground and keeps its background, so a
+marker drawn over a colored area keeps the color under it. Set a channel explicitly to
+replace it, including back to the default: `Style(bg = ChromeRole.DEFAULT)` or
+`Style(strikethrough = false)`. A channel no write sets renders as `ChromeRole.DEFAULT`.
+
+To draw a popup, such as a dialog or a banner, over content without it showing through, render
+the `Clear` widget into the popup's area first: it resets every cell there to a blank that sets
+no channel. Then render the popup into the same area:
+`frame.renderWidget(Clear, area)` followed by `frame.renderWidget(popup, area)`.
 
 For custom colors, construct `MapRolePalette` with a name, an `AnsiLevel`, a
 `defaultBackground`, and a map from roles to `PaletteColor` values. Include every

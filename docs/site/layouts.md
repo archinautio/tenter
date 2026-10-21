@@ -26,21 +26,23 @@ is shortened with `…` to fit; with it, lines wrap at word boundaries.
 ## Write a custom widget
 
 For content that is not plain text, implement `MeasurableWidget` and write it row by
-row with a `TextCursor`; its height follows from what you wrote:
+row with a `RowWriter`; its height follows from what you wrote:
 
 ```kotlin
 class Summary(private val items: List<String>) : MeasurableWidget {
-    override fun write(cursor: TextCursor) {
-        items.forEach { cursor.writeLine(it) }
+    override fun write(writer: RowWriter) {
+        items.forEach { writer.writeLine(it) }
     }
 }
 ```
 
 `writeLine` writes a `String` or a `Line` and advances; `newLine` leaves a blank row;
 `write(column, text, row = …)` places text at a column, on the current row unless you
-name an earlier one; `cursor.width` is the available width. Place a child with
-`cursor.draw(child)`; never call a child's `write` yourself, since it would write into
-your rows instead of its own. `widget.measure(width)` returns the `Size` content takes.
+name an earlier one; `writer.width` is the available width. Place a child with
+`writer.draw(child)`; never call a child's `write` yourself, since it would write into
+your rows instead of its own. A child wider than `writer.width`, such as a large
+`fixedSize` drawing, makes your widget that wide too, so a viewport can scroll to it; text
+past the edge is clipped instead. `widget.measure(width)` returns the `Size` content takes.
 
 ## Stack content vertically
 

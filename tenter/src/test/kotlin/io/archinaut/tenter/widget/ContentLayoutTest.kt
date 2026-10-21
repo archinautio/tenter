@@ -40,10 +40,10 @@ internal class ContentLayoutTest {
 
     @Test
     fun `flowing content counts trailing blank rows and blank-only content`() {
-        val content = MeasurableWidget { cursor ->
-            cursor.writeLine("line")
-            cursor.newLine()
-            cursor.newLine()
+        val content = MeasurableWidget { writer ->
+            writer.writeLine("line")
+            writer.newLine()
+            writer.newLine()
         }
 
         val layout = content.prepare(12)
@@ -53,14 +53,14 @@ internal class ContentLayoutTest {
         assertEquals(1, MeasurableWidget { it.newLine() }.measure(12).height)
         assertEquals(
             6,
-            MeasurableWidget { cursor -> cursor.write(column = 0, text = "overlay", row = 5) }.measure(12).height,
+            MeasurableWidget { writer -> writer.write(column = 0, text = "overlay", row = 5) }.measure(12).height,
         )
     }
 
     @Test
     fun `flowing content prepares a thousand rows without a height ceiling`() {
-        val content = MeasurableWidget { cursor ->
-            repeat(1_000) { row -> cursor.writeLine("row$row") }
+        val content = MeasurableWidget { writer ->
+            repeat(1_000) { row -> writer.writeLine("row$row") }
         }
 
         val layout = content.prepare(20)
@@ -73,7 +73,7 @@ internal class ContentLayoutTest {
 
     @Test
     fun `zero available width remains valid and fixed content keeps its declared width`() {
-        val flowing = MeasurableWidget { cursor -> cursor.writeLine("ignored") }
+        val flowing = MeasurableWidget { writer -> writer.writeLine("ignored") }
         val fixed = EmptyWidget.fixedSize(20, 4)
 
         assertEquals(0, flowing.measure(0).width)
@@ -85,7 +85,7 @@ internal class ContentLayoutTest {
     @Test
     fun `prepared text paints immutable recorded values`() {
         var label = "before"
-        val content = MeasurableWidget { cursor -> cursor.writeLine(label) }
+        val content = MeasurableWidget { writer -> writer.writeLine(label) }
 
         val layout = content.prepare(20)
         label = "after"
@@ -135,11 +135,11 @@ internal class ContentLayoutTest {
     @Test
     fun `prepared child is painted once per layout paint and does not append during painting`() {
         var prepareCount = 0
-        val child = MeasurableWidget { cursor ->
+        val child = MeasurableWidget { writer ->
             prepareCount++
-            cursor.markReveal()
+            writer.markReveal()
         }
-        val parent = MeasurableWidget { cursor -> cursor.draw(child) }
+        val parent = MeasurableWidget { writer -> writer.draw(child) }
 
         val layout = parent.prepare(10)
         assertEquals(1, prepareCount)
@@ -151,16 +151,16 @@ internal class ContentLayoutTest {
     }
 
     @Test
-    fun `text cursor draw content uses the prepared logical height`() {
+    fun `row writer draw content uses the prepared logical height`() {
         val child = MeasurableWidget { content ->
             content.writeLine("A")
             content.newLine()
         }
         var used = 0
         var rowAfter = 0
-        val parent = MeasurableWidget { cursor ->
-            used = cursor.draw(child)
-            rowAfter = cursor.row
+        val parent = MeasurableWidget { writer ->
+            used = writer.draw(child)
+            rowAfter = writer.row
         }
 
         val buffer = render(parent, 10, 5)
@@ -275,9 +275,9 @@ internal class ContentLayoutTest {
     @Test
     fun `drawing a child without a request keeps the parent's earlier request`() {
         val canvas = Canvas.offscreen(6, 3)
-        val parent = MeasurableWidget { cursor ->
-            cursor.markReveal()
-            cursor.draw(MeasurableWidget { it.writeLine("child") })
+        val parent = MeasurableWidget { writer ->
+            writer.markReveal()
+            writer.draw(MeasurableWidget { it.writeLine("child") })
         }
 
         parent.render(canvas)

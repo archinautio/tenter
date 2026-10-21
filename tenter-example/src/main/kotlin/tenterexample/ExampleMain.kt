@@ -29,14 +29,14 @@ import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
 /**
  * Runs the separate-consumer smoke scenario without raw input or terminal lifecycle escapes.
- * It exercises long measured content, composition, settled hit-testing, both layout factories,
+ * It exercises long measured content, composition, settled hit-testing, an application-owned panel layout,
  * widget glyphs, keymap dispatch, scrolling, reveal following, panel states, and animation.
  */
 public fun runHeadlessSmoke(): SmokeResult {
     // --8<-- [start:padding]
-    val framed = MeasurableWidget { cursor ->
-        cursor.writeLine("OK")
-        cursor.markReveal(row = 0)
+    val framed = MeasurableWidget { writer ->
+        writer.writeLine("OK")
+        writer.markReveal(row = 0)
     }.block(Block.bordered(padding = Padding.uniform(1)))
     val size = framed.measure(8)
     // --8<-- [end:padding]
@@ -47,15 +47,15 @@ public fun runHeadlessSmoke(): SmokeResult {
     Viewport(framed).render(Canvas.offscreen(size.width, 3), followed)
     check(followed.settled?.revealed?.y == 2) { "the block lost the child's reveal" }
 
-    val app = ExampleApp(ExampleLayoutMode.MAIN_AND_SIDES)
-    val terminal = headlessTerminal(width = 80, height = 12)
+    val app = ExampleApp()
+    val terminal = headlessTerminal(width = 140, height = 24)
     var frame = terminal.draw(app::render)
     val initialText = frameText(frame)
     check("row 0" in initialText) { "the rendered list did not contain its first generated row" }
     check("PgUp/PgDn" in initialText) { "the rendered help did not contain the keymap hints" }
 
     val initialLayout = checkNotNull(app.panels.layout)
-    val wheelTarget = checkNotNull(initialLayout.main).content
+    val wheelTarget = checkNotNull(initialLayout.slotOf(ExamplePanelId.ROWS)).content
     repeat(EXAMPLE_ROW_COUNT) {
         app.handle(MouseEvent(x = wheelTarget.x + 1, y = wheelTarget.y + 1, wheelDown = true))
     }
@@ -64,7 +64,7 @@ public fun runHeadlessSmoke(): SmokeResult {
     check("row 599" in scrolledText) { "wheel scrolling did not reach the final generated row" }
 
     val scrolledLayout = checkNotNull(app.panels.layout)
-    val clickTarget = checkNotNull(scrolledLayout.main).content
+    val clickTarget = checkNotNull(scrolledLayout.slotOf(ExamplePanelId.ROWS)).content
     val clickX = clickTarget.x + 1
     val clickY = clickTarget.y + 1
     val hit = checkNotNull(app.panels.hitTest(clickX, clickY))
@@ -76,16 +76,7 @@ public fun runHeadlessSmoke(): SmokeResult {
     check(app.state.selectedRow in app.state.checkedRows) { "the click did not toggle the selected row" }
     check(frame.width == 44 && frame.height == 8) { "the resized frame did not use the new dimensions" }
 
-    check(app.cycleHelp() == PanelMode.MAXIMIZED) { "the help panel did not maximize" }
-    check(app.cycleHelp() == PanelMode.MINIMIZED) { "the help panel did not minimize" }
-    check(app.cycleHelp() == PanelMode.NORMAL) { "the help panel did not restore its normal state" }
-
-    val uniform = ExampleApp(ExampleLayoutMode.UNIFORM)
-    headlessTerminal(width = 100, height = 12).draw(uniform::render)
-    val uniformLayout = checkNotNull(uniform.panels.layout)
-    check(uniformLayout.main == null && uniformLayout.sides.size == 2) {
-        "the uniform layout did not place both fresh panel instances"
-    }
+    checkPanelLayout()
 
     val animation = animationProbe()
     val firstFrame = renderAnimationFrame(animation.firstFrame)
@@ -117,8 +108,41 @@ public fun main(args: Array<String>) {
     }
 }
 
+/**
+ * Checks the application-owned layout: the status bar on top, the catalog filling the left, the
+ * side panels at their mode's width on the right, and a maximized panel taking the whole body.
+ */
+private fun checkPanelLayout() {
+    val app = ExampleApp()
+    val terminal = headlessTerminal(width = 140, height = 24)
+
+    terminal.draw(app::render)
+    val normal = checkNotNull(app.panels.layout)
+    val rows = checkNotNull(normal.slotOf(ExamplePanelId.ROWS)).outer
+    val details = checkNotNull(normal.slotOf(ExamplePanelId.DETAILS)).outer
+    val help = checkNotNull(normal.slotOf(ExamplePanelId.HELP)).outer
+    check(rows.x == 0 && rows.y == ExampleApp.STATUS_HEIGHT) { "the catalog is not below the status bar at the left" }
+    check(details.x == rows.width && help.x + help.width == 140) { "the side panels are not right of the catalog" }
+
+    check(app.cycle(ExamplePanelId.DETAILS) == PanelMode.MAXIMIZED) { "the details panel did not maximize" }
+    terminal.draw(app::render)
+    val maximized = checkNotNull(app.panels.layout).slots.single()
+    check(maximized.id == ExamplePanelId.DETAILS && maximized.outer.width == 140) { "a maximized panel did not take the body" }
+
+    check(app.cycle(ExamplePanelId.DETAILS) == PanelMode.MINIMIZED) { "the details panel did not minimize" }
+    terminal.draw(app::render)
+    val minimized = checkNotNull(checkNotNull(app.panels.layout).slotOf(ExamplePanelId.DETAILS)).outer
+    check(minimized.width == ExampleApp.MINIMIZED_WIDTH) { "a minimized panel did not shrink to its stub" }
+    check(app.cycle(ExamplePanelId.DETAILS) == PanelMode.NORMAL) { "the details panel did not restore its normal state" }
+
+    check(app.cycle(ExamplePanelId.ROWS) == PanelMode.MAXIMIZED) { "the catalog did not maximize" }
+    check(app.cycle(ExamplePanelId.ROWS) == PanelMode.NORMAL) { "the catalog has a mode besides normal and maximized" }
+    check(app.cycle(ExamplePanelId.HELP) == PanelMode.MAXIMIZED) { "the help panel did not maximize" }
+    check(app.cycle(ExamplePanelId.HELP) == PanelMode.NORMAL) { "the help panel has a mode besides normal and maximized" }
+}
+
 private fun runInteractive(backend: MordantTerminal, terminal: Terminal) {
-    val app = ExampleApp(ExampleLayoutMode.MAIN_AND_SIDES)
+    val app = ExampleApp()
     terminal.draw(app::render)
 
     // --8<-- [start:input-loop]

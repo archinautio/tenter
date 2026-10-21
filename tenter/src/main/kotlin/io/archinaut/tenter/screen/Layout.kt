@@ -13,7 +13,7 @@ public enum class Direction {
 }
 
 /**
- * Splits a [Rect] into adjacent segments along one axis, in the manner of Ratatui's `Layout`:
+ * Splits a [Rect] into adjacent segments along one axis:
  *
  * ```kotlin
  * val (header, body, footer) = Layout.vertical(Length(1), Fill(1), Length(1)).split(frame.area)

@@ -7,11 +7,11 @@ import io.archinaut.tenter.screen.Line
 import io.archinaut.tenter.screen.Style
 
 /**
- * Lines of text, in the manner of Ratatui's `Paragraph`. Without [wrap], each line takes one row
- * and is ellipsized to the available width; with it, lines wrap at word boundaries and a word
- * wider than a row is split. An empty line is a blank row.
+ * Lines of text. Without [wrap], each line takes one row and is ellipsized to the available width;
+ * with it, lines wrap at word boundaries and a word wider than a row is split. An empty line is a
+ * blank row.
  *
- * Use it to show text; implement [MeasurableWidget] with a [TextCursor] for custom content.
+ * Use it to show text; implement [MeasurableWidget] with a [RowWriter] for custom content.
  */
 public class Paragraph(
     private val lines: List<Line>,
@@ -22,11 +22,11 @@ public class Paragraph(
     public constructor(text: String, style: Style = Style.DEFAULT, wrap: Boolean = false) :
         this(text.split('\n').map { Line(it, style) }, wrap)
 
-    override fun write(cursor: TextCursor) {
+    override fun write(writer: RowWriter) {
         for (line in lines) {
-            val rows = if (wrap) line.wrap(cursor.width) else listOf(line)
-            if (rows.isEmpty()) cursor.newLine()
-            rows.forEach(cursor::writeLine)
+            val rows = if (wrap) line.wrap(writer.width) else listOf(line)
+            if (rows.isEmpty()) writer.newLine()
+            rows.forEach(writer::writeLine)
         }
     }
 }

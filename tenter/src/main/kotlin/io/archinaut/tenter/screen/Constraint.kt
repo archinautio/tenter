@@ -4,8 +4,8 @@
 package io.archinaut.tenter.screen
 
 /**
- * How much of a [Layout]'s main axis one segment asks for, in the manner of Ratatui's
- * `Constraint`. See [Layout.split] for how competing constraints are resolved.
+ * How much of a [Layout]'s main axis one segment asks for. See [Layout.split] for how competing
+ * constraints are resolved.
  */
 public sealed interface Constraint {
 

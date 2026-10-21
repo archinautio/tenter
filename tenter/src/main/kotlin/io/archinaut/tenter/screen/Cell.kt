@@ -11,6 +11,6 @@ public data class Cell(
     public companion object {
         /** The default, unstyled space cell — reused wherever a blank cell is needed so a fresh
          * screen doesn't allocate a distinct identical instance per cell. */
-        public val EMPTY: Cell = Cell()
+        internal val EMPTY: Cell = Cell()
     }
 }

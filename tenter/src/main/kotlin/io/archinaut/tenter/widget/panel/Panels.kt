@@ -4,23 +4,31 @@
 package io.archinaut.tenter.widget.panel
 
 import io.archinaut.tenter.screen.Canvas
+import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.widget.StatefulWidget
 
 /**
- * Draws the [visible] panels of a [PanelSet] into the whole canvas, building each panel's
- * content from [inputs], in the manner of a Ratatui `StatefulWidget` over its state.
- * Read the completed frame's geometry from [PanelSet.layout] afterwards.
+ * Draws panels of a [PanelSet], each into its rectangle of [areas], building each panel's content
+ * from [inputs], with the set as its state. Read the completed frame's geometry from
+ * [PanelSet.layout] afterwards.
  *
- * Managed offsets and hit geometry publish together only after every slot paints successfully.
+ * The application owns the layout: split the frame with [io.archinaut.tenter.screen.Layout] each
+ * frame, choosing every panel's size from its [PanelSet.modeOf] — for example, giving a maximized
+ * panel the whole area and leaving the others out. Only the panels in [areas] are drawn, in its
+ * iteration order, so a later one paints over an earlier one where they overlap. Areas are frame
+ * coordinates, like the rectangles [io.archinaut.tenter.screen.Layout] splits from the frame's
+ * area, and are clipped to the canvas this widget renders into.
+ *
+ * Managed offsets and hit geometry publish together only after every panel paints successfully.
  * A failed frame retains queued scrolling intent; application callbacks and canvas writes are
  * not rolled back, so discard the failed frame's canvas.
  */
 public class Panels<K : PanelId, I>(
     private val inputs: I,
-    private val visible: Set<K>,
+    private val areas: Map<K, Rect>,
 ) : StatefulWidget<PanelSet<K, I>> {
 
     override fun render(canvas: Canvas, state: PanelSet<K, I>) {
-        state.render(canvas, inputs, visible)
+        state.render(canvas, inputs, areas)
     }
 }

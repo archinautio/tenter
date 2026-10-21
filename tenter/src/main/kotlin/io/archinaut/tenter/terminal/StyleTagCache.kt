@@ -9,6 +9,7 @@ import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.colormath.Color as ColorValue
 import com.github.ajalt.colormath.model.Ansi16 as ColormathAnsi16
+import io.archinaut.tenter.palette.ChromeRole
 import io.archinaut.tenter.palette.ColorRole
 import io.archinaut.tenter.palette.PaletteColor
 import io.archinaut.tenter.palette.RolePalette
@@ -61,11 +62,16 @@ internal class StyleTagCache(private val palette: RolePalette, private val ansiL
         return tags
     }
 
-    private fun buildStyle(style: Style): TextStyle = TextStyle(
-        color = foregroundCache.getOrPut(style.fg) { resolve(style.fg, background = false).toColormathColor() },
-        bgColor = backgroundCache.getOrPut(style.bg) { resolve(style.bg, background = true).toColormathColor() },
-        strikethrough = style.strikethrough,
-    )
+    /** A channel no write set renders as [ChromeRole.DEFAULT], or without strikethrough. */
+    private fun buildStyle(style: Style): TextStyle {
+        val fg = style.fg ?: ChromeRole.DEFAULT
+        val bg = style.bg ?: ChromeRole.DEFAULT
+        return TextStyle(
+            color = foregroundCache.getOrPut(fg) { resolve(fg, background = false).toColormathColor() },
+            bgColor = backgroundCache.getOrPut(bg) { resolve(bg, background = true).toColormathColor() },
+            strikethrough = style.strikethrough ?: false,
+        )
+    }
 
     private fun resolve(role: ColorRole, background: Boolean): PaletteColor = when (role) {
         is PaletteColor -> role

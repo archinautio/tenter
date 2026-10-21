@@ -29,7 +29,7 @@ public data class Rect(
      * The part of this rectangle inside [bounds]. When they don't overlap, the result is empty and
      * sits on the nearest edge of [bounds], so it is always contained in [bounds].
      */
-    public fun clipTo(bounds: Rect): Rect {
+    internal fun clipTo(bounds: Rect): Rect {
         val boundsMaxX = bounds.x + bounds.width
         val boundsMaxY = bounds.y + bounds.height
 
@@ -55,7 +55,7 @@ public data class Rect(
     }
 
     /** This rectangle moved by ([dx], [dy]). */
-    public fun offset(dx: Int, dy: Int): Rect = copy(x = x + dx, y = y + dy)
+    internal fun offset(dx: Int, dy: Int): Rect = copy(x = x + dx, y = y + dy)
 
     /** Removes [padding], clamping each edge so the result remains a valid rectangle. */
     public fun inner(padding: Padding): Rect {

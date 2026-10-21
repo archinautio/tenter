@@ -16,11 +16,11 @@ import io.archinaut.tenter.text.TextWrap
  */
 public class KeyHelp(private val sections: List<KeySection>) : MeasurableWidget {
 
-    override fun write(cursor: TextCursor) {
-        cursor.draw(MeasurableWidget { writeSections(it) }.block(HEADING))
+    override fun write(writer: RowWriter) {
+        writer.draw(MeasurableWidget { writeSections(it) }.block(HEADING))
     }
 
-    private fun writeSections(cursor: TextCursor) {
+    private fun writeSections(writer: RowWriter) {
         // One key column shared across every section (not per-hint) so descriptions line up in a
         // single straight edge down the panel instead of jagging with each key's own length.
         // The description is wrapped on its own — not as part of one combined "key + description"
@@ -28,18 +28,18 @@ public class KeyHelp(private val sections: List<KeySection>) : MeasurableWidget 
         // destroy alignment padding embedded in the text.
         val keyColumnWidth = sections.flatMap { it.hints }.maxOfOrNull { CellWidth.of(it.keys) } ?: 0
         val prefixWidth = keyColumnWidth + 2
-        val descWidth = (cursor.width - prefixWidth).coerceAtLeast(1)
+        val descWidth = (writer.width - prefixWidth).coerceAtLeast(1)
 
         for ((index, section) in sections.withIndex()) {
-            cursor.writeLine(section.title, SUBSECTION_STYLE)
+            writer.writeLine(section.title, SUBSECTION_STYLE)
             for (hint in section.hints) {
                 TextWrap.wrap(hint.description, descWidth).forEachIndexed { i, wrapped ->
-                    if (i == 0) cursor.write(0, hint.keys, KEY_STYLE)
-                    cursor.write(prefixWidth, wrapped, DESC_STYLE)
-                    cursor.newLine()
+                    if (i == 0) writer.write(0, hint.keys, KEY_STYLE)
+                    writer.write(prefixWidth, wrapped, DESC_STYLE)
+                    writer.newLine()
                 }
             }
-            if (index < sections.size - 1) cursor.newLine()
+            if (index < sections.size - 1) writer.newLine()
         }
     }
 

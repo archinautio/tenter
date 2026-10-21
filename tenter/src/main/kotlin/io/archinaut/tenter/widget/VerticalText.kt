@@ -17,11 +17,11 @@ public class VerticalText(
     private val style: Style = Style(ChromeRole.TEXT_PRIMARY),
 ) : MeasurableWidget {
 
-    override fun write(cursor: TextCursor) {
+    override fun write(writer: RowWriter) {
         for (cluster in textClusters(text)) {
             if (cluster.width == 0) continue
-            cursor.write(cursor.width / 2, cluster.drawableText, style)
-            cursor.newLine()
+            writer.write(writer.width / 2, cluster.drawableText, style)
+            writer.newLine()
         }
     }
 }

@@ -7,7 +7,7 @@ import io.archinaut.tenter.screen.Canvas
 
 /**
  * Something that renders into a [Canvas] using caller-owned state that outlives one frame, such
- * as a scroll position, in the manner of Ratatui's `StatefulWidget`.
+ * as a scroll position.
  */
 public interface StatefulWidget<in S> {
     public fun render(canvas: Canvas, state: S)

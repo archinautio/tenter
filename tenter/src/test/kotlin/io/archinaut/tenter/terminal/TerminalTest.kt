@@ -125,6 +125,18 @@ internal class TerminalTest {
     }
 
     @Test
+    fun `a channel no write set renders as the palette default`() {
+        val buffer = Buffer(1, 1)
+        Canvas.of(buffer).setString(0, 0, "X", Style(fg = ChromeRole.DANGER))
+
+        terminal.renderBuffer(buffer)
+
+        val out = recorder.output()
+        assertTrue(out.contains("38;2;255;153;153"), "Expected DANGER's foreground: ${out.repr()}")
+        assertTrue(out.contains("48;2;16;20;24"), "Expected the fixture's default background: ${out.repr()}")
+    }
+
+    @Test
     fun `default cell emits a different palette's sequences when constructed with it`() {
         val altRecorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val altBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = altRecorder)

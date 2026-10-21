@@ -25,13 +25,13 @@ public data class Padding(
     )
 
     /** This padding with the top and bottom edges dropped. */
-    public fun horizontalEdges(): Padding = Padding(left = left, right = right)
+    internal fun horizontalEdges(): Padding = Padding(left = left, right = right)
 
     /** This padding with the left and right edges dropped. */
-    public fun verticalEdges(): Padding = Padding(top = top, bottom = bottom)
+    internal fun verticalEdges(): Padding = Padding(top = top, bottom = bottom)
 
     /** True when all edges are zero. */
-    public fun isZero(): Boolean = this === ZERO || (left or top or right or bottom) == 0
+    internal fun isZero(): Boolean = this === ZERO || (left or top or right or bottom) == 0
 
     public companion object {
         public val ZERO: Padding = Padding()
@@ -43,6 +43,6 @@ public data class Padding(
         public fun horizontal(n: Int): Padding = Padding(left = n, right = n)
 
         /** [n] cells on the top and bottom edges. */
-        public fun vertical(n: Int): Padding = Padding(top = n, bottom = n)
+        internal fun vertical(n: Int): Padding = Padding(top = n, bottom = n)
     }
 }

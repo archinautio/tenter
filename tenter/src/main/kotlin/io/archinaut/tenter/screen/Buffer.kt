@@ -41,11 +41,16 @@ internal class Buffer(
         writeCell(x, y, cell, area)
     }
 
+    /**
+     * Writes [cell] at ([x], [y]) within [clip]. Its style is patched over what was painted there
+     * unless [replace] is set, which stores [cell] exactly as given, as if nothing was painted before.
+     */
     internal fun writeCell(
         x: Int,
         y: Int,
         cell: Cell,
         clip: Rect,
+        replace: Boolean = false,
     ) {
         val glyph = cell.toStoredGlyph()
         val clipLeft = clip.x
@@ -66,11 +71,14 @@ internal class Buffer(
         if (targetEnd > clipRight || targetEnd > width) return
         if (!canReplace(x, y, targetEnd, clip)) return
 
+        // The glyph's style is patched over what its lead column had painted, so channels it leaves
+        // unset — typically the background — keep their painted value.
+        val painted = if (replace) glyph else glyph.withStyle(cells[y][x].cell.style.patch(glyph.cell.style))
         clearGlyphAt(x, y)
         if (glyph.width == 2) clearGlyphAt(x + 1, y)
-        cells[y][x] = glyph
+        cells[y][x] = painted
         if (glyph.width == 2) {
-            cells[y][x + 1] = StoredCell(glyph.cell, width = 2, continuation = true)
+            cells[y][x + 1] = StoredCell(painted.cell, width = 2, continuation = true)
         }
     }
 
@@ -136,8 +144,9 @@ internal class Buffer(
         clip: Rect,
     ) {
         if (!canReplace(x, y, x + 1, clip)) return
+        val painted = cells[y][x].cell.style.patch(style)
         clearGlyphAt(x, y)
-        cells[y][x] = StoredCell(Cell(" ", style), width = 1, continuation = false)
+        cells[y][x] = StoredCell(Cell(" ", painted), width = 1, continuation = false)
     }
 
     private fun Cell.toStoredGlyph(): StoredCell {
@@ -164,6 +173,9 @@ internal data class StoredCell(
     internal val continuation: Boolean,
 ) {
     internal fun asPublicCell(): Cell = if (continuation) Cell("", cell.style) else cell
+
+    internal fun withStyle(style: Style): StoredCell =
+        if (style == cell.style) this else copy(cell = cell.copy(style = style))
 }
 
 private fun String.toDebugString(): String = replace("\u001B", "<ESC>")

@@ -92,6 +92,16 @@ public class Canvas private constructor(
         }
     }
 
+    /** Resets every cell this canvas can write to a blank that sets no style channel. */
+    internal fun clear() {
+        val visible = visibleArea
+        for (y in visible.y until visible.y + visible.height) {
+            for (x in visible.x until visible.x + visible.width) {
+                buffer.writeCell(bounds.x + x, bounds.y + y, Cell.EMPTY, clip, replace = true)
+            }
+        }
+    }
+
     /**
      * Marks the rect content most wants visible — e.g. a selection cursor, a highlighted row.
      * Stored on the backing [Buffer] in absolute coords (translated through this canvas's

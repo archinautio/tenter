@@ -10,8 +10,8 @@ import io.archinaut.tenter.widget.StatefulWidget
 import io.archinaut.tenter.widget.Widget
 
 /**
- * One frame being drawn by [Terminal.draw], in the manner of Ratatui's `Frame`. It is only valid
- * inside the draw callback that received it.
+ * One frame being drawn by [Terminal.draw]. It is only valid inside the draw callback that
+ * received it.
  *
  * Widgets render into a [Rect] of [area]; each one receives a [Canvas] clipped to the
  * intersection of that rectangle with the frame, so it cannot paint outside its own area.

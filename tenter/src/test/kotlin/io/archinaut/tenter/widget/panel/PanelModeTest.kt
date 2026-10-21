@@ -17,7 +17,6 @@ internal class PanelModeTest {
     ): Panel<TestPanelId, Unit> = Panel(
         id = TestPanelId.A,
         title = "T",
-        width = 20,
         normal = { MeasurableWidget { } },
         minimized = if (minimized) ({ MeasurableWidget { } }) else null,
         maximized = if (maximized) ({ MeasurableWidget { } }) else null,
@@ -35,7 +34,7 @@ internal class PanelModeTest {
 
     @Test
     fun `set operations cycle forward and backward and skip undeclared modes`() {
-        val set = PanelSet.uniform(listOf(panel()))
+        val set = PanelSet(listOf(panel()))
 
         set.cycleFocusedMode(1)
         assertEquals(PanelMode.MAXIMIZED, set.modeOf(TestPanelId.A))
@@ -44,7 +43,7 @@ internal class PanelModeTest {
         set.cycleFocusedMode(-1)
         assertEquals(PanelMode.MAXIMIZED, set.modeOf(TestPanelId.A))
 
-        val minimizedAndNormal = PanelSet.uniform(listOf(panel(minimized = true, maximized = false)))
+        val minimizedAndNormal = PanelSet(listOf(panel(minimized = true, maximized = false)))
         minimizedAndNormal.cycleFocusedMode(1)
         assertEquals(PanelMode.MINIMIZED, minimizedAndNormal.modeOf(TestPanelId.A))
     }
@@ -55,26 +54,13 @@ internal class PanelModeTest {
         val b = Panel<TestPanelId, Unit>(
             id = TestPanelId.B,
             title = "B",
-            width = 20,
-            normal = { MeasurableWidget { } },
+                normal = { MeasurableWidget { } },
         )
-        val set = PanelSet.uniform(listOf(a, b))
+        val set = PanelSet(listOf(a, b))
         set.cycleFocusedMode(-1)
         set.cycleFocusedMode(-1)
         assertEquals(PanelMode.MAXIMIZED, set.modeOf(TestPanelId.A))
         set.focus(TestPanelId.B)
         assertEquals(PanelMode.MINIMIZED, set.modeOf(TestPanelId.A))
-    }
-
-    @Test
-    fun `a panel rejects nonpositive widths`() {
-        for (width in listOf(-1, 0)) {
-            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
-                Panel<TestPanelId, Unit>(TestPanelId.A, "T", width = width, normal = { MeasurableWidget { } })
-            }
-            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
-                Panel<TestPanelId, Unit>(TestPanelId.A, "T", minimizedWidth = width, normal = { MeasurableWidget { } })
-            }
-        }
     }
 }

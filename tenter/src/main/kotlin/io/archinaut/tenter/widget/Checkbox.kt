@@ -59,8 +59,8 @@ public class Checkbox(
     private val glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
 ) : MeasurableWidget {
 
-    override fun write(cursor: TextCursor) {
-        cursor.write(0, checkboxIcon(state, glyphs), Style(color))
+    override fun write(writer: RowWriter) {
+        writer.write(0, checkboxIcon(state, glyphs), Style(color))
     }
 
     public companion object {

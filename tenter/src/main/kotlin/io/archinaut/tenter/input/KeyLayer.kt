@@ -11,7 +11,7 @@ package io.archinaut.tenter.input
  * precedence-only layer such as panel scrolling does.
  * Structural validity, including sectionless credits, is owned by [KeyMap] at construction.
  */
-public data class KeyLayer<A : Any>(
+public data class KeyLayer<out A : Any>(
     public val title: String?,
     public val bindings: List<KeyBinding<A>>,
     public val hintGroups: List<HintGroup> = emptyList(),

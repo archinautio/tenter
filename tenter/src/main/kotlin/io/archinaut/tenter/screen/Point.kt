@@ -10,6 +10,6 @@ public data class Point(
 ) {
     public companion object {
         /** The top-left cell, `(0, 0)`. */
-        public val ORIGIN: Point = Point(0, 0)
+        internal val ORIGIN: Point = Point(0, 0)
     }
 }

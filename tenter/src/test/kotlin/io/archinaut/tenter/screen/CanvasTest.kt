@@ -22,6 +22,38 @@ internal class CanvasTest {
     }
 
     @Test
+    fun `a write changes only the channels its style sets`() {
+        val canvas = Canvas.offscreen(3, 1)
+        canvas.set(0, 0, Cell(" ", Style(bg = ChromeRole.SUCCESS)))
+        canvas.set(1, 0, Cell(" ", Style(fg = ChromeRole.INFO, strikethrough = true)))
+
+        canvas.setString(0, 0, "AB", Style(fg = ChromeRole.DANGER))
+
+        assertEquals(Cell("A", Style(fg = ChromeRole.DANGER, bg = ChromeRole.SUCCESS)), canvas.get(0, 0))
+        assertEquals(Cell("B", Style(fg = ChromeRole.DANGER, strikethrough = true)), canvas.get(1, 0))
+    }
+
+    @Test
+    fun `a write that sets a channel to the default replaces what was painted`() {
+        val canvas = Canvas.offscreen(1, 1)
+        canvas.set(0, 0, Cell("A", Style(bg = ChromeRole.SUCCESS, strikethrough = true)))
+
+        canvas.set(0, 0, Cell("B", Style(bg = ChromeRole.DEFAULT, strikethrough = false)))
+
+        assertEquals(Cell("B", Style(bg = ChromeRole.DEFAULT, strikethrough = false)), canvas.get(0, 0))
+    }
+
+    @Test
+    fun `a wide glyph keeps the background painted under it`() {
+        val canvas = Canvas.offscreen(2, 1)
+        canvas.setString(0, 0, "  ", Style(bg = ChromeRole.SUCCESS))
+
+        canvas.setString(0, 0, "中", Style(fg = ChromeRole.DANGER))
+
+        assertEquals(Cell("中", Style(fg = ChromeRole.DANGER, bg = ChromeRole.SUCCESS)), canvas.get(0, 0))
+    }
+
+    @Test
     fun `set out of bounds is ignored`() {
         val canvas = Canvas.offscreen(3, 3)
 
@@ -78,12 +110,12 @@ internal class CanvasTest {
     }
 
     @Test
-    fun `setString uses default colors when not specified`() {
+    fun `setString without a style leaves every channel unset`() {
         val canvas = Canvas.offscreen(5, 1)
 
         canvas.setString(0, 0, "AB")
 
-        assertEquals(Cell("A", Style(ChromeRole.DEFAULT, ChromeRole.DEFAULT)), canvas.get(0, 0))
+        assertEquals(Cell("A", Style.DEFAULT), canvas.get(0, 0))
     }
 
     @Test

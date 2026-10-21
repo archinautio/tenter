@@ -187,8 +187,8 @@ internal class BlockTest {
 
     // ── scrollbar thumbs, synchronized with a Viewport ─────────────────────────────────────────
 
-    private fun stubContent(lines: Int): MeasurableWidget = MeasurableWidget { cursor ->
-        repeat(lines) { row -> cursor.writeLine("line$row") }
+    private fun stubContent(lines: Int): MeasurableWidget = MeasurableWidget { writer ->
+        repeat(lines) { row -> writer.writeLine("line$row") }
     }
 
     @Test

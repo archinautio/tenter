@@ -24,8 +24,8 @@ import io.archinaut.tenter.widget.render
  */
 internal class PanelViewportTest {
 
-    private fun stubContent(lines: Int): MeasurableWidget = MeasurableWidget { cursor ->
-        repeat(lines) { row -> cursor.writeLine("line$row") }
+    private fun stubContent(lines: Int): MeasurableWidget = MeasurableWidget { writer ->
+        repeat(lines) { row -> writer.writeLine("line$row") }
     }
 
     private fun panel(content: MeasurableWidget, scrollOffset: Int? = 0, state: ViewportState = ViewportState(

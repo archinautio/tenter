@@ -24,16 +24,16 @@ public class SelectableRow(
     private val glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
 ) : MeasurableWidget {
 
-    override fun write(cursor: TextCursor) {
-        if (selected) cursor.markReveal()
+    override fun write(writer: RowWriter) {
+        if (selected) writer.markReveal()
 
         val color = if (selected) ChromeRole.ACCENT else textColor
         val marker = if (selected) "▶" else " "
         val left = "$marker   $label"
         if (right == null) {
-            cursor.writeLine(left, Style(color))
+            writer.writeLine(left, Style(color))
         } else {
-            cursor.writeRow(left, right, Style(color))
+            writer.writeRow(left, right, Style(color))
         }
 
         val resolvedCheckboxColor = when {
@@ -41,7 +41,7 @@ public class SelectableRow(
             checkboxColor != null -> checkboxColor
             else -> Checkbox.intrinsicColor(checkState)
         }
-        cursor.write(CHECKBOX_COLUMN, checkboxIcon(checkState, glyphs), Style(resolvedCheckboxColor), row = 0)
+        writer.write(CHECKBOX_COLUMN, checkboxIcon(checkState, glyphs), Style(resolvedCheckboxColor), row = 0)
     }
 
     private companion object {

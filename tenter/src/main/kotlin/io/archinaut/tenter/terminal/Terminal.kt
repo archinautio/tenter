@@ -15,7 +15,7 @@ import com.github.ajalt.mordant.rendering.Size
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
 /**
- * Draws frames to a Mordant [backend], in the manner of Ratatui's `Terminal`.
+ * Draws frames to a Mordant [backend].
  *
  * The terminal owns two [Buffer]s. Each [draw] resets the current one, hands it to the caller
  * as a [Frame], sends only the cells that changed since the previous frame, and then swaps the
@@ -76,9 +76,9 @@ public class Terminal(private val backend: MordantTerminal, palette: RolePalette
         buffer.reset()
         render(Frame(buffer))
         flush(buffer)
-        val sent = previous
-        current = if (sent != null && sent.width == buffer.width && sent.height == buffer.height) {
-            sent
+        val recycled = previous
+        current = if (recycled != null && recycled.width == buffer.width && recycled.height == buffer.height) {
+            recycled
         } else {
             Buffer(buffer.width, buffer.height)
         }
@@ -190,7 +190,8 @@ public class Terminal(private val backend: MordantTerminal, palette: RolePalette
                 activeStyle = null
                 activeTags = null
             } else {
-                val skipClose = activeStyle != null && activeStyle.strikethrough == runStyle.strikethrough
+                val skipClose = activeStyle != null &&
+                    (activeStyle.strikethrough ?: false) == (runStyle.strikethrough ?: false)
                 if (!skipClose) activeTags?.let { sb.append(it.close) }
                 sb.append(tags.open)
                 activeStyle = runStyle

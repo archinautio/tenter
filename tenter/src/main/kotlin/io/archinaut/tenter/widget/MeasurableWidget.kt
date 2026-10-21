@@ -11,16 +11,16 @@ import io.archinaut.tenter.screen.Size
  * [Viewport] accept it. A plain [Widget] paints into whatever area it is given; a measurable one
  * writes its rows, and its height follows from what it wrote.
  *
- * Implement [write], or create one from a lambda: `MeasurableWidget { cursor -> ... }`. Place a
- * child inside another measurable widget with [TextCursor.draw]; never call [write] yourself, as
+ * Implement [write], or create one from a lambda: `MeasurableWidget { writer -> ... }`. Place a
+ * child inside another measurable widget with [RowWriter.draw]; never call [write] yourself, as
  * the child would write into the parent's rows instead of its own.
  */
 public fun interface MeasurableWidget : Widget {
     /**
-     * Writes this widget's content. [TextCursor.width] is the available width and row 0 is this
+     * Writes this widget's content. [RowWriter.width] is the available width and row 0 is this
      * widget's top. Capture frame data here; the written content may be painted repeatedly.
      */
-    public fun write(cursor: TextCursor)
+    public fun write(writer: RowWriter)
 
     /** Writes this widget at the canvas width, then paints it from the top-left corner. */
     public override fun render(canvas: Canvas) {
@@ -51,13 +51,13 @@ public fun Widget.fixedSize(width: Int, height: Int): MeasurableWidget {
 /**
  * The internal seam behind [MeasurableWidget] for the library's own composites ([Stack],
  * [Columns], [block]), which place prepared children at explicit coordinates instead of writing
- * rows through a cursor.
+ * rows through a [RowWriter].
  */
 internal interface LayoutWidget : MeasurableWidget {
     fun layout(availableWidth: Int): ContentLayout
 
-    override fun write(cursor: TextCursor) {
-        cursor.draw(this)
+    override fun write(writer: RowWriter) {
+        writer.draw(this)
     }
 }
 
@@ -66,9 +66,9 @@ internal fun MeasurableWidget.prepare(availableWidth: Int): ContentLayout {
     require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
     if (this is LayoutWidget) return layout(availableWidth)
     val sink = RecordingTextSink(availableWidth)
-    val cursor = TextCursor(sink)
-    write(cursor)
-    return ContentLayout(availableWidth, cursor.occupiedHeight, sink.snapshot())
+    val writer = RowWriter(sink)
+    write(writer)
+    return ContentLayout(sink.occupiedWidth, writer.occupiedHeight, sink.snapshot())
 }
 
 /** Builds a fixed-size prepared composition from placement instructions. */

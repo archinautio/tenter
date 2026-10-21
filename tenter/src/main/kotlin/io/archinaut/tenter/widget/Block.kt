@@ -13,9 +13,8 @@ import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
 
 /**
- * Borders, an optional title/badge on the top row, and padding, in the manner of Ratatui's
- * `Block`. `Block()` has no border; [bordered] draws all four sides. A block without borders is how
- * content gets padding alone.
+ * Borders, an optional title/badge on the top row, and padding. `Block()` has no border;
+ * [bordered] draws all four sides. A block without borders is how content gets padding alone.
  *
  * A block paints only its own chrome. In an allocated area, render it and then render the content
  * into [inner]; around measurable content, use [MeasurableWidget.block]. The title sits on the top
@@ -126,7 +125,7 @@ public class Block(
     }
 
     public companion object {
-        /** A block with all four borders, in the manner of Ratatui's `Block::bordered`. */
+        /** A block with all four borders. */
         public fun bordered(
             title: String = "",
             badge: String? = null,
@@ -161,9 +160,9 @@ public class Block(
 }
 
 /**
- * This content surrounded by [block]'s borders, title, and padding, in the manner of Ratatui's
- * `.block()`. The result is measurable: its width is the content's plus the block's sides, its
- * height the content's plus the block's top and bottom.
+ * This content surrounded by [block]'s borders, title, and padding. The result is measurable: its
+ * width is the content's plus the block's sides, its height the content's plus the block's top and
+ * bottom.
  */
 public fun MeasurableWidget.block(block: Block): MeasurableWidget {
     val content = this

@@ -27,7 +27,7 @@ The public guides own caller-facing contracts. Consult them before changing the
 corresponding implementation; do not maintain a second description here:
 
 - [Content and layouts](site/layouts.md): measurable widgets, blocks, frames, layout splitting, snapshots, and memory costs.
-- [Scrolling and panels](site/panels.md): state ownership, panel widths, completed-frame observations, hidden panels, and failed-render recovery.
+- [Scrolling and panels](site/panels.md): state ownership, application-owned panel placement, completed-frame observations, hidden panels, and failed-render recovery.
 - [Input and resizing](site/input.md): key-map validation, event collection, application confinement, and terminal lifetime.
 - [Widgets and styling](site/styling.md): glyph choices, display-cell sizing, and palette requirements.
 - [Animation](site/animation.md): finite elapsed-time playback and caller scheduling.
@@ -37,10 +37,11 @@ corresponding implementation; do not maintain a second description here:
 - Tenter adds primitives to Mordant rather than wrapping it. Preserve direct Mordant
   types in `TerminalEvent.Input` and `KeyBinding`, and take a Mordant terminal in `events`.
 - `KeyMap` copies context, layer, and group collections, and `PanelSet` copies its panel
-  lists. Do not expose mutable declaration collections.
-- A panel's content builder runs once per rendered frame; widths come from the panel
-  declaration, never from calling a builder. Keep mode-specific options out of the common
-  render operation.
+  list. Do not expose mutable declaration collections.
+- A panel's content builder runs once per rendered frame. Panels have no size: the
+  application places each rendered panel in a rectangle every frame, typically split with
+  `Layout` from its `PanelSet.modeOf`. Do not reintroduce panel widths, layout factories, or a
+  library-chosen arrangement. Keep mode-specific options out of the common render operation.
 - Propagate reveal requests through composites such as `Stack`, `Columns`, and `.block()`,
   and resolve them before the actual viewport paint. Commit managed viewport state and hit geometry together
   only after all panels paint successfully. Expose no provisional or second settled-state read path.

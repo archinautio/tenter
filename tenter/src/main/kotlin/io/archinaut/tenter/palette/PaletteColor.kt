@@ -8,7 +8,7 @@ import com.github.ajalt.mordant.rendering.AnsiLevel
 /**
  * A concrete color, in whatever space it was authored in. It is also a [ColorRole] that resolves to
  * itself: use one directly in a [io.archinaut.tenter.screen.Style] for content whose color must not
- * change with the theme, as Ratatui uses `Color::Rgb`; use a semantic role for themeable content.
+ * change with the theme; use a semantic role for themeable content.
  *
  * Colors are never converted between spaces: a palette picks one [PaletteColor] subtype for every
  * role it defines, matching the terminal capability it targets, and the terminal renders each

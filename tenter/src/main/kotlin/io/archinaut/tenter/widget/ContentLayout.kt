@@ -108,8 +108,8 @@ internal class ContentLayout(
 
     /**
      * Paints into [canvas], whose area is this layout's, skipping text rows and children outside
-     * the part [canvas] can show. Children paint straight into a window of the same buffer, as
-     * Ratatui widgets share one buffer, so composition costs no intermediate copy.
+     * the part [canvas] can show. Children paint straight into a window of the same buffer, so
+     * composition costs no intermediate copy.
      */
     private fun paint(canvas: Canvas, rendered: Map<Instruction.Raw, Canvas>) {
         val visible = canvas.visibleArea

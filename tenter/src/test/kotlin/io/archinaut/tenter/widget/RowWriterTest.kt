@@ -11,11 +11,12 @@ import io.archinaut.tenter.screen.Line
 import io.archinaut.tenter.screen.Span
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.screen.Rect
+import io.archinaut.tenter.screen.Size
 
-internal class TextCursorTest {
+internal class RowWriterTest {
 
     /** Writes [block] as a measurable widget painted into a fresh [width]x[height] canvas. */
-    private fun paint(width: Int, height: Int, block: (TextCursor) -> Unit): Canvas =
+    private fun paint(width: Int, height: Int, block: (RowWriter) -> Unit): Canvas =
         Canvas.offscreen(width, height).also { MeasurableWidget(block).render(it) }
 
     @Test
@@ -32,10 +33,10 @@ internal class TextCursorTest {
             }.fixedSize(4, 1) to Rect(0, 0, 4, 1),
         )
         for ((child, expected) in cases) {
-            val canvas = paint(4, 3) { cursor ->
-                cursor.writeLine("parent")
-                cursor.markReveal(row = 0)
-                cursor.draw(child)
+            val canvas = paint(4, 3) { writer ->
+                writer.writeLine("parent")
+                writer.markReveal(row = 0)
+                writer.draw(child)
             }
 
             assertEquals(expected, canvas.revealRect())
@@ -43,9 +44,26 @@ internal class TextCursorTest {
     }
 
     @Test
+    fun `a drawn child wider than the writer widens the widget, as a stacked one does`() {
+        val wide = EmptyWidget.fixedSize(30, 2)
+
+        val written = MeasurableWidget { it.writeLine("list"); it.draw(wide) }.measure(10)
+
+        assertEquals(Size(30, 3), written)
+        assertEquals(Stack(listOf(wide), gutter = 0).measure(10).width, written.width)
+    }
+
+    @Test
+    fun `text past the writer width does not widen the widget`() {
+        val written = MeasurableWidget { it.write(8, "overflowing") }.measure(10)
+
+        assertEquals(Size(10, 1), written)
+    }
+
+    @Test
     fun `writeLine paints each span in its own style at the right column`() {
-        val canvas = paint(20, 3) { cursor ->
-            cursor.writeLine(Line(Span("foo", Style(ChromeRole.DANGER)), Span("bar", Style(ChromeRole.SUCCESS))))
+        val canvas = paint(20, 3) { writer ->
+            writer.writeLine(Line(Span("foo", Style(ChromeRole.DANGER)), Span("bar", Style(ChromeRole.SUCCESS))))
         }
 
         assertEquals(Style(ChromeRole.DANGER), canvas.get(0, 0).style)
@@ -58,8 +76,8 @@ internal class TextCursorTest {
 
     @Test
     fun `writeLine advances a wide codepoint's column by two cells`() {
-        val canvas = paint(20, 3) { cursor ->
-            cursor.writeLine(Line(Span("中", Style(ChromeRole.DANGER)), Span("A", Style(ChromeRole.SUCCESS))))
+        val canvas = paint(20, 3) { writer ->
+            writer.writeLine(Line(Span("中", Style(ChromeRole.DANGER)), Span("A", Style(ChromeRole.SUCCESS))))
         }
 
         assertEquals("中", canvas.get(0, 0).symbol)
@@ -70,7 +88,7 @@ internal class TextCursorTest {
 
     @Test
     fun `writeLine ellipsizes at the available width`() {
-        val canvas = paint(5, 1) { cursor -> cursor.writeLine("hello world", Style(ChromeRole.DANGER)) }
+        val canvas = paint(5, 1) { writer -> writer.writeLine("hello world", Style(ChromeRole.DANGER)) }
 
         assertEquals("hell…", (0 until 5).joinToString("") { canvas.get(it, 0).symbol })
     }
@@ -79,9 +97,9 @@ internal class TextCursorTest {
     fun `writeLine advances row by one and returns the row written`() {
         var written = -1
         var rowAfter = -1
-        paint(10, 3) { cursor ->
-            written = cursor.writeLine("a")
-            rowAfter = cursor.row
+        paint(10, 3) { writer ->
+            written = writer.writeLine("a")
+            rowAfter = writer.row
         }
 
         assertEquals(0, written)
@@ -91,11 +109,11 @@ internal class TextCursorTest {
     @Test
     fun `write overlays an earlier row without advancing`() {
         var rowAfter = -1
-        val canvas = paint(6, 2) { cursor ->
-            cursor.writeLine("ab")
-            cursor.writeLine("cd")
-            cursor.write(column = 3, text = "X", row = 0)
-            rowAfter = cursor.row
+        val canvas = paint(6, 2) { writer ->
+            writer.writeLine("ab")
+            writer.writeLine("cd")
+            writer.write(column = 3, text = "X", row = 0)
+            rowAfter = writer.row
         }
 
         assertEquals("ab X  ", (0 until 6).joinToString("") { canvas.get(it, 0).symbol })
@@ -104,16 +122,16 @@ internal class TextCursorTest {
 
     @Test
     fun `markReveal defaults to the current row and accepts an explicit one`() {
-        val current = paint(4, 3) { cursor ->
-            cursor.newLine()
-            cursor.markReveal(height = 2)
-            cursor.newLine()
-            cursor.newLine()
+        val current = paint(4, 3) { writer ->
+            writer.newLine()
+            writer.markReveal(height = 2)
+            writer.newLine()
+            writer.newLine()
         }
-        val explicit = paint(4, 3) { cursor ->
-            cursor.newLine()
-            cursor.newLine()
-            cursor.markReveal(row = 0)
+        val explicit = paint(4, 3) { writer ->
+            writer.newLine()
+            writer.newLine()
+            writer.markReveal(row = 0)
         }
 
         assertEquals(Rect(0, 1, 4, 2), current.revealRect())

@@ -17,7 +17,7 @@ import com.github.ajalt.mordant.input.KeyboardEvent
  * two spellings are the same keystroke (`?` vs. shift+`?` across posix and Windows, say) is an
  * application decision, not one `tenter` makes on a caller's behalf.
  */
-public data class KeyBinding<A : Any>(
+public data class KeyBinding<out A : Any>(
     val chord: KeyboardEvent,
     val action: A,
     val hintGroup: String,

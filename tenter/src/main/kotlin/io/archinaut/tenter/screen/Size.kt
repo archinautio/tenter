@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.screen
 
-/** A nonnegative width and height in terminal cells, in the manner of Ratatui's `Size`. */
+/** A nonnegative width and height in terminal cells. */
 public data class Size(
     public val width: Int,
     public val height: Int,

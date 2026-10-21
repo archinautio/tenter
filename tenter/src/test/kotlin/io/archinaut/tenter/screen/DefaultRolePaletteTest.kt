@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.terminal.renderBuffer
-import io.archinaut.tenter.widget.TextCursor
+import io.archinaut.tenter.widget.RowWriter
 import io.archinaut.tenter.widget.CheckState
 import io.archinaut.tenter.widget.SelectableRow
 

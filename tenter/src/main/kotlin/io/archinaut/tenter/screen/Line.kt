@@ -8,16 +8,16 @@ import io.archinaut.tenter.text.TextTruncation
 import io.archinaut.tenter.text.TextWrap
 import io.archinaut.tenter.text.textClusters
 
-/** A run of text in one [style], in the manner of Ratatui's `Span`. */
+/** A run of text in one [style]. */
 public data class Span(
     public val text: String,
     public val style: Style = Style.DEFAULT,
 )
 
 /**
- * One line of text whose styling varies along its length, in the manner of Ratatui's `Line`: a
- * sequence of [Span]s that measures, wraps, truncates, and paints as one unit, so a caller wanting
- * two colors on one line never computes a column.
+ * One line of text whose styling varies along its length: a sequence of [Span]s that measures,
+ * wraps, truncates, and paints as one unit, so a caller wanting two colors on one line never
+ * computes a column.
  *
  * ```
  * Line("plain")

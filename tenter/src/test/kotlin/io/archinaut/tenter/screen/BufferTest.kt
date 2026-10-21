@@ -12,10 +12,10 @@ import org.junit.jupiter.api.assertThrows
 internal class BufferTest {
 
     @Test
-    fun `new buffer has all cells set to default`() {
+    fun `new buffer has all cells blank with no style channel set`() {
         val buffer = Buffer(3, 2)
 
-        val defaultCell = Cell(style = Style(ChromeRole.DEFAULT, ChromeRole.DEFAULT))
+        val defaultCell = Cell(" ", Style.DEFAULT)
         for (x in 0 until 3) {
             for (y in 0 until 2) {
                 assertEquals(defaultCell, buffer.get(x, y))

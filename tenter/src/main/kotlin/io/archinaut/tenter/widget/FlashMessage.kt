@@ -18,7 +18,7 @@ public data class FlashMessage(
     val style: Style = Style(ChromeRole.INFO),
 ) : MeasurableWidget {
 
-    override fun write(cursor: TextCursor) {
-        cursor.writeLine(text, style)
+    override fun write(writer: RowWriter) {
+        writer.writeLine(text, style)
     }
 }

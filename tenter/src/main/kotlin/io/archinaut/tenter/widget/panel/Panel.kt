@@ -15,31 +15,19 @@ import io.archinaut.tenter.widget.block
 /**
  * One stateful panel declaration. A panel owns its current mode, restore mode, attachment, and
  * viewport state; [PanelSet] is the only public module that may mutate those values. Each mode's
- * builder returns the panel's content for one frame; its width comes from this declaration.
+ * builder returns the panel's content for one frame.
  *
- * [width] is the panel's outer width in its normal mode, or null to share the space the layout
- * allocates (the main panel of [PanelSet.mainAndSides], or a proportional column of
- * [PanelSet.uniform]). A minimized panel is [minimizedWidth] wide; a maximized panel takes the
- * whole area. Widths are clipped to the available space.
- *
- * Visibility is still the host application's decision: a host chooses which panels to include in
- * a [Panels] frame.
+ * A panel has no size: where it goes and how big it is in each mode is the host application's
+ * decision, made every frame by the areas it passes to [Panels].
  */
 public class Panel<K : PanelId, I>(
     internal val id: K,
     private val title: String,
     private val badge: String? = null,
-    internal val width: Int? = null,
-    private val minimizedWidth: Int = MINIMIZED_WIDTH,
     private val normal: (I) -> MeasurableWidget,
     private val minimized: ((I) -> MeasurableWidget)? = null,
     private val maximized: ((I) -> MeasurableWidget)? = null,
 ) {
-    init {
-        require(width == null || width > 0) { "Panel $id width must be positive: $width" }
-        require(minimizedWidth > 0) { "Panel $id minimized width must be positive: $minimizedWidth" }
-    }
-
     private val viewportState: ViewportState = ViewportState()
     private var restoreMode: PanelMode = PanelMode.NORMAL
     private var attached: Boolean = false
@@ -81,15 +69,6 @@ public class Panel<K : PanelId, I>(
         PanelMode.MAXIMIZED -> maximized ?: error("Panel $id is in MAXIMIZED mode but declares no maximized content")
     }.invoke(inputs)
 
-    /** Whether this panel takes a fixed-width slot right now: it declares a [width], or is minimized. */
-    internal val isFixed: Boolean get() = width != null || mode == PanelMode.MINIMIZED
-
-    /** The outer width of this panel's fixed slot in its current mode. */
-    internal fun fixedWidth(): Int = when (mode) {
-        PanelMode.MINIMIZED -> minimizedWidth
-        else -> checkNotNull(width) { "Panel $id has no fixed width in $mode mode" }
-    }
-
     internal fun claimAttachment() {
         require(!attached) { "Panel $id is already attached to a PanelSet" }
         attached = true
@@ -116,11 +95,6 @@ public class Panel<K : PanelId, I>(
 
     internal fun settle(candidate: ViewportState) {
         viewportState.adopt(candidate)
-    }
-
-    public companion object {
-        /** Column width of a minimized panel when an application has no narrower preference. */
-        public const val MINIMIZED_WIDTH: Int = 7
     }
 }
 
