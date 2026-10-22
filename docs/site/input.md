@@ -8,18 +8,18 @@ Create a Mordant `Terminal` as the backend and enter
 Update application state and repaint there as well.
 
 `withScreen` restores the screen and cursor when its block returns or throws.
-Keep only one event collection active per terminal. Collecting `backend.events()`
+Keep only one event collection active per terminal. Collecting `terminal.events()`
 manages raw mode, and stopping collection releases it before collection returns. The
 flow starts producing events when collected. Avoid abrupt process termination inside the screen scope, which
 bypasses normal cleanup.
 
 ## Collect events and repaint
 
-`backend.events()` delivers keyboard and mouse input and terminal resizes as one flow.
+`terminal.events()` delivers keyboard and mouse input and terminal resizes as one flow.
 The compiled [interactive example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt)
 collects it. This excerpt runs inside
-`runInteractive`, after creating `app` and drawing the initial frame. `backend` is the
-Mordant terminal, and `terminal` is the Tenter `Terminal` that `withScreen` provides.
+`runInteractive`, after creating `app` and drawing the initial frame. `terminal` is the
+Tenter `Terminal` that `withScreen` provides, so the loop reads events from and draws to one object.
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt:input-loop"

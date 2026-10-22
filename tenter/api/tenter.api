@@ -520,6 +520,8 @@ public final class io/archinaut/tenter/terminal/Terminal {
 	public fun <init> (Lcom/github/ajalt/mordant/terminal/Terminal;Lio/archinaut/tenter/palette/RolePalette;)V
 	public final fun clear ()V
 	public final fun draw (Lkotlin/jvm/functions/Function1;)Lio/archinaut/tenter/terminal/CompletedFrame;
+	public final fun events (Lcom/github/ajalt/mordant/input/MouseTracking;)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun events$default (Lio/archinaut/tenter/terminal/Terminal;Lcom/github/ajalt/mordant/input/MouseTracking;ILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
 	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
 	public final fun resize (II)V
 }
@@ -547,11 +549,6 @@ public final class io/archinaut/tenter/terminal/TerminalEvent$Resized : io/archi
 	public final fun getSize ()Lio/archinaut/tenter/screen/Size;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/terminal/TerminalEventKt {
-	public static final fun events (Lcom/github/ajalt/mordant/terminal/Terminal;Lcom/github/ajalt/mordant/input/MouseTracking;)Lkotlinx/coroutines/flow/Flow;
-	public static synthetic fun events$default (Lcom/github/ajalt/mordant/terminal/Terminal;Lcom/github/ajalt/mordant/input/MouseTracking;ILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class io/archinaut/tenter/terminal/TerminalScreenKt {

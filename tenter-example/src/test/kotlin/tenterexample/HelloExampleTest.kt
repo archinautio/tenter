@@ -29,7 +29,7 @@ internal class HelloExampleTest {
             error("input after quit must not be read")
         }
 
-        runHello(terminal, events)
+        runHello(terminal) { events }
 
         assertEquals(2, read)
     }

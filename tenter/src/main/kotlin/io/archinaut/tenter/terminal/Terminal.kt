@@ -11,8 +11,10 @@ import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 
+import com.github.ajalt.mordant.input.MouseTracking
 import com.github.ajalt.mordant.rendering.Size
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Draws frames to a Mordant [backend].
@@ -35,8 +37,9 @@ import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
  * [com.github.ajalt.mordant.rendering.AnsiLevel.NONE] every SGR tag is suppressed regardless of
  * [palette], since the terminal cannot render color at all.
  *
- * The alternate screen and cursor lifecycle belongs to [withScreen]; this class only paints and
- * invalidates frames. It is not thread-safe.
+ * [events] reads input and resizes from the same [backend], so an application needs only this
+ * terminal for both its event loop and its frames. The alternate screen and cursor lifecycle
+ * belongs to [withScreen]. It is not thread-safe.
  */
 public class Terminal(private val backend: MordantTerminal, palette: RolePalette) {
 
@@ -85,6 +88,26 @@ public class Terminal(private val backend: MordantTerminal, palette: RolePalette
         previous = buffer
         return CompletedFrame(buffer)
     }
+
+    /**
+     * This terminal's events — user input with [mouseTracking], and size changes — as one cold flow,
+     * in the manner of an application reading events in its own loop. The first [TerminalEvent.Resized]
+     * fires at startup; later ones only when the size changes. Size polling also refreshes the size
+     * the next [draw] follows.
+     *
+     * Collecting acquires raw mode. To quit, stop collecting — for example with `takeWhile` on the
+     * application's quit key: raw mode is released before collection returns, at most one input poll
+     * interval (100 ms) later, whatever ends the collection. Only one collection should be active for a
+     * terminal at a time, so compose this flow once in the application's event loop.
+     *
+     * Terminal rendering, mutable panel/viewport state, and terminal-size observation should be
+     * confined to one application execution context. The input reader runs on
+     * [kotlinx.coroutines.Dispatchers.IO] and size polling in the collector's context; callers own the
+     * dispatcher and confinement policy and should not infer that the merged flow runs on one
+     * physical OS thread.
+     */
+    public fun events(mouseTracking: MouseTracking = MouseTracking.Normal): Flow<TerminalEvent> =
+        backend.events(mouseTracking)
 
     /**
      * Clears the current drawing destination and invalidates the diff base, so the next [draw]

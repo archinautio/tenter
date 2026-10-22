@@ -16,8 +16,9 @@ private const val EXIT_ALT_SCREEN: String = "\u001b[?1049l"
  *
  * The [palette] is selected by the caller and is used only to construct the [Terminal] handed to [block]. This
  * operation does not collect input, run an event loop, or make the mutable terminal safe to use
- * from multiple threads. A caller may put a synchronous `runBlocking` application inside [block].
- * Input flows acquire and release raw mode separately when they are collected.
+ * from multiple threads. A caller may put a synchronous `runBlocking` application inside [block]
+ * and read input from [Terminal.events], which acquires and releases raw mode separately while it
+ * is collected.
  *
  * Entry and cleanup are exception-safe, including a failure after one of the entry operations has
  * already written to the terminal. Cleanup is idempotent. If the block or entry fails and cleanup

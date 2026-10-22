@@ -35,7 +35,8 @@ corresponding implementation; do not maintain a second description here:
 ## Implementation invariants
 
 - Tenter adds primitives to Mordant rather than wrapping it. Preserve direct Mordant
-  types in `TerminalEvent.Input` and `KeyBinding`, and take a Mordant terminal in `events`.
+  types in `TerminalEvent.Input` and `KeyBinding`, and take the application's Mordant terminal in
+  `withScreen` rather than constructing one.
 - `KeyMap` copies context, layer, and group collections, and `PanelSet` copies its panel
   list. Do not expose mutable declaration collections.
 - A panel's content builder runs once per rendered frame. Panels have no size: the

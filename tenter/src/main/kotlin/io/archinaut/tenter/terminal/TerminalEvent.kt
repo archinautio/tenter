@@ -30,22 +30,8 @@ public sealed interface TerminalEvent {
     public data class Resized(val size: Size) : TerminalEvent
 }
 
-/**
- * This terminal's events — user input with [mouseTracking], and size changes — as one cold flow,
- * in the manner of an application reading events in its own loop. The first [TerminalEvent.Resized]
- * fires at startup; later ones only when the size changes.
- *
- * Collecting acquires raw mode. To quit, stop collecting — for example with `takeWhile` on the
- * application's quit key: raw mode is released before collection returns, at most one input poll
- * interval (100 ms) later, whatever ends the collection. Only one collection should be active for a
- * terminal at a time, so compose this flow once in the application's event loop.
- *
- * Terminal rendering, mutable panel/viewport state, and terminal-size observation should be
- * confined to one application execution context. The input reader runs on [Dispatchers.IO] and
- * size polling in the collector's context; callers own the dispatcher and confinement policy and
- * should not infer that the merged flow runs on one physical OS thread.
- */
-public fun MordantTerminal.events(mouseTracking: MouseTracking = MouseTracking.Normal): Flow<TerminalEvent> =
+/** Backs [Terminal.events]: input and resize events merged into one cold flow. */
+internal fun MordantTerminal.events(mouseTracking: MouseTracking): Flow<TerminalEvent> =
     merge(inputEvents(mouseTracking), resizeEvents())
 
 /**

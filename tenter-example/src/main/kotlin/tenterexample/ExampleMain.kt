@@ -16,7 +16,6 @@ import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.terminal.CompletedFrame
 import io.archinaut.tenter.terminal.Terminal
 import io.archinaut.tenter.terminal.TerminalEvent
-import io.archinaut.tenter.terminal.events
 import io.archinaut.tenter.terminal.withScreen
 import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.Widget
@@ -104,7 +103,7 @@ public fun main(args: Array<String>) {
 
     val backend = MordantTerminal()
     backend.withScreen(DefaultRolePalette) { terminal ->
-        runInteractive(backend, terminal)
+        runInteractive(terminal)
     }
 }
 
@@ -141,13 +140,13 @@ private fun checkPanelLayout() {
     check(app.cycle(ExamplePanelId.HELP) == PanelMode.NORMAL) { "the help panel has a mode besides normal and maximized" }
 }
 
-private fun runInteractive(backend: MordantTerminal, terminal: Terminal) {
+private fun runInteractive(terminal: Terminal) {
     val app = ExampleApp()
     terminal.draw(app::render)
 
     // --8<-- [start:input-loop]
     runBlocking {
-        backend.events()
+        terminal.events()
             // A Resized event needs no handling: the next draw follows the backend's new size.
             .onEach { event -> if (event is TerminalEvent.Input) app.handle(event.event) }
             // The quit key sets running to false; stopping collection releases the terminal.

@@ -4,28 +4,30 @@
 package tenterexample.hello
 
 import com.github.ajalt.mordant.input.KeyboardEvent
-import com.github.ajalt.mordant.terminal.Terminal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.runBlocking
 import io.archinaut.tenter.palette.DefaultRolePalette
+import io.archinaut.tenter.terminal.Terminal
 import io.archinaut.tenter.terminal.TerminalEvent
-import io.archinaut.tenter.terminal.events
 import io.archinaut.tenter.terminal.withScreen
 import io.archinaut.tenter.widget.Paragraph
+import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
 public fun main() {
-    val backend = Terminal()
-    runHello(backend, backend.events())
+    runHello(MordantTerminal())
 }
 
 /** The application owns the loop; tests can supply input without acquiring a real terminal. */
-public fun runHello(backend: Terminal, events: Flow<TerminalEvent>) {
+public fun runHello(
+    backend: MordantTerminal,
+    events: (Terminal) -> Flow<TerminalEvent> = { terminal -> terminal.events() },
+) {
     val greeting = Paragraph("Hello from Tenter — press q to quit")
     backend.withScreen(DefaultRolePalette) { terminal ->
         terminal.draw { frame -> frame.renderWidget(greeting, frame.area) }
         runBlocking {
-            events.takeWhile { event -> !event.isKey("q") }.collect { }
+            events(terminal).takeWhile { event -> !event.isKey("q") }.collect { }
         }
     }
 }
