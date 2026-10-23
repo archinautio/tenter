@@ -64,7 +64,7 @@ internal class TerminalTest {
 
     private val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
     private val backend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder)
-    private val terminal = Terminal(backend, FixturePalette)
+    private val terminal = Terminal(backend).apply { enterScope(FixturePalette) }
 
     @Test
     fun `fixed colors render through a custom palette in both channels`() {
@@ -88,7 +88,7 @@ internal class TerminalTest {
         val buffer = Buffer(1, 1)
         buffer.set(0, 0, Cell("X", Style(fg = fixed, bg = fixed)))
 
-        Terminal(customBackend, customPalette).renderBuffer(buffer)
+        Terminal(customBackend).apply { enterScope(customPalette) }.renderBuffer(buffer)
 
         assertTrue(recorder.output().contains("38;2;255;0;0"))
         assertTrue(recorder.output().contains("48;2;255;0;0"))
@@ -140,7 +140,7 @@ internal class TerminalTest {
     fun `default cell emits a different palette's sequences when constructed with it`() {
         val altRecorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val altBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = altRecorder)
-        val altTerminal = Terminal(altBackend, AltFixturePalette)
+        val altTerminal = Terminal(altBackend).apply { enterScope(AltFixturePalette) }
 
         val buffer = Buffer(5, 1)
         Canvas.of(buffer).setString(0, 0, "hello")
@@ -447,7 +447,7 @@ internal class TerminalTest {
     fun `a non-interactive terminal clear gets no alt-screen escapes`() {
         val plainRecorder = TerminalRecorder(ansiLevel = AnsiLevel.NONE)
         val plainBackend = MordantTerminal(ansiLevel = AnsiLevel.NONE, terminalInterface = plainRecorder)
-        val plainTerminal = Terminal(plainBackend, FixturePalette)
+        val plainTerminal = Terminal(plainBackend).apply { enterScope(FixturePalette) }
 
         plainTerminal.clear()
 
@@ -464,7 +464,7 @@ internal class TerminalTest {
         // using the palette's background rather than whatever the terminal itself defaults to.
         val altRecorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val altBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = altRecorder)
-        val altTerminal = Terminal(altBackend, AltFixturePalette)
+        val altTerminal = Terminal(altBackend).apply { enterScope(AltFixturePalette) }
 
         altTerminal.clear()
 
@@ -480,7 +480,7 @@ internal class TerminalTest {
     fun `AnsiLevel NONE emits no SGR codes at all`() {
         val noneRecorder = TerminalRecorder(ansiLevel = AnsiLevel.NONE)
         val noneBackend = MordantTerminal(ansiLevel = AnsiLevel.NONE, terminalInterface = noneRecorder)
-        val noneTerminal = Terminal(noneBackend, FixturePalette)
+        val noneTerminal = Terminal(noneBackend).apply { enterScope(FixturePalette) }
 
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "abc", Style(fg = ChromeRole.DANGER, strikethrough = true))

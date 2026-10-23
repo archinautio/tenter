@@ -12,9 +12,12 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 
 import com.github.ajalt.mordant.input.MouseTracking
+import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.Size
+import com.github.ajalt.mordant.terminal.TerminalRecorder
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 /**
  * Draws frames to a Mordant [backend].
@@ -29,21 +32,35 @@ import kotlinx.coroutines.flow.Flow
  * [events] polls it), the next draw resizes both buffers. [resize] sets a size explicitly,
  * which holds until the backend's size next changes.
  *
- * [palette] resolves every [ColorRole] a caller draws with to a concrete color; picking *which*
- * palette to use (a light/dark choice, detecting the terminal's color support, letting the user
- * override it) is the host application's job, not this terminal's — construct the [RolePalette]
- * before handing it here. The backend's own [com.github.ajalt.mordant.rendering.AnsiLevel] is
- * still read directly off [backend] for exactly one purpose: at
- * [com.github.ajalt.mordant.rendering.AnsiLevel.NONE] every SGR tag is suppressed regardless of
- * [palette], since the terminal cannot render color at all.
+ * Creating a terminal writes nothing. [draw] works only inside [withScreen], whose [RolePalette]
+ * resolves every [ColorRole] a caller draws with to a concrete color; picking *which* palette to
+ * use (a light/dark choice, [ansiLevel], letting the user override it) is the host application's
+ * job. At [AnsiLevel.NONE] every SGR tag is suppressed regardless of the palette, since the
+ * terminal cannot render color at all.
+ *
+ * A [headless] terminal never touches a real one: it draws anywhere, without color, so tests can
+ * check the frames an application draws through [lastFrame] or [draw]'s result.
  *
  * [events] reads input and resizes from the same [backend], so an application needs only this
- * terminal for both its event loop and its frames. The alternate screen and cursor lifecycle
- * belongs to [withScreen]. It is not thread-safe.
+ * terminal for both its event loop and its frames. It is not thread-safe.
  */
-public class Terminal(private val backend: MordantTerminal, palette: RolePalette) {
+public class Terminal private constructor(
+    /**
+     * The Mordant terminal this terminal draws to and reads from. Printing through it directly
+     * bypasses frame diffing; call [clear] afterwards so the next [draw] repaints fully.
+     */
+    public val backend: MordantTerminal,
+    private val headless: Boolean,
+) {
 
-    private val styleTagCache = StyleTagCache(palette, backend.terminalInfo.ansiLevel)
+    /**
+     * A terminal over [backend]. The default is the process's real terminal; pass another one to
+     * configure Mordant yourself.
+     */
+    public constructor(backend: MordantTerminal = MordantTerminal()) : this(backend, headless = false)
+
+    // The active withScreen scope's style tags, or null outside any scope.
+    private var styles: StyleTagCache? = null
 
     private var backendSize: Size = backend.size
     private var current: Buffer = Buffer(backendSize.width.coerceAtLeast(0), backendSize.height.coerceAtLeast(0))
@@ -54,6 +71,16 @@ public class Terminal(private val backend: MordantTerminal, palette: RolePalette
 
     /** The full drawable area of the next frame. */
     public val area: Rect get() = Rect(0, 0, current.width, current.height)
+
+    /** The color level [backend] supports, for choosing the palette to pass to [withScreen]. */
+    public val ansiLevel: AnsiLevel get() = backend.terminalInfo.ansiLevel
+
+    /**
+     * What the latest successful [draw] returned, or null before the first one. It survives [clear],
+     * and a test reads it after the application's own loop has drawn.
+     */
+    public var lastFrame: CompletedFrame? = null
+        private set
 
     /**
      * Resizes the drawing area to [width] x [height]. The next [draw] repaints fully, clearing
@@ -69,11 +96,14 @@ public class Terminal(private val backend: MordantTerminal, palette: RolePalette
     /**
      * Calls [render] with a fresh [Frame] covering [area], then sends what changed since the
      * previous frame. If [render] throws, nothing is sent, the previous frame remains the diff
-     * base, and the exception propagates.
+     * base and [lastFrame], and the exception propagates.
      *
      * The returned [CompletedFrame] reads the drawn cells and stays valid until the next draw.
+     *
+     * @throws IllegalStateException outside [withScreen], unless this terminal is [headless].
      */
     public fun draw(render: (Frame) -> Unit): CompletedFrame {
+        check(styles != null || headless) { "draw outside withScreen; wrap the drawing code in terminal.withScreen { }" }
         autoresize()
         val buffer = current
         buffer.reset()
@@ -86,7 +116,7 @@ public class Terminal(private val backend: MordantTerminal, palette: RolePalette
             Buffer(buffer.width, buffer.height)
         }
         previous = buffer
-        return CompletedFrame(buffer)
+        return CompletedFrame(buffer).also { lastFrame = it }
     }
 
     /**
@@ -105,22 +135,36 @@ public class Terminal(private val backend: MordantTerminal, palette: RolePalette
      * [kotlinx.coroutines.Dispatchers.IO] and size polling in the collector's context; callers own the
      * dispatcher and confinement policy and should not infer that the merged flow runs on one
      * physical OS thread.
+     *
+     * A [headless] terminal has no input: its flow completes immediately.
      */
     public fun events(mouseTracking: MouseTracking = MouseTracking.Normal): Flow<TerminalEvent> =
-        backend.events(mouseTracking)
+        if (headless) emptyFlow() else backend.events(mouseTracking)
 
     /**
      * Clears the current drawing destination and invalidates the diff base, so the next [draw]
      * repaints fully. The scoped [withScreen] operation owns alternate-screen and cursor
      * lifecycle; calling this method directly never starts or ends an alternate-screen session.
      *
-     * The default style's SGR tag is emitted before `clearScreen()` (which erases using whatever
-     * SGR is currently active) so the cleared screen uses the palette's background immediately.
+     * Inside [withScreen], the default style's SGR tag is emitted before `clearScreen()` (which
+     * erases using whatever SGR is currently active) so the cleared screen uses the palette's
+     * background immediately.
      */
     public fun clear() {
-        val defaultStyle = styleTagCache.tagsFor(Style.DEFAULT)?.open.orEmpty()
+        val defaultStyle = styles?.tagsFor(Style.DEFAULT)?.open.orEmpty()
         backend.rawPrint(defaultStyle + backend.cursor.getMoves { clearScreen(); setPosition(0, 0) })
         previous = null
+    }
+
+    /** Starts a [withScreen] scope drawing with [palette]. */
+    internal fun enterScope(palette: RolePalette) {
+        check(styles == null) { "withScreen is already active on this terminal" }
+        styles = StyleTagCache(palette, ansiLevel)
+    }
+
+    /** Ends the scope [enterScope] started. */
+    internal fun exitScope() {
+        styles = null
     }
 
     private fun autoresize() {
@@ -207,7 +251,7 @@ public class Terminal(private val backend: MordantTerminal, palette: RolePalette
                 runChars.append(cell.symbol)
                 x++
             }
-            val tags = styleTagCache.tagsFor(runStyle)
+            val tags = styles?.tagsFor(runStyle)
             if (tags == null) {
                 activeTags?.let { sb.append(it.close) }
                 activeStyle = null
@@ -223,5 +267,24 @@ public class Terminal(private val backend: MordantTerminal, palette: RolePalette
             sb.append(runChars)
         }
         activeTags?.let { sb.append(it.close) }
+    }
+
+    public companion object {
+        /**
+         * A [width] x [height] terminal that never touches a real one, for tests and headless
+         * rendering. It draws without color, also outside [withScreen], reports [AnsiLevel.NONE],
+         * and its [events] flow is empty.
+         */
+        public fun headless(width: Int, height: Int): Terminal {
+            val recorder = TerminalRecorder(
+                ansiLevel = AnsiLevel.NONE,
+                width = width,
+                height = height,
+                outputInteractive = false,
+                inputInteractive = false,
+            )
+            val backend = MordantTerminal(ansiLevel = AnsiLevel.NONE, width = width, height = height, terminalInterface = recorder)
+            return Terminal(backend, headless = true)
+        }
     }
 }

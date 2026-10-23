@@ -23,4 +23,8 @@ public class CompletedFrame internal constructor(
 
     /** @throws IndexOutOfBoundsException if ([x], [y]) is outside [area]. */
     public fun get(x: Int, y: Int): Cell = buffer.get(x, y)
+
+    /** Each row's text, top to bottom. A wide character appears once, not once per column it covers. */
+    public fun lines(): List<String> =
+        (0 until height).map { y -> (0 until width).joinToString("") { x -> get(x, y).symbol } }
 }

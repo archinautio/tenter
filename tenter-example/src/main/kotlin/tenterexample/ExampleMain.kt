@@ -4,16 +4,12 @@
 package tenterexample
 
 import com.github.ajalt.mordant.input.MouseEvent
-import com.github.ajalt.mordant.rendering.AnsiLevel
-import com.github.ajalt.mordant.terminal.TerminalRecorder
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.runBlocking
-import io.archinaut.tenter.palette.DefaultRolePalette
 import io.archinaut.tenter.widget.panel.PanelMode
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Padding
-import io.archinaut.tenter.terminal.CompletedFrame
 import io.archinaut.tenter.terminal.Terminal
 import io.archinaut.tenter.terminal.TerminalEvent
 import io.archinaut.tenter.terminal.withScreen
@@ -24,7 +20,6 @@ import io.archinaut.tenter.widget.ViewportState
 import io.archinaut.tenter.widget.Viewport
 import io.archinaut.tenter.widget.block
 import io.archinaut.tenter.widget.measure
-import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
 /**
  * Runs the separate-consumer smoke scenario without raw input or terminal lifecycle escapes.
@@ -47,9 +42,9 @@ public fun runHeadlessSmoke(): SmokeResult {
     check(followed.settled?.revealed?.y == 2) { "the block lost the child's reveal" }
 
     val app = ExampleApp()
-    val terminal = headlessTerminal(width = 140, height = 24)
+    val terminal = Terminal.headless(width = 140, height = 24)
     var frame = terminal.draw(app::render)
-    val initialText = frameText(frame)
+    val initialText = frame.lines().joinToString("\n")
     check("row 0" in initialText) { "the rendered list did not contain its first generated row" }
     check("PgUp/PgDn" in initialText) { "the rendered help did not contain the keymap hints" }
 
@@ -59,7 +54,7 @@ public fun runHeadlessSmoke(): SmokeResult {
         app.handle(MouseEvent(x = wheelTarget.x + 1, y = wheelTarget.y + 1, wheelDown = true))
     }
     frame = terminal.draw(app::render)
-    val scrolledText = frameText(frame)
+    val scrolledText = frame.lines().joinToString("\n")
     check("row 599" in scrolledText) { "wheel scrolling did not reach the final generated row" }
 
     val scrolledLayout = checkNotNull(app.panels.layout)
@@ -101,10 +96,7 @@ public fun main(args: Array<String>) {
         return
     }
 
-    val backend = MordantTerminal()
-    backend.withScreen(DefaultRolePalette) { terminal ->
-        runInteractive(terminal)
-    }
+    Terminal().withScreen { terminal -> runInteractive(terminal) }
 }
 
 /**
@@ -113,7 +105,7 @@ public fun main(args: Array<String>) {
  */
 private fun checkPanelLayout() {
     val app = ExampleApp()
-    val terminal = headlessTerminal(width = 140, height = 24)
+    val terminal = Terminal.headless(width = 140, height = 24)
 
     terminal.draw(app::render)
     val normal = checkNotNull(app.panels.layout)
@@ -156,24 +148,8 @@ private fun runInteractive(terminal: Terminal) {
     // --8<-- [end:input-loop]
 }
 
-/** A Tenter terminal over an in-memory recorder, for drawing frames without a real terminal. */
-internal fun headlessTerminal(width: Int, height: Int): Terminal = Terminal(
-    MordantTerminal(
-        ansiLevel = AnsiLevel.NONE,
-        width = width,
-        height = height,
-        terminalInterface = TerminalRecorder(ansiLevel = AnsiLevel.NONE, width = width, height = height),
-    ),
-    DefaultRolePalette,
-)
-
 private fun renderAnimationFrame(widget: Widget): Canvas {
     val canvas = Canvas.offscreen(3, 1)
     widget.render(canvas)
     return canvas
 }
-
-private fun frameText(frame: CompletedFrame): String =
-    (0 until frame.height).joinToString("\n") { y ->
-        (0 until frame.width).joinToString("") { x -> frame.get(x, y).symbol }
-    }

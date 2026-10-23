@@ -2,24 +2,33 @@
 
 ## Keep drawing and state updates together
 
-Create a Mordant `Terminal` as the backend and enter
-`backend.withScreen(DefaultRolePalette) { terminal -> ... }`. The block receives Tenter's
-`Terminal`; call `terminal.draw { frame -> ... }` for the initial frame. Collect input and resize events in one application execution context.
+Create a Tenter `Terminal` and enter its screen scope with
+`Terminal().withScreen { terminal -> ... }`. Inside the block, call
+`terminal.draw { frame -> ... }` for the initial frame. Collect input and resize events in one application execution context.
 Update application state and repaint there as well.
 
-`withScreen` restores the screen and cursor when its block returns or throws.
+`withScreen` restores the screen and cursor when its block returns or throws. Drawing
+outside the scope throws, and so does a nested scope on the same terminal; entering again
+after a scope returned is fine.
 Keep only one event collection active per terminal. Collecting `terminal.events()`
 manages raw mode, and stopping collection releases it before collection returns. The
 flow starts producing events when collected. Avoid abrupt process termination inside the screen scope, which
 bypasses normal cleanup.
+
+## Reach the Mordant terminal
+
+`Terminal()` creates the process's real Mordant terminal and exposes it as `terminal.backend`.
+Pass your own as `Terminal(backend)` to configure Mordant yourself. Printing through `backend`
+directly bypasses frame diffing; call `terminal.clear()` afterwards so the next draw repaints
+fully. To test drawing without a real terminal, see [testing](testing.md).
 
 ## Collect events and repaint
 
 `terminal.events()` delivers keyboard and mouse input and terminal resizes as one flow.
 The compiled [interactive example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt)
 collects it. This excerpt runs inside
-`runInteractive`, after creating `app` and drawing the initial frame. `terminal` is the
-Tenter `Terminal` that `withScreen` provides, so the loop reads events from and draws to one object.
+`runInteractive`, after creating `app` and drawing the initial frame. The loop reads events
+from and draws to the same `terminal`.
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt:input-loop"

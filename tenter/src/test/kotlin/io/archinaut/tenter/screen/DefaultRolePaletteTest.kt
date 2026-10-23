@@ -30,7 +30,7 @@ internal class DefaultRolePaletteTest {
             buffer.set(index, 2, Cell("X", Style(fg = role, bg = role)))
         }
 
-        io.archinaut.tenter.terminal.Terminal(terminal, DefaultRolePalette).renderBuffer(buffer)
+        io.archinaut.tenter.terminal.Terminal(terminal).apply { enterScope(DefaultRolePalette) }.renderBuffer(buffer)
 
         for (role in ChromeRole.entries) {
             assertTrue(DefaultRolePalette.foreground(role) is PaletteColor.Ansi16)

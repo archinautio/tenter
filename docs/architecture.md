@@ -29,14 +29,18 @@ corresponding implementation; do not maintain a second description here:
 - [Content and layouts](site/layouts.md): measurable widgets, blocks, frames, layout splitting, snapshots, and memory costs.
 - [Scrolling and panels](site/panels.md): state ownership, application-owned panel placement, completed-frame observations, hidden panels, and failed-render recovery.
 - [Input and resizing](site/input.md): key-map validation, event collection, application confinement, and terminal lifetime.
+- [Testing](site/testing.md): headless terminals, injected input, and frame assertions.
 - [Widgets and styling](site/styling.md): glyph choices, display-cell sizing, and palette requirements.
 - [Animation](site/animation.md): finite elapsed-time playback and caller scheduling.
 
 ## Implementation invariants
 
-- Tenter adds primitives to Mordant rather than wrapping it. Preserve direct Mordant
-  types in `TerminalEvent.Input` and `KeyBinding`, and take the application's Mordant terminal in
-  `withScreen` rather than constructing one.
+- Tenter is a library over Mordant, not a framework around it. Applications create a `Terminal`
+  and decide when to enter its screen scope; Tenter creates a real Mordant terminal by default,
+  but never hides it: `Terminal` accepts any configured Mordant terminal and exposes it as
+  `backend`. Preserve direct Mordant types in `TerminalEvent.Input` and `KeyBinding`.
+- The palette belongs to the `withScreen` scope. A real terminal draws only inside one; a headless
+  terminal draws anywhere, without color, so consumers test frames, not escape output.
 - `KeyMap` copies context, layer, and group collections, and `PanelSet` copies its panel
   list. Do not expose mutable declaration collections.
 - A panel's content builder runs once per rendered frame. Panels have no size: the

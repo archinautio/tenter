@@ -11,6 +11,7 @@ nav = [
   { "Content and layouts" = "layouts.md" },
   { "Scrolling and panels" = "panels.md" },
   { "Input and resizing" = "input.md" },
+  { "Testing" = "testing.md" },
   { "Widgets and styling" = "styling.md" },
   { "Animation" = "animation.md" },
   { "Examples and troubleshooting" = "examples.md" },

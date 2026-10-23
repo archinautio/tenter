@@ -52,7 +52,7 @@ private class Label(private val text: String) : Widget {
 internal class TerminalDrawTest {
 
     private val screen = ResizableRecorder(6, 2)
-    private val terminal = Terminal(screen.backend, PlainPalette)
+    private val terminal = Terminal(screen.backend).apply { enterScope(PlainPalette) }
 
     @Test
     fun `the area starts at the backend's size`() {

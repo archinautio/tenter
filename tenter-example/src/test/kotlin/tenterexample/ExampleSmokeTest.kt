@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import io.archinaut.tenter.terminal.Terminal
 import io.archinaut.tenter.widget.panel.Panel
 import io.archinaut.tenter.widget.panel.PanelMode
 import io.archinaut.tenter.widget.panel.PanelSet
@@ -27,7 +28,7 @@ internal class ExampleSmokeTest {
     @Test
     fun `validated keymap movement and public settled hit test drive selection and toggle`() {
         val app = ExampleApp()
-        headlessTerminal(width = 140, height = 24).draw(app::render)
+        Terminal.headless(width = 140, height = 24).draw(app::render)
 
         app.handleKey(KeyboardEvent("ArrowDown"))
         app.handleKey(KeyboardEvent(" "))
@@ -71,7 +72,7 @@ internal class ExampleSmokeTest {
             app.handleKey(KeyboardEvent("ArrowDown"))
         }
         // Short enough that every panel's content overflows it.
-        val terminal = headlessTerminal(width = 140, height = 9)
+        val terminal = Terminal.headless(width = 140, height = 9)
         terminal.draw(app::render)
 
         for ((key, id) in listOf("1" to ExamplePanelId.ROWS, "2" to ExamplePanelId.DETAILS, "3" to ExamplePanelId.CHECKED)) {
@@ -95,7 +96,7 @@ internal class ExampleSmokeTest {
             app.handleKey(KeyboardEvent(" "))
             app.handleKey(KeyboardEvent("ArrowDown"))
         }
-        val terminal = headlessTerminal(width = 140, height = 9)
+        val terminal = Terminal.headless(width = 140, height = 9)
         terminal.draw(app::render)
 
         app.handleKey(KeyboardEvent("3"))
@@ -121,8 +122,8 @@ internal class ExampleSmokeTest {
         // Both apps coexist and render only because each one builds its own panel instances.
         val first = ExampleApp()
         val second = ExampleApp()
-        headlessTerminal(width = 140, height = 24).draw(first::render)
-        headlessTerminal(width = 140, height = 24).draw(second::render)
+        Terminal.headless(width = 140, height = 24).draw(first::render)
+        Terminal.headless(width = 140, height = 24).draw(second::render)
 
         assertEquals(ExamplePanelId.ROWS, first.panels.focused)
         assertEquals(ExamplePanelId.ROWS, second.panels.focused)

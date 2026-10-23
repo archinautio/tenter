@@ -3,7 +3,6 @@
 
 package io.archinaut.tenter.terminal
 
-import io.archinaut.tenter.palette.DefaultRolePalette
 import io.archinaut.tenter.screen.Size
 import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.terminal.Terminal
@@ -58,7 +57,7 @@ internal class TerminalEventTest {
         fun `stopping collection on the application's quit key releases raw mode before returning`() {
             val keys = listOf(KeyboardEvent("a"), KeyboardEvent("q"), KeyboardEvent("b"))
             val probe = RawModeProbe(TerminalRecorder(width = 80, height = 20).apply { inputEvents = keys.toMutableList() })
-            val terminal = io.archinaut.tenter.terminal.Terminal(Terminal(terminalInterface = probe), DefaultRolePalette)
+            val terminal = io.archinaut.tenter.terminal.Terminal(backend = Terminal(terminalInterface = probe))
 
             val seen = runBlocking {
                 withTimeout(5.seconds) {

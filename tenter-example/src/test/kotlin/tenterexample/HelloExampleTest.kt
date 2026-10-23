@@ -4,24 +4,22 @@
 package tenterexample
 
 import com.github.ajalt.mordant.input.KeyboardEvent
-import com.github.ajalt.mordant.rendering.AnsiLevel
-import com.github.ajalt.mordant.terminal.Terminal
-import com.github.ajalt.mordant.terminal.TerminalRecorder
 import kotlinx.coroutines.flow.flow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import io.archinaut.tenter.terminal.Terminal
 import io.archinaut.tenter.terminal.TerminalEvent
 import tenterexample.hello.runHello
 
 internal class HelloExampleTest {
+    // --8<-- [start:test]
     @Test
     fun `hello paints before reading and quits without consuming later input`() {
-        val recorder = TerminalRecorder(ansiLevel = AnsiLevel.NONE, width = 50, height = 8)
-        val terminal = Terminal(ansiLevel = AnsiLevel.NONE, terminalInterface = recorder)
+        val terminal = Terminal.headless(width = 50, height = 8)
         var read = 0
         val events = flow<TerminalEvent> {
-            assertTrue(recorder.output().contains("Hello from Tenter"))
+            assertTrue(checkNotNull(terminal.lastFrame).lines().first().startsWith("Hello from Tenter"))
             read++
             emit(TerminalEvent.Input(KeyboardEvent("x")))
             read++
@@ -29,8 +27,9 @@ internal class HelloExampleTest {
             error("input after quit must not be read")
         }
 
-        runHello(terminal) { events }
+        runHello(terminal, events)
 
         assertEquals(2, read)
     }
+    // --8<-- [end:test]
 }

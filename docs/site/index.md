@@ -96,6 +96,7 @@ height, scrolling viewports, and managed panels on top of these concepts.
 - [Content and layouts](layouts.md): compose text, columns, padding, and borders.
 - [Scrolling and panels](panels.md): show more content than fits on screen.
 - [Input and resizing](input.md): update your application in response to events.
+- [Testing](testing.md): check the frames your application draws.
 - [Widgets and styling](styling.md): add selection, checkboxes, and colors.
 - [Animation](animation.md): render frames over time.
 - [Examples and troubleshooting](examples.md): run the full demonstration.

@@ -3,8 +3,10 @@
 
 package io.archinaut.tenter.terminal
 
-import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
+import io.archinaut.tenter.palette.DefaultRolePalette
 import io.archinaut.tenter.palette.RolePalette
+
+import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
 // Mordant exposes cursor control but not the alternate screen buffer. These are raw escapes,
 // gated by the same interactive check as Mordant's cursor implementation.
@@ -12,30 +14,40 @@ private const val ENTER_ALT_SCREEN: String = "\u001b[?1049h"
 private const val EXIT_ALT_SCREEN: String = "\u001b[?1049l"
 
 /**
- * Runs [block] inside one alternate-screen and cursor scope.
+ * Runs [block] with this terminal inside one alternate-screen and cursor scope, drawing with
+ * [palette].
  *
- * The [palette] is selected by the caller and is used only to construct the [Terminal] handed to [block]. This
- * operation does not collect input, run an event loop, or make the mutable terminal safe to use
- * from multiple threads. A caller may put a synchronous `runBlocking` application inside [block]
- * and read input from [Terminal.events], which acquires and releases raw mode separately while it
- * is collected.
+ * Entry clears the screen, so the first [Terminal.draw] in [block] repaints fully. Entering again
+ * after an earlier scope has returned is fine, also with another palette; a nested scope on the
+ * same terminal throws [IllegalStateException].
+ *
+ * This operation does not collect input, run an event loop, or make the mutable terminal safe to
+ * use from multiple threads. A caller may put a synchronous `runBlocking` application inside
+ * [block] and read input from [Terminal.events], which acquires and releases raw mode separately
+ * while it is collected.
  *
  * Entry and cleanup are exception-safe, including a failure after one of the entry operations has
  * already written to the terminal. Cleanup is idempotent. If the block or entry fails and cleanup
  * fails as well, the original failure is rethrown and the cleanup failure is suppressed on it.
  * Noninteractive terminals do not receive alternate-screen or cursor escape sequences.
  */
-public fun <T> MordantTerminal.withScreen(
-    palette: RolePalette,
-    block: (Terminal) -> T,
-): T {
-    val lifecycle = ScreenLifecycle(this)
+public fun <T> Terminal.withScreen(palette: RolePalette = DefaultRolePalette, block: (Terminal) -> T): T {
+    // Outside the try: a rejected nested scope must not end the outer one.
+    enterScope(palette)
+    try {
+        return runOnScreen(block)
+    } finally {
+        exitScope()
+    }
+}
+
+private fun <T> Terminal.runOnScreen(block: (Terminal) -> T): T {
+    val lifecycle = ScreenLifecycle(backend)
     var failure: Throwable? = null
     try {
         lifecycle.enter()
-        val terminal = Terminal(this, palette)
-        terminal.clear()
-        return block(terminal)
+        clear()
+        return block(this)
     } catch (thrown: Throwable) {
         failure = thrown
         throw thrown
