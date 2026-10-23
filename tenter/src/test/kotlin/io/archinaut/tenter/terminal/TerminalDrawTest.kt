@@ -152,7 +152,7 @@ internal class TerminalDrawTest {
     @Test
     fun `a new screen repaints its first frame fully`() {
         screen.draw { it.renderWidget(Label("x"), it.area) }
-        terminal.closeScreen(screen)
+        terminal.closeScreen(screen, failure = null)
         val next = terminal.openScreen(PlainPalette)
         device.recorder.clearOutput()
 

@@ -68,14 +68,17 @@ public sealed class Terminal(
      * terminal throws [IllegalStateException]. The [Screen] closes when [block] returns.
      *
      * This operation does not collect input, run an event loop, or make the terminal safe to use from
-     * multiple threads. A caller may put a synchronous `runBlocking` application inside [block] and
-     * read input from [Screen.events].
+     * multiple threads. [block] is inlined, so inside a coroutine it may suspend — for example to run
+     * the application's event loop over [Screen.events] — and a synchronous caller may put a
+     * `runBlocking` application inside it instead. Either way, keep every use of the screen confined
+     * to one execution context.
      *
      * Entry and cleanup are exception-safe, including a failure after entry has already written to
      * the terminal. If the block or entry fails and cleanup fails as well, the original failure is
      * rethrown and the cleanup failure is suppressed on it.
      */
-    public fun <T> withScreen(palette: RolePalette = DefaultRolePalette, block: (Screen) -> T): T {
+    public inline fun <T> withScreen(palette: RolePalette = DefaultRolePalette, block: (Screen) -> T): T {
+        // Kept minimal: this body is copied into callers, so the logic lives in the two calls.
         val screen = openScreen(palette)
         var failure: Throwable? = null
         try {
@@ -84,16 +87,12 @@ public sealed class Terminal(
             failure = thrown
             throw thrown
         } finally {
-            try {
-                closeScreen(screen)
-            } catch (cleanupFailure: Throwable) {
-                val originalFailure = failure ?: throw cleanupFailure
-                originalFailure.addSuppressed(cleanupFailure)
-            }
+            closeScreen(screen, failure)
         }
     }
 
     /** Opens the [Screen] that [withScreen] runs its block with. */
+    @PublishedApi
     internal fun openScreen(palette: RolePalette): Screen {
         check(!screenOpen) { "withScreen is already active on this terminal" }
         val session = open(palette)
@@ -101,10 +100,17 @@ public sealed class Terminal(
         return Screen(this, session)
     }
 
-    /** Closes a [screen] that [openScreen] returned, even if closing its session fails. */
-    internal fun closeScreen(screen: Screen) {
+    /**
+     * Closes a [screen] that [openScreen] returned, even if closing its session fails. A cleanup
+     * failure is suppressed on [failure], the block's or entry's own, when there is one.
+     */
+    @PublishedApi
+    internal fun closeScreen(screen: Screen, failure: Throwable?) {
         try {
             screen.close()
+        } catch (cleanupFailure: Throwable) {
+            if (failure == null) throw cleanupFailure
+            failure.addSuppressed(cleanupFailure)
         } finally {
             screenOpen = false
         }

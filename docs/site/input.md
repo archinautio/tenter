@@ -4,7 +4,8 @@
 
 Create a Tenter `Terminal` and enter its screen scope with
 `Terminal().withScreen { screen -> ... }`. Inside the block, call
-`screen.draw { frame -> ... }` for the initial frame. Collect input and resize events in one application execution context.
+`screen.draw { frame -> ... }` for the initial frame. The block is inlined, so inside a
+coroutine it can suspend, for example to collect `screen.events()` directly. Collect input and resize events in one application execution context.
 Update application state and repaint there as well.
 
 `withScreen` restores the screen and cursor when its block returns or throws. Only the

@@ -108,6 +108,15 @@ internal class HeadlessTerminalTest {
     }
 
     @Test
+    fun `a coroutine suspends inside the screen scope`() {
+        val terminal = Terminal.headless(width = 3, height = 1) { key("a") }
+
+        val events = runBlocking { terminal.withScreen { screen -> screen.events().toList() } }
+
+        assertEquals(2, events.size)
+    }
+
+    @Test
     fun `the script sees what the application drew for its previous event`() {
         val seen = mutableListOf<String>()
         val terminal = Terminal.headless(width = 3, height = 1) {

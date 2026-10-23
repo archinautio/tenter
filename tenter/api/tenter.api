@@ -540,7 +540,9 @@ public final class io/archinaut/tenter/terminal/Screen {
 public abstract class io/archinaut/tenter/terminal/Terminal {
 	public static final field Companion Lio/archinaut/tenter/terminal/Terminal$Companion;
 	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun closeScreen (Lio/archinaut/tenter/terminal/Screen;Ljava/lang/Throwable;)V
 	public abstract fun getAnsiLevel ()Lcom/github/ajalt/mordant/rendering/AnsiLevel;
+	public final fun openScreen (Lio/archinaut/tenter/palette/RolePalette;)Lio/archinaut/tenter/terminal/Screen;
 	public final fun withScreen (Lio/archinaut/tenter/palette/RolePalette;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static synthetic fun withScreen$default (Lio/archinaut/tenter/terminal/Terminal;Lio/archinaut/tenter/palette/RolePalette;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
 }
