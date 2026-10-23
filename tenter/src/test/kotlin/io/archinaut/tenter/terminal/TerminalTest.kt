@@ -64,7 +64,7 @@ internal class TerminalTest {
 
     private val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
     private val backend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder)
-    private val terminal = Terminal(backend).apply { enterScope(FixturePalette) }
+    private val screen = Terminal(backend).openScreen(FixturePalette).also { recorder.clearOutput() }
 
     @Test
     fun `fixed colors render through a custom palette in both channels`() {
@@ -88,7 +88,7 @@ internal class TerminalTest {
         val buffer = Buffer(1, 1)
         buffer.set(0, 0, Cell("X", Style(fg = fixed, bg = fixed)))
 
-        Terminal(customBackend).apply { enterScope(customPalette) }.renderBuffer(buffer)
+        Terminal(customBackend).openScreen(customPalette).also { recorder.clearOutput() }.renderBuffer(buffer)
 
         assertTrue(recorder.output().contains("38;2;255;0;0"))
         assertTrue(recorder.output().contains("48;2;255;0;0"))
@@ -99,7 +99,7 @@ internal class TerminalTest {
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "abc")
 
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         // setPosition(0, 0) emits ESC[1;1H (1-indexed row;col) — the literal ESC byte is part of
         // the prefix, not just the bracket text that follows it.
@@ -116,7 +116,7 @@ internal class TerminalTest {
         val buffer = Buffer(5, 1)
         Canvas.of(buffer).setString(0, 0, "hello")
 
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         assertTrue(out.contains("hello"), "Expected 'hello' in output: ${out.repr()}")
@@ -129,7 +129,7 @@ internal class TerminalTest {
         val buffer = Buffer(1, 1)
         Canvas.of(buffer).setString(0, 0, "X", Style(fg = ChromeRole.DANGER))
 
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         assertTrue(out.contains("38;2;255;153;153"), "Expected DANGER's foreground: ${out.repr()}")
@@ -140,11 +140,11 @@ internal class TerminalTest {
     fun `default cell emits a different palette's sequences when constructed with it`() {
         val altRecorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val altBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = altRecorder)
-        val altTerminal = Terminal(altBackend).apply { enterScope(AltFixturePalette) }
+        val altScreen = Terminal(altBackend).openScreen(AltFixturePalette).also { altRecorder.clearOutput() }
 
         val buffer = Buffer(5, 1)
         Canvas.of(buffer).setString(0, 0, "hello")
-        altTerminal.renderBuffer(buffer)
+        altScreen.renderBuffer(buffer)
 
         val out = altRecorder.output()
         assertTrue(out.contains("38;2;32;36;40"), "Expected AltFixturePalette's foreground: ${out.repr()}")
@@ -157,7 +157,7 @@ internal class TerminalTest {
         val buffer = Buffer(4, 1)
         Canvas.of(buffer).setString(0, 0, "ABCD", Style(fg = ChromeRole.DANGER))
 
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         // The characters must appear contiguous — no SGR codes between them
@@ -182,7 +182,7 @@ internal class TerminalTest {
             buffer.set(x, 0, Cell("X", Style(fg = ChromeRole.DANGER)))
         }
 
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         val resetSeq = "39;49m"
@@ -197,7 +197,7 @@ internal class TerminalTest {
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "XYZ", Style(fg = ChromeRole.DANGER, strikethrough = true))
 
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         assertTrue(out.contains("XYZ"), "Expected 'XYZ' to appear contiguously in output: ${out.repr()}")
@@ -229,7 +229,7 @@ internal class TerminalTest {
         buffer.set(0, 0, Cell("A", Style(fg = ChromeRole.DANGER, bg = ChromeRole.SUCCESS)))
         buffer.set(1, 0, Cell("B", Style.DEFAULT))
 
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         val betweenAAndB = out.substringAfter("A").substringBefore("B")
@@ -252,7 +252,7 @@ internal class TerminalTest {
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "中") // 中, width=2
 
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         assertTrue(out.contains("中"), "Expected wide char '中' in output: ${out.repr()}")
@@ -267,7 +267,7 @@ internal class TerminalTest {
         Canvas.of(buffer).setString(0, 1, "CD")
         Canvas.of(buffer).setString(0, 2, "EF")
 
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         // Rows joined with \r\n, last row has no trailing \r\n. Each row is its own styled run
@@ -289,14 +289,14 @@ internal class TerminalTest {
     fun `second render of an identical buffer emits nothing`() {
         val first = Buffer(5, 2)
         Canvas.of(first).setString(0, 0, "hello")
-        terminal.renderBuffer(first)
+        screen.renderBuffer(first)
 
         // A fresh, separately-allocated buffer with the same content — draw() diffs by value,
         // not by instance identity.
         val second = Buffer(5, 2)
         Canvas.of(second).setString(0, 0, "hello")
         recorder.clearOutput()
-        terminal.renderBuffer(second)
+        screen.renderBuffer(second)
 
         assertEquals("", recorder.output(), "An unchanged frame must produce no output at all")
     }
@@ -305,13 +305,13 @@ internal class TerminalTest {
     fun `single changed cell emits only that cell, not the rest of the row`() {
         val first = Buffer(5, 1)
         Canvas.of(first).setString(0, 0, "hello")
-        terminal.renderBuffer(first)
+        screen.renderBuffer(first)
 
         // Only column 2 differs ('l' -> 't').
         val second = Buffer(5, 1)
         Canvas.of(second).setString(0, 0, "hetlo")
         recorder.clearOutput()
-        terminal.renderBuffer(second)
+        screen.renderBuffer(second)
 
         val out = recorder.output()
         assertTrue(out.contains("t"), "Expected the changed cell 't' in the diff output: ${out.repr()}")
@@ -327,13 +327,13 @@ internal class TerminalTest {
         // glyph at column 1 and an empty Cell("") continuation at column 2.
         val first = Buffer(4, 1)
         Canvas.of(first).setString(0, 0, "a中b")
-        terminal.renderBuffer(first)
+        screen.renderBuffer(first)
 
         // Swap the wide glyph for a different one of the same width, at the same position.
         val second = Buffer(4, 1)
         Canvas.of(second).setString(0, 0, "a日b")
         recorder.clearOutput()
-        terminal.renderBuffer(second)
+        screen.renderBuffer(second)
 
         val out = recorder.output()
         assertTrue(out.contains("日"), "Expected the new wide glyph to be resent whole: ${out.repr()}")
@@ -344,12 +344,12 @@ internal class TerminalTest {
     fun `replacing a wide glyph with narrow text repaints its full old footprint`() {
         val first = Buffer(3, 1)
         Canvas.of(first).setString(0, 0, "中A")
-        terminal.renderBuffer(first)
+        screen.renderBuffer(first)
 
         val second = Buffer(3, 1)
         Canvas.of(second).setString(0, 0, "XA")
         recorder.clearOutput()
-        terminal.renderBuffer(second)
+        screen.renderBuffer(second)
 
         val out = recorder.output()
         assertTrue(out.contains("XA"), "Expected both columns of the old wide footprint to be repainted: ${out.repr()}")
@@ -360,11 +360,11 @@ internal class TerminalTest {
     fun `replacing a wide continuation emits the replacement and clears its lead`() {
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "中A")
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         buffer.set(1, 0, Cell("X"))
         recorder.clearOutput()
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         assertTrue(out.contains(" X"), "Expected the lead to be erased before the replacement: ${out.repr()}")
@@ -375,11 +375,11 @@ internal class TerminalTest {
     fun `changing a wide glyph style repaints its complete terminal footprint`() {
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "中", Style(fg = ChromeRole.DANGER))
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         Canvas.of(buffer).setString(0, 0, "中", Style(fg = ChromeRole.SUCCESS))
         recorder.clearOutput()
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         val out = recorder.output()
         assertTrue(out.contains("中"), "Expected the styled wide glyph to be repainted: ${out.repr()}")
@@ -390,11 +390,11 @@ internal class TerminalTest {
     fun `mutating a submitted buffer is visible on the next render`() {
         val buffer = Buffer(1, 1)
         Canvas.of(buffer).setString(0, 0, "A")
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         buffer.set(0, 0, Cell("B"))
         recorder.clearOutput()
-        terminal.renderBuffer(buffer)
+        screen.renderBuffer(buffer)
 
         assertTrue(recorder.output().contains("B"), "Expected the reused buffer's new cell: ${recorder.output().repr()}")
     }
@@ -403,13 +403,13 @@ internal class TerminalTest {
     fun `a terminal size change forces a full repaint even though content is unchanged`() {
         val first = Buffer(3, 1)
         Canvas.of(first).setString(0, 0, "abc")
-        terminal.renderBuffer(first)
+        screen.renderBuffer(first)
 
         // Same content, different dimensions.
         val resized = Buffer(4, 1)
         Canvas.of(resized).setString(0, 0, "abc")
         recorder.clearOutput()
-        terminal.renderBuffer(resized)
+        screen.renderBuffer(resized)
 
         assertTrue(
             recorder.output().startsWith("[1;1H"),
@@ -421,56 +421,32 @@ internal class TerminalTest {
     fun `shrinking the buffer clears stale content before repainting`() {
         val first = Buffer(4, 1)
         Canvas.of(first).setString(0, 0, "ABCD")
-        terminal.renderBuffer(first)
+        screen.renderBuffer(first)
 
         val smaller = Buffer(1, 1)
         Canvas.of(smaller).setString(0, 0, "Z")
         recorder.clearOutput()
-        terminal.renderBuffer(smaller)
+        screen.renderBuffer(smaller)
 
         assertTrue(recorder.output().contains("[2J"), "Expected stale terminal content to be erased: ${recorder.output().repr()}")
         assertTrue(recorder.output().contains("Z"), "Expected the smaller frame to be painted: ${recorder.output().repr()}")
     }
 
-    // ---- clear and frame invalidation ----
+    // ---- entering a screen ----
 
     @Test
-    fun `clear invalidates the frame without entering or leaving the alternate screen`() {
-        terminal.clear()
-        assertTrue(
-            !recorder.output().contains("1049"),
-            "clear() must not own alternate-screen lifecycle: ${recorder.output().repr()}",
-        )
-    }
-
-    @Test
-    fun `a non-interactive terminal clear gets no alt-screen escapes`() {
-        val plainRecorder = TerminalRecorder(ansiLevel = AnsiLevel.NONE)
-        val plainBackend = MordantTerminal(ansiLevel = AnsiLevel.NONE, terminalInterface = plainRecorder)
-        val plainTerminal = Terminal(plainBackend).apply { enterScope(FixturePalette) }
-
-        plainTerminal.clear()
-
-        assertTrue(
-            !plainRecorder.output().contains("1049"),
-            "Expected no alt-screen switching on a non-interactive terminal: ${plainRecorder.output().repr()}",
-        )
-    }
-
-    @Test
-    fun `clear paints the palette's default background before erasing, not the terminal's own`() {
-        // Regression guard for the cross-fade flash described in Terminal.clear's KDoc: the
-        // default-style SGR tag must be emitted before the erase-display sequence, so ED erases
-        // using the palette's background rather than whatever the terminal itself defaults to.
+    fun `entering a screen paints the palette's default background before erasing, not the terminal's own`() {
+        // Regression guard for a cross-fade flash: the default-style SGR tag must be emitted before
+        // the erase-display sequence, so ED erases using the palette's background rather than
+        // whatever the terminal itself defaults to.
         val altRecorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val altBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = altRecorder)
-        val altTerminal = Terminal(altBackend).apply { enterScope(AltFixturePalette) }
 
-        altTerminal.clear()
+        Terminal(altBackend).openScreen(AltFixturePalette)
 
         val out = altRecorder.output()
         val bgIndex = out.indexOf("48;2;248;245;238")
-        val eraseIndex = out.indexOf("[2J")
+        val eraseIndex = out.indexOf("[2J")
         assertTrue(bgIndex >= 0, "Expected AltFixturePalette's default background before clearing: ${out.repr()}")
         assertTrue(eraseIndex >= 0, "Expected an erase-display sequence: ${out.repr()}")
         assertTrue(bgIndex < eraseIndex, "Expected the background tag before the erase sequence: ${out.repr()}")
@@ -480,11 +456,11 @@ internal class TerminalTest {
     fun `AnsiLevel NONE emits no SGR codes at all`() {
         val noneRecorder = TerminalRecorder(ansiLevel = AnsiLevel.NONE)
         val noneBackend = MordantTerminal(ansiLevel = AnsiLevel.NONE, terminalInterface = noneRecorder)
-        val noneTerminal = Terminal(noneBackend).apply { enterScope(FixturePalette) }
+        val noneScreen = Terminal(noneBackend).openScreen(FixturePalette).also { noneRecorder.clearOutput() }
 
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "abc", Style(fg = ChromeRole.DANGER, strikethrough = true))
-        noneTerminal.renderBuffer(buffer)
+        noneScreen.renderBuffer(buffer)
 
         val out = noneRecorder.output()
         assertTrue(out.contains("abc"), "Expected plain text content: ${out.repr()}")

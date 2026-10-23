@@ -28,7 +28,7 @@ internal class ExampleSmokeTest {
     @Test
     fun `validated keymap movement and public settled hit test drive selection and toggle`() {
         val app = ExampleApp()
-        Terminal.headless(width = 140, height = 24).draw(app::render)
+        Terminal.headless(width = 140, height = 24).withScreen { it.draw(app::render) }
 
         app.handleKey(KeyboardEvent("ArrowDown"))
         app.handleKey(KeyboardEvent(" "))
@@ -73,18 +73,18 @@ internal class ExampleSmokeTest {
         }
         // Short enough that every panel's content overflows it.
         val terminal = Terminal.headless(width = 140, height = 9)
-        terminal.draw(app::render)
+        terminal.withScreen { it.draw(app::render) }
 
         for ((key, id) in listOf("1" to ExamplePanelId.ROWS, "2" to ExamplePanelId.DETAILS, "3" to ExamplePanelId.CHECKED)) {
             app.handleKey(KeyboardEvent(key))
             app.handleKey(KeyboardEvent("PageDown"))
-            terminal.draw(app::render)
+            terminal.withScreen { it.draw(app::render) }
             val paged = scrollOf(app, id)
             assertTrue(paged.offset.y > 0, "$id did not page down")
 
             val content = checkNotNull(checkNotNull(app.panels.layout).slotOf(id)).content
             app.handle(MouseEvent(x = content.x + 1, y = content.y + 1, wheelUp = true))
-            terminal.draw(app::render)
+            terminal.withScreen { it.draw(app::render) }
             assertTrue(scrollOf(app, id).offset.y < paged.offset.y, "$id did not scroll up by wheel")
         }
     }
@@ -97,15 +97,15 @@ internal class ExampleSmokeTest {
             app.handleKey(KeyboardEvent("ArrowDown"))
         }
         val terminal = Terminal.headless(width = 140, height = 9)
-        terminal.draw(app::render)
+        terminal.withScreen { it.draw(app::render) }
 
         app.handleKey(KeyboardEvent("3"))
         app.handleKey(KeyboardEvent("ArrowDown"))
         app.handleKey(KeyboardEvent("ArrowDown"))
-        terminal.draw(app::render)
+        terminal.withScreen { it.draw(app::render) }
         assertEquals(2, scrollOf(app, ExamplePanelId.CHECKED).offset.y)
         app.handleKey(KeyboardEvent("ArrowUp"))
-        terminal.draw(app::render)
+        terminal.withScreen { it.draw(app::render) }
         assertEquals(1, scrollOf(app, ExamplePanelId.CHECKED).offset.y)
         assertEquals(30, app.state.selectedRow, "scrolling a side panel must not move the selection")
 
@@ -122,8 +122,8 @@ internal class ExampleSmokeTest {
         // Both apps coexist and render only because each one builds its own panel instances.
         val first = ExampleApp()
         val second = ExampleApp()
-        Terminal.headless(width = 140, height = 24).draw(first::render)
-        Terminal.headless(width = 140, height = 24).draw(second::render)
+        Terminal.headless(width = 140, height = 24).withScreen { it.draw(first::render) }
+        Terminal.headless(width = 140, height = 24).withScreen { it.draw(second::render) }
 
         assertEquals(ExamplePanelId.ROWS, first.panels.focused)
         assertEquals(ExamplePanelId.ROWS, second.panels.focused)

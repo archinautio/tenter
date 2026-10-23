@@ -10,7 +10,7 @@ import io.archinaut.tenter.widget.StatefulWidget
 import io.archinaut.tenter.widget.Widget
 
 /**
- * One frame being drawn by [Terminal.draw]. It is only valid inside the draw callback that
+ * One frame being drawn by [Screen.draw]. It is only valid inside the draw callback that
  * received it.
  *
  * Widgets render into a [Rect] of [area]; each one receives a [Canvas] clipped to the

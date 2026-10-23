@@ -8,8 +8,8 @@ import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Rect
 
 /**
- * A read-only view of the cells a [Terminal.draw] call sent to the terminal. It reads the
- * terminal's own buffer, so it is only valid until the next draw.
+ * A read-only view of the cells a [Screen.draw] call presented. A real terminal's reads its own
+ * buffer, so it is only valid until the next draw; a [HeadlessTerminal]'s stays valid for good.
  */
 public class CompletedFrame internal constructor(
     private val buffer: Buffer
@@ -27,4 +27,9 @@ public class CompletedFrame internal constructor(
     /** Each row's text, top to bottom. A wide character appears once, not once per column it covers. */
     public fun lines(): List<String> =
         (0 until height).map { y -> (0 until width).joinToString("") { x -> get(x, y).symbol } }
+
+    internal companion object {
+        /** A [width] x [height] frame of blank cells, as a freshly cleared screen shows. */
+        internal fun blank(width: Int, height: Int): CompletedFrame = CompletedFrame(Buffer(width, height))
+    }
 }

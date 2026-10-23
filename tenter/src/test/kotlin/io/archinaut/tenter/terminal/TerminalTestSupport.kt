@@ -7,9 +7,9 @@ import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.widget.Widget
 
-/** Draws a frame whose cells are a copy of [buffer], resizing this terminal to match it first. */
-internal fun Terminal.renderBuffer(buffer: Buffer): CompletedFrame {
-    resize(buffer.width, buffer.height)
+/** Draws a frame whose cells are a copy of [buffer], resizing the terminal to match it first. */
+internal fun Screen.renderBuffer(buffer: Buffer): CompletedFrame {
+    terminal.resize(buffer.width, buffer.height)
     return draw { frame ->
         frame.renderWidget(
             object : Widget {

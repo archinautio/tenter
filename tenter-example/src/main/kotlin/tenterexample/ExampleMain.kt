@@ -10,9 +10,9 @@ import kotlinx.coroutines.runBlocking
 import io.archinaut.tenter.widget.panel.PanelMode
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Padding
+import io.archinaut.tenter.terminal.Screen
 import io.archinaut.tenter.terminal.Terminal
 import io.archinaut.tenter.terminal.TerminalEvent
-import io.archinaut.tenter.terminal.withScreen
 import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.Widget
 import io.archinaut.tenter.widget.MeasurableWidget
@@ -43,7 +43,7 @@ public fun runHeadlessSmoke(): SmokeResult {
 
     val app = ExampleApp()
     val terminal = Terminal.headless(width = 140, height = 24)
-    var frame = terminal.draw(app::render)
+    var frame = terminal.withScreen { it.draw(app::render) }
     val initialText = frame.lines().joinToString("\n")
     check("row 0" in initialText) { "the rendered list did not contain its first generated row" }
     check("PgUp/PgDn" in initialText) { "the rendered help did not contain the keymap hints" }
@@ -53,7 +53,7 @@ public fun runHeadlessSmoke(): SmokeResult {
     repeat(EXAMPLE_ROW_COUNT) {
         app.handle(MouseEvent(x = wheelTarget.x + 1, y = wheelTarget.y + 1, wheelDown = true))
     }
-    frame = terminal.draw(app::render)
+    frame = terminal.withScreen { it.draw(app::render) }
     val scrolledText = frame.lines().joinToString("\n")
     check("row 599" in scrolledText) { "wheel scrolling did not reach the final generated row" }
 
@@ -64,8 +64,7 @@ public fun runHeadlessSmoke(): SmokeResult {
     val hit = checkNotNull(app.panels.hitTest(clickX, clickY))
     val clickedRow = checkNotNull(hit.contentPoint).y
     app.handle(MouseEvent(x = clickX, y = clickY, left = true))
-    terminal.resize(44, 8)
-    frame = terminal.draw(app::render)
+    frame = Terminal.headless(width = 44, height = 8).withScreen { it.draw(app::render) }
     check(app.state.selectedRow == clickedRow) { "the click selected the wrong generated row" }
     check(app.state.selectedRow in app.state.checkedRows) { "the click did not toggle the selected row" }
     check(frame.width == 44 && frame.height == 8) { "the resized frame did not use the new dimensions" }
@@ -96,7 +95,7 @@ public fun main(args: Array<String>) {
         return
     }
 
-    Terminal().withScreen { terminal -> runInteractive(terminal) }
+    Terminal().withScreen { screen -> runInteractive(screen) }
 }
 
 /**
@@ -107,7 +106,7 @@ private fun checkPanelLayout() {
     val app = ExampleApp()
     val terminal = Terminal.headless(width = 140, height = 24)
 
-    terminal.draw(app::render)
+    terminal.withScreen { it.draw(app::render) }
     val normal = checkNotNull(app.panels.layout)
     val rows = checkNotNull(normal.slotOf(ExamplePanelId.ROWS)).outer
     val details = checkNotNull(normal.slotOf(ExamplePanelId.DETAILS)).outer
@@ -116,12 +115,12 @@ private fun checkPanelLayout() {
     check(details.x == rows.width && help.x + help.width == 140) { "the side panels are not right of the catalog" }
 
     check(app.cycle(ExamplePanelId.DETAILS) == PanelMode.MAXIMIZED) { "the details panel did not maximize" }
-    terminal.draw(app::render)
+    terminal.withScreen { it.draw(app::render) }
     val maximized = checkNotNull(app.panels.layout).slots.single()
     check(maximized.id == ExamplePanelId.DETAILS && maximized.outer.width == 140) { "a maximized panel did not take the body" }
 
     check(app.cycle(ExamplePanelId.DETAILS) == PanelMode.MINIMIZED) { "the details panel did not minimize" }
-    terminal.draw(app::render)
+    terminal.withScreen { it.draw(app::render) }
     val minimized = checkNotNull(checkNotNull(app.panels.layout).slotOf(ExamplePanelId.DETAILS)).outer
     check(minimized.width == ExampleApp.MINIMIZED_WIDTH) { "a minimized panel did not shrink to its stub" }
     check(app.cycle(ExamplePanelId.DETAILS) == PanelMode.NORMAL) { "the details panel did not restore its normal state" }
@@ -132,18 +131,18 @@ private fun checkPanelLayout() {
     check(app.cycle(ExamplePanelId.HELP) == PanelMode.NORMAL) { "the help panel has a mode besides normal and maximized" }
 }
 
-private fun runInteractive(terminal: Terminal) {
+private fun runInteractive(screen: Screen) {
     val app = ExampleApp()
-    terminal.draw(app::render)
+    screen.draw(app::render)
 
     // --8<-- [start:input-loop]
     runBlocking {
-        terminal.events()
+        screen.events()
             // A Resized event needs no handling: the next draw follows the backend's new size.
             .onEach { event -> if (event is TerminalEvent.Input) app.handle(event.event) }
             // The quit key sets running to false; stopping collection releases the terminal.
             .takeWhile { app.running }
-            .collect { terminal.draw(app::render) }
+            .collect { screen.draw(app::render) }
     }
     // --8<-- [end:input-loop]
 }

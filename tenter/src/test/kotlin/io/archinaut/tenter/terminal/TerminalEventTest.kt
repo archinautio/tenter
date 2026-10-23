@@ -57,14 +57,16 @@ internal class TerminalEventTest {
         fun `stopping collection on the application's quit key releases raw mode before returning`() {
             val keys = listOf(KeyboardEvent("a"), KeyboardEvent("q"), KeyboardEvent("b"))
             val probe = RawModeProbe(TerminalRecorder(width = 80, height = 20).apply { inputEvents = keys.toMutableList() })
-            val terminal = io.archinaut.tenter.terminal.Terminal(backend = Terminal(terminalInterface = probe))
+            val terminal = io.archinaut.tenter.terminal.Terminal(Terminal(terminalInterface = probe))
 
-            val seen = runBlocking {
-                withTimeout(5.seconds) {
-                    terminal.events()
-                        .takeWhile { !(it is TerminalEvent.Input && (it.event as? KeyboardEvent)?.key == "q") }
-                        .filterIsInstance<TerminalEvent.Input>()
-                        .toList()
+            val seen = terminal.withScreen { screen ->
+                runBlocking {
+                    withTimeout(5.seconds) {
+                        screen.events()
+                            .takeWhile { !(it is TerminalEvent.Input && (it.event as? KeyboardEvent)?.key == "q") }
+                            .filterIsInstance<TerminalEvent.Input>()
+                            .toList()
+                    }
                 }
             }
 

@@ -30,7 +30,7 @@ public sealed interface TerminalEvent {
     public data class Resized(val size: Size) : TerminalEvent
 }
 
-/** Backs [Terminal.events]: input and resize events merged into one cold flow. */
+/** Backs [Screen.events] on a real terminal: input and resize events merged into one cold flow. */
 internal fun MordantTerminal.events(mouseTracking: MouseTracking): Flow<TerminalEvent> =
     merge(inputEvents(mouseTracking), resizeEvents())
 

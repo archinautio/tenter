@@ -79,8 +79,9 @@ Ratatui, the names map directly:
 
 | Tenter | Ratatui | Role |
 | --- | --- | --- |
-| `Terminal` | `Terminal` | Owns the screen buffers and sends only what changed on each `draw`. Wraps a Mordant terminal as its backend. |
-| `Frame` | `Frame` | One frame inside `terminal.draw { frame -> }`: its `area` and `renderWidget` / `renderStatefulWidget`. |
+| `Terminal` | `Terminal` | A real terminal over Mordant, or a headless one for tests. `withScreen { screen -> }` opens its `Screen`. |
+| `Screen` | `Terminal` | The terminal while its scope runs: `draw` sends only what changed, and `events` reads input. |
+| `Frame` | `Frame` | One frame inside `screen.draw { frame -> }`: its `area` and `renderWidget` / `renderStatefulWidget`. |
 | `Widget`, `StatefulWidget` | `Widget`, `StatefulWidget` | Something that renders into an area, optionally with caller-owned state. |
 | `Canvas` | `Rect` + `Buffer` | The area a widget renders into: clipped, with local coordinates. Test a widget by rendering it into `Canvas.offscreen(width, height)`. |
 | `Cell`, `Style` | `Cell`, `Style` | A styled terminal cell, and its colors. |

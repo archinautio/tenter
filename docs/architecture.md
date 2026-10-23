@@ -8,9 +8,9 @@ Public API signatures are tracked by `tenter/api/tenter.api`.
 
 `tenter/src/test/kotlin/io/archinaut/tenter/ArchitectureTest.kt` enforces the dependency boundaries below, prevents BattleTech imports, and keeps managed `Panel` mutations behind `PanelSet`.
 
-The packages have distinct jobs: `palette` owns semantic colors; `text` owns display-cell metrics; `screen` owns buffers, cells, styles, canvas painting, and `Layout`/`Constraint` rectangle splitting; `widget` owns the `Widget`, `MeasurableWidget`, and `StatefulWidget` contracts, the internal recorded layouts behind measurable widgets, and every widget (blocks, viewports, rows, gauges), with stateful panel composition (the `Panels` widget over its `PanelSet` state) in `widget.panel`; `animation` owns finite frame descriptions and elapsed-time playback; `input` owns key maps and their help hints; `terminal` owns the double-buffered `Terminal`, its per-draw `Frame`, diff rendering, terminal event flows, and screen lifecycle.
+The packages have distinct jobs: `palette` owns semantic colors; `text` owns display-cell metrics; `screen` owns buffers, cells, styles, canvas painting, and `Layout`/`Constraint` rectangle splitting; `widget` owns the `Widget`, `MeasurableWidget`, and `StatefulWidget` contracts, the internal recorded layouts behind measurable widgets, and every widget (blocks, viewports, rows, gauges), with stateful panel composition (the `Panels` widget over its `PanelSet` state) in `widget.panel`; `animation` owns finite frame descriptions and elapsed-time playback; `input` owns key maps and their help hints; `terminal` owns the real and headless `Terminal`s, the `Screen` their scope opens, its per-draw `Frame`, diff rendering, terminal event flows, and screen lifecycle.
 
-The rendering model follows Ratatui: `Terminal.draw` hands a `Frame` to the caller, widgets render into a `Canvas` clipped to their `Rect`, and the terminal diffs the drawn `Buffer` against the previous one.
+The rendering model follows Ratatui: `Screen.draw` hands a `Frame` to the caller, widgets render into a `Canvas` clipped to their `Rect`, and the screen presents the drawn `Buffer`. `Terminal` is sealed: each kind opens an internal `Session` per scope that presents frames. A real terminal's session diffs against its previous frame and renders styles with the scope's palette; a headless terminal's keeps each frame as a snapshot.
 
 ## Module and dependency boundaries
 
@@ -37,10 +37,12 @@ corresponding implementation; do not maintain a second description here:
 
 - Tenter is a library over Mordant, not a framework around it. Applications create a `Terminal`
   and decide when to enter its screen scope; Tenter creates a real Mordant terminal by default,
-  but never hides it: `Terminal` accepts any configured Mordant terminal and exposes it as
-  `backend`. Preserve direct Mordant types in `TerminalEvent.Input` and `KeyBinding`.
-- The palette belongs to the `withScreen` scope. A real terminal draws only inside one; a headless
-  terminal draws anywhere, without color, so consumers test frames, not escape output.
+  and `Terminal(mordant)` accepts any configured one. Preserve direct Mordant types in
+  `TerminalEvent.Input` and `KeyBinding`.
+- The palette belongs to the `withScreen` scope, and only its `Screen` draws, on every kind of
+  terminal. A headless terminal follows the same rules as a real one, without color, so consumers
+  test frames and scripted input, not escape output. Keep test-only observation (`frame`, the
+  input script) on `HeadlessTerminal`, not on `Terminal`.
 - `KeyMap` copies context, layer, and group collections, and `PanelSet` copies its panel
   list. Do not expose mutable declaration collections.
 - A panel's content builder runs once per rendered frame. Panels have no size: the

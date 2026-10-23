@@ -62,9 +62,8 @@ internal class TerminalScreenTest {
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder))
 
         terminal.withScreen(ScreenTestPalette) { }
-        val second = terminal.withScreen(ScreenTestPalette) { it }
+        terminal.withScreen(ScreenTestPalette) { }
 
-        assertSame(terminal, second)
         assertEquals(2, recorder.output().countOccurrences("\u001B[?1049h"))
         assertEquals(2, recorder.output().countOccurrences("\u001B[?1049l"))
     }
@@ -74,21 +73,22 @@ internal class TerminalScreenTest {
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder))
 
-        terminal.withScreen(ScreenTestPalette) {
+        terminal.withScreen(ScreenTestPalette) { screen ->
             assertThrows<IllegalStateException> { terminal.withScreen(ScreenTestPalette) { } }
-            terminal.draw { frame -> frame.renderWidget(ScreenLabel("still drawing"), frame.area) }
+            screen.draw { frame -> frame.renderWidget(ScreenLabel("still drawing"), frame.area) }
         }
 
         assertEquals(1, recorder.output().countOccurrences("\u001B[?1049h"))
     }
 
     @Test
-    fun `drawing outside a scope throws`() {
+    fun `a screen refuses to draw or read once its scope has returned`() {
         val terminal = Terminal(MordantTerminal(terminalInterface = TerminalRecorder()))
 
-        assertThrows<IllegalStateException> { terminal.draw { } }
-        terminal.withScreen(ScreenTestPalette) { }
-        assertThrows<IllegalStateException> { terminal.draw { } }
+        val leaked = terminal.withScreen(ScreenTestPalette) { it }
+
+        assertThrows<IllegalStateException> { leaked.draw { } }
+        assertThrows<IllegalStateException> { leaked.events() }
     }
 
     @Test

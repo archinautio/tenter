@@ -51,112 +51,114 @@ private class Label(private val text: String) : Widget {
 
 internal class TerminalDrawTest {
 
-    private val screen = ResizableRecorder(6, 2)
-    private val terminal = Terminal(screen.backend).apply { enterScope(PlainPalette) }
+    private val device = ResizableRecorder(6, 2)
+    private val terminal = Terminal(device.backend)
+    private val screen = terminal.openScreen(PlainPalette)
 
     @Test
     fun `the area starts at the backend's size`() {
-        assertEquals(Rect(0, 0, 6, 2), terminal.area)
+        assertEquals(Rect(0, 0, 6, 2), screen.area)
     }
 
     @Test
     fun `draw renders widgets into the frame and returns the completed cells`() {
-        val completed = terminal.draw { frame ->
+        val completed = screen.draw { frame ->
             assertEquals(Rect(0, 0, 6, 2), frame.area)
             frame.renderWidget(Label("hi"), Rect(1, 1, 5, 1))
         }
 
         assertEquals("      \n hi   ", text(completed))
-        assertTrue(screen.recorder.output().contains("hi"))
+        assertTrue(device.recorder.output().contains("hi"))
     }
 
     @Test
     fun `an identical second frame sends nothing`() {
-        terminal.draw { it.renderWidget(Label("same"), it.area) }
-        screen.recorder.clearOutput()
+        screen.draw { it.renderWidget(Label("same"), it.area) }
+        device.recorder.clearOutput()
 
-        terminal.draw { it.renderWidget(Label("same"), it.area) }
+        screen.draw { it.renderWidget(Label("same"), it.area) }
 
-        assertEquals("", screen.recorder.output())
+        assertEquals("", device.recorder.output())
     }
 
     @Test
     fun `each frame starts blank, so dropping a widget erases it`() {
-        terminal.draw { it.renderWidget(Label("gone"), it.area) }
-        screen.recorder.clearOutput()
+        screen.draw { it.renderWidget(Label("gone"), it.area) }
+        device.recorder.clearOutput()
 
-        val completed = terminal.draw { }
+        val completed = screen.draw { }
 
         assertEquals("      \n      ", text(completed))
-        assertTrue(screen.recorder.output().contains("    "), "expected the old cells to be blanked")
+        assertTrue(device.recorder.output().contains("    "), "expected the old cells to be blanked")
     }
 
     @Test
     fun `only the changed cells are sent`() {
-        terminal.draw { it.renderWidget(Label("hello"), it.area) }
-        screen.recorder.clearOutput()
+        screen.draw { it.renderWidget(Label("hello"), it.area) }
+        device.recorder.clearOutput()
 
-        terminal.draw { it.renderWidget(Label("hallo"), it.area) }
+        screen.draw { it.renderWidget(Label("hallo"), it.area) }
 
-        val out = screen.recorder.output()
+        val out = device.recorder.output()
         assertTrue(out.contains("a"), "expected the changed cell")
         assertTrue(!out.contains("llo"), "expected unchanged cells to be skipped: $out")
     }
 
     @Test
     fun `a failed draw sends nothing and keeps the previous frame as the diff base`() {
-        terminal.draw { it.renderWidget(Label("kept"), it.area) }
-        screen.recorder.clearOutput()
+        screen.draw { it.renderWidget(Label("kept"), it.area) }
+        device.recorder.clearOutput()
         val failure = IllegalStateException("render failed")
 
         val thrown = assertThrows<IllegalStateException> {
-            terminal.draw { frame ->
+            screen.draw { frame ->
                 frame.renderWidget(Label("half"), frame.area)
                 throw failure
             }
         }
 
         assertSame(failure, thrown)
-        assertEquals("", screen.recorder.output())
-        terminal.draw { it.renderWidget(Label("kept"), it.area) }
-        assertEquals("", screen.recorder.output(), "the failed frame must not become the diff base")
+        assertEquals("", device.recorder.output())
+        screen.draw { it.renderWidget(Label("kept"), it.area) }
+        assertEquals("", device.recorder.output(), "the failed frame must not become the diff base")
     }
 
     @Test
     fun `draw follows a backend resize with a full repaint`() {
-        terminal.draw { it.renderWidget(Label("a"), it.area) }
-        screen.size = Size(4, 3)
-        screen.backend.updateSize()
-        screen.recorder.clearOutput()
+        screen.draw { it.renderWidget(Label("a"), it.area) }
+        device.size = Size(4, 3)
+        device.backend.updateSize()
+        device.recorder.clearOutput()
 
-        val completed = terminal.draw { it.renderWidget(Label("a"), it.area) }
+        val completed = screen.draw { it.renderWidget(Label("a"), it.area) }
 
         assertEquals(Rect(0, 0, 4, 3), completed.area)
-        assertTrue(screen.recorder.output().contains("a"), "a resized frame must repaint fully")
+        assertTrue(device.recorder.output().contains("a"), "a resized frame must repaint fully")
     }
 
     @Test
     fun `an explicit resize holds until the backend size changes`() {
         terminal.resize(3, 1)
 
-        assertEquals(Rect(0, 0, 3, 1), terminal.draw { }.area)
-        assertEquals(Rect(0, 0, 3, 1), terminal.draw { }.area)
+        assertEquals(Rect(0, 0, 3, 1), screen.draw { }.area)
+        assertEquals(Rect(0, 0, 3, 1), screen.draw { }.area)
 
-        screen.size = Size(5, 2)
-        screen.backend.updateSize()
+        device.size = Size(5, 2)
+        device.backend.updateSize()
 
-        assertEquals(Rect(0, 0, 5, 2), terminal.draw { }.area)
+        assertEquals(Rect(0, 0, 5, 2), screen.draw { }.area)
     }
 
     @Test
-    fun `clear forces the next frame to repaint fully`() {
-        terminal.draw { it.renderWidget(Label("x"), it.area) }
-        terminal.clear()
-        screen.recorder.clearOutput()
+    fun `a new screen repaints its first frame fully`() {
+        screen.draw { it.renderWidget(Label("x"), it.area) }
+        terminal.closeScreen(screen)
+        val next = terminal.openScreen(PlainPalette)
+        device.recorder.clearOutput()
 
-        terminal.draw { it.renderWidget(Label("x"), it.area) }
+        next.draw { it.renderWidget(Label("x"), it.area) }
 
-        assertTrue(screen.recorder.output().contains("x"))
+        assertTrue(device.recorder.output().contains("x"))
     }
 
     @Test
@@ -169,8 +171,8 @@ internal class TerminalDrawTest {
         }
         val state = intArrayOf(0)
 
-        terminal.draw { it.renderStatefulWidget(counter, it.area, state) }
-        val completed = terminal.draw { it.renderStatefulWidget(counter, it.area, state) }
+        screen.draw { it.renderStatefulWidget(counter, it.area, state) }
+        val completed = screen.draw { it.renderStatefulWidget(counter, it.area, state) }
 
         assertEquals(2, state[0])
         assertEquals("2", completed.get(0, 0).symbol)
@@ -178,7 +180,7 @@ internal class TerminalDrawTest {
 
     @Test
     fun `a widget is clipped to its area`() {
-        val completed = terminal.draw { it.renderWidget(Label("overflow"), Rect(2, 0, 3, 1)) }
+        val completed = screen.draw { it.renderWidget(Label("overflow"), Rect(2, 0, 3, 1)) }
 
         assertEquals("  ove \n      ", text(completed))
     }
@@ -193,7 +195,7 @@ internal class TerminalDrawTest {
             }
         }
 
-        val completed = terminal.draw { frame -> frame.renderWidget(widget, Rect(4, 1, 10, 10)) }
+        val completed = screen.draw { frame -> frame.renderWidget(widget, Rect(4, 1, 10, 10)) }
 
         assertEquals(Rect(0, 0, 2, 1), area)
 
