@@ -5,7 +5,7 @@ package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.input.KeySection
 import io.archinaut.tenter.screen.Style
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.text.TextWrap
 
@@ -47,11 +47,11 @@ public class KeyHelp(private val sections: List<KeySection>) : MeasurableWidget 
         private val HEADING = Block(
             title = "KEYS",
             borders = Borders.TOP,
-            borderColor = ChromeRole.INFO,
-            titleColor = ChromeRole.INFO,
+            borderColor = StandardRole.INFO,
+            titleColor = StandardRole.INFO,
         )
-        private val SUBSECTION_STYLE = Style(ChromeRole.ACCENT)
-        private val KEY_STYLE = Style(ChromeRole.INFO)
-        private val DESC_STYLE = Style(ChromeRole.TEXT_PRIMARY)
+        private val SUBSECTION_STYLE = Style(StandardRole.ACCENT)
+        private val KEY_STYLE = Style(StandardRole.INFO)
+        private val DESC_STYLE = Style(StandardRole.TEXT_PRIMARY)
     }
 }

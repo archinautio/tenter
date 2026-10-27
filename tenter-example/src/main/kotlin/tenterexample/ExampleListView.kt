@@ -4,7 +4,7 @@
 package tenterexample
 
 import io.archinaut.tenter.screen.Style
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.widget.Columns
 import io.archinaut.tenter.widget.Column
 import io.archinaut.tenter.widget.MeasurableWidget
@@ -23,7 +23,7 @@ internal class ExampleListView(
     override fun write(writer: RowWriter) {
         val markerColumn = MeasurableWidget { column ->
             repeat(rowCount) { index ->
-                column.writeLine(if (index == state.selectedRow) "▶" else " ", Style(ChromeRole.ACCENT))
+                column.writeLine(if (index == state.selectedRow) "▶" else " ", Style(StandardRole.ACCENT))
             }
         }
         val rowColumnWidth = (writer.width - COLUMN_GUTTER - MARKER_WIDTH).coerceAtLeast(0)

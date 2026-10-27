@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test
 
 /**
  * Enforces the internal layering `docs/architecture.md` describes for this module —
- * `text/input -> palette -> screen -> widget -> animation/terminal`, with terminal
- * consuming input, palette, screen, and widget for frame drawing and scoped lifecycle, never
+ * `text/input -> color -> screen -> widget -> animation/terminal`, with terminal
+ * consuming input, color, screen, and widget for frame drawing and scoped lifecycle, never
  * the reverse — as an allowed-dependency matrix
  * between `tenter`'s direct child packages. [ArchitectureTest] enforces the module's *external*
  * seam (no `battletech.*` import, nothing outside an approved third-party allowlist); this
@@ -26,11 +26,11 @@ class LayeringTest {
     private val allowed: Map<String, Set<String>> = mapOf(
         "text" to emptySet(),
         "input" to emptySet(),
-        "palette" to emptySet(),
-        "screen" to setOf("palette", "text"),
+        "color" to emptySet(),
+        "screen" to setOf("color", "text"),
         "animation" to setOf("screen", "text", "widget"),
-        "terminal" to setOf("input", "palette", "screen", "widget"),
-        "widget" to setOf("input", "palette", "screen", "text"),
+        "terminal" to setOf("input", "color", "screen", "widget"),
+        "widget" to setOf("input", "color", "screen", "text"),
     )
 
     /** The direct child of `tenter` [packageName] belongs to, e.g. `io.archinaut.tenter.widget` -> `"widget"`. */

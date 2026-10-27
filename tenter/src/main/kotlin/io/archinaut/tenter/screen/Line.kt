@@ -21,8 +21,8 @@ public data class Span(
  *
  * ```
  * Line("plain")
- * Line("warning", Style(ChromeRole.WARNING))
- * Line(Span("key ", Style(ChromeRole.INFO)), Span("description"))
+ * Line("warning", Style(StandardRole.WARNING))
+ * Line(Span("key ", Style(StandardRole.INFO)), Span("description"))
  * ```
  *
  * Spans are canonical: empty spans are dropped and adjacent same-styled spans merged, so two lines

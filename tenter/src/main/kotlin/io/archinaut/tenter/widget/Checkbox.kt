@@ -4,8 +4,8 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Style
-import io.archinaut.tenter.palette.ColorRole
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.ColorRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.text.CellWidth
 
 // Nerd Fonts icons (https://www.nerdfonts.com/cheat-sheet)
@@ -66,8 +66,8 @@ public class Checkbox(
     public companion object {
         /** Default per-state color when the surrounding row does not override it. */
         public fun intrinsicColor(state: CheckState): ColorRole = when (state) {
-            CheckState.CHECKED -> ChromeRole.SUCCESS
-            else -> ChromeRole.TEXT_MUTED
+            CheckState.CHECKED -> StandardRole.SUCCESS
+            else -> StandardRole.TEXT_MUTED
         }
     }
 }

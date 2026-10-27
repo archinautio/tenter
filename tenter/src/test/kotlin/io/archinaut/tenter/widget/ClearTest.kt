@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Rect
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 
 internal class ClearTest {
 
-    private val painted = Style(fg = ChromeRole.DANGER, bg = ChromeRole.SUCCESS, strikethrough = true)
+    private val painted = Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS, strikethrough = true)
 
     @Test
     fun `clear resets every cell of its area to an unpainted blank`() {
@@ -35,9 +35,9 @@ internal class ClearTest {
         canvas.set(0, 0, Cell("X", painted))
 
         Clear.render(canvas)
-        canvas.set(0, 0, Cell("─", Style(fg = ChromeRole.ACCENT)))
+        canvas.set(0, 0, Cell("─", Style(fg = StandardRole.ACCENT)))
 
-        assertEquals(Cell("─", Style(fg = ChromeRole.ACCENT)), canvas.get(0, 0))
+        assertEquals(Cell("─", Style(fg = StandardRole.ACCENT)), canvas.get(0, 0))
     }
 
     @Test

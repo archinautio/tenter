@@ -66,6 +66,96 @@ public final class io/archinaut/tenter/animation/GlyphGrid : io/archinaut/tenter
 	public final fun styleAt (II)Lio/archinaut/tenter/screen/Style;
 }
 
+public abstract interface class io/archinaut/tenter/color/ColorRole {
+}
+
+public abstract interface class io/archinaut/tenter/color/ColorScheme {
+	public static final field Companion Lio/archinaut/tenter/color/ColorScheme$Companion;
+	public fun background (Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/color/TerminalColor;
+	public abstract fun foreground (Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/color/TerminalColor;
+	public abstract fun getDefaultBackground ()Lio/archinaut/tenter/color/TerminalColor;
+}
+
+public final class io/archinaut/tenter/color/ColorScheme$Companion {
+	public final fun getDefault ()Lio/archinaut/tenter/color/ColorScheme;
+}
+
+public final class io/archinaut/tenter/color/ColorScheme$DefaultImpls {
+	public static fun background (Lio/archinaut/tenter/color/ColorScheme;Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/color/TerminalColor;
+}
+
+public final class io/archinaut/tenter/color/MapColorScheme : io/archinaut/tenter/color/ColorScheme {
+	public fun <init> (Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/AnsiLevel;Lio/archinaut/tenter/color/TerminalColor;Ljava/util/Map;)V
+	public fun background (Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/color/TerminalColor;
+	public fun foreground (Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/color/TerminalColor;
+	public fun getDefaultBackground ()Lio/archinaut/tenter/color/TerminalColor;
+	public final fun getLevel ()Lcom/github/ajalt/mordant/rendering/AnsiLevel;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/archinaut/tenter/color/StandardRole : java/lang/Enum, io/archinaut/tenter/color/ColorRole {
+	public static final field ACCENT Lio/archinaut/tenter/color/StandardRole;
+	public static final field DANGER Lio/archinaut/tenter/color/StandardRole;
+	public static final field DEFAULT Lio/archinaut/tenter/color/StandardRole;
+	public static final field DISABLED Lio/archinaut/tenter/color/StandardRole;
+	public static final field INFO Lio/archinaut/tenter/color/StandardRole;
+	public static final field PANEL_BORDER Lio/archinaut/tenter/color/StandardRole;
+	public static final field PANEL_BORDER_FOCUSED Lio/archinaut/tenter/color/StandardRole;
+	public static final field SUCCESS Lio/archinaut/tenter/color/StandardRole;
+	public static final field TEXT_MUTED Lio/archinaut/tenter/color/StandardRole;
+	public static final field TEXT_PRIMARY Lio/archinaut/tenter/color/StandardRole;
+	public static final field TEXT_SUBTLE Lio/archinaut/tenter/color/StandardRole;
+	public static final field WARNING Lio/archinaut/tenter/color/StandardRole;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/color/StandardRole;
+	public static fun values ()[Lio/archinaut/tenter/color/StandardRole;
+}
+
+public abstract interface class io/archinaut/tenter/color/TerminalColor : io/archinaut/tenter/color/ColorRole {
+	public static final field Companion Lio/archinaut/tenter/color/TerminalColor$Companion;
+}
+
+public final class io/archinaut/tenter/color/TerminalColor$Ansi16 : io/archinaut/tenter/color/TerminalColor {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lio/archinaut/tenter/color/TerminalColor$Ansi16;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/color/TerminalColor$Ansi16;IILjava/lang/Object;)Lio/archinaut/tenter/color/TerminalColor$Ansi16;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/archinaut/tenter/color/TerminalColor$Ansi256 : io/archinaut/tenter/color/TerminalColor {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lio/archinaut/tenter/color/TerminalColor$Ansi256;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/color/TerminalColor$Ansi256;IILjava/lang/Object;)Lio/archinaut/tenter/color/TerminalColor$Ansi256;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/archinaut/tenter/color/TerminalColor$Companion {
+	public final fun parse (Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/AnsiLevel;)Lio/archinaut/tenter/color/TerminalColor;
+}
+
+public final class io/archinaut/tenter/color/TerminalColor$TrueColor : io/archinaut/tenter/color/TerminalColor {
+	public fun <init> (III)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun copy (III)Lio/archinaut/tenter/color/TerminalColor$TrueColor;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/color/TerminalColor$TrueColor;IIIILjava/lang/Object;)Lio/archinaut/tenter/color/TerminalColor$TrueColor;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBlue ()I
+	public final fun getGreen ()I
+	public final fun getRed ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/archinaut/tenter/input/HintGroup {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -146,98 +236,6 @@ public final class io/archinaut/tenter/input/KeySection {
 	public final fun getTitle ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/palette/ChromeRole : java/lang/Enum, io/archinaut/tenter/palette/ColorRole {
-	public static final field ACCENT Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field DANGER Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field DEFAULT Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field DISABLED Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field INFO Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field PANEL_BORDER Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field PANEL_BORDER_FOCUSED Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field SUCCESS Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field TEXT_MUTED Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field TEXT_PRIMARY Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field TEXT_SUBTLE Lio/archinaut/tenter/palette/ChromeRole;
-	public static final field WARNING Lio/archinaut/tenter/palette/ChromeRole;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/palette/ChromeRole;
-	public static fun values ()[Lio/archinaut/tenter/palette/ChromeRole;
-}
-
-public abstract interface class io/archinaut/tenter/palette/ColorRole {
-}
-
-public final class io/archinaut/tenter/palette/DefaultRolePalette : io/archinaut/tenter/palette/RolePalette {
-	public static final field INSTANCE Lio/archinaut/tenter/palette/DefaultRolePalette;
-	public fun background (Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/palette/PaletteColor;
-	public fun foreground (Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/palette/PaletteColor;
-	public fun getDefaultBackground ()Lio/archinaut/tenter/palette/PaletteColor;
-}
-
-public final class io/archinaut/tenter/palette/MapRolePalette : io/archinaut/tenter/palette/RolePalette {
-	public fun <init> (Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/AnsiLevel;Lio/archinaut/tenter/palette/PaletteColor;Ljava/util/Map;)V
-	public fun background (Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/palette/PaletteColor;
-	public fun foreground (Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/palette/PaletteColor;
-	public fun getDefaultBackground ()Lio/archinaut/tenter/palette/PaletteColor;
-	public final fun getLevel ()Lcom/github/ajalt/mordant/rendering/AnsiLevel;
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class io/archinaut/tenter/palette/PaletteColor : io/archinaut/tenter/palette/ColorRole {
-	public static final field Companion Lio/archinaut/tenter/palette/PaletteColor$Companion;
-}
-
-public final class io/archinaut/tenter/palette/PaletteColor$Ansi16 : io/archinaut/tenter/palette/PaletteColor {
-	public fun <init> (I)V
-	public final fun component1 ()I
-	public final fun copy (I)Lio/archinaut/tenter/palette/PaletteColor$Ansi16;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/palette/PaletteColor$Ansi16;IILjava/lang/Object;)Lio/archinaut/tenter/palette/PaletteColor$Ansi16;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCode ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/palette/PaletteColor$Companion {
-	public final fun parse (Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/AnsiLevel;)Lio/archinaut/tenter/palette/PaletteColor;
-}
-
-public final class io/archinaut/tenter/palette/PaletteColor$TrueColor : io/archinaut/tenter/palette/PaletteColor {
-	public fun <init> (III)V
-	public final fun component1 ()I
-	public final fun component2 ()I
-	public final fun component3 ()I
-	public final fun copy (III)Lio/archinaut/tenter/palette/PaletteColor$TrueColor;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/palette/PaletteColor$TrueColor;IIIILjava/lang/Object;)Lio/archinaut/tenter/palette/PaletteColor$TrueColor;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBlue ()I
-	public final fun getGreen ()I
-	public final fun getRed ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/palette/PaletteColor$Xterm256 : io/archinaut/tenter/palette/PaletteColor {
-	public fun <init> (I)V
-	public final fun component1 ()I
-	public final fun copy (I)Lio/archinaut/tenter/palette/PaletteColor$Xterm256;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/palette/PaletteColor$Xterm256;IILjava/lang/Object;)Lio/archinaut/tenter/palette/PaletteColor$Xterm256;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getIndex ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class io/archinaut/tenter/palette/RolePalette {
-	public fun background (Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/palette/PaletteColor;
-	public abstract fun foreground (Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/palette/PaletteColor;
-	public abstract fun getDefaultBackground ()Lio/archinaut/tenter/palette/PaletteColor;
-}
-
-public final class io/archinaut/tenter/palette/RolePalette$DefaultImpls {
-	public static fun background (Lio/archinaut/tenter/palette/RolePalette;Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/palette/PaletteColor;
 }
 
 public final class io/archinaut/tenter/screen/Canvas {
@@ -483,16 +481,16 @@ public final class io/archinaut/tenter/screen/Span {
 public final class io/archinaut/tenter/screen/Style {
 	public static final field Companion Lio/archinaut/tenter/screen/Style$Companion;
 	public fun <init> ()V
-	public fun <init> (Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Ljava/lang/Boolean;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lio/archinaut/tenter/palette/ColorRole;
-	public final fun component2 ()Lio/archinaut/tenter/palette/ColorRole;
+	public fun <init> (Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/archinaut/tenter/color/ColorRole;
+	public final fun component2 ()Lio/archinaut/tenter/color/ColorRole;
 	public final fun component3 ()Ljava/lang/Boolean;
-	public final fun copy (Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Ljava/lang/Boolean;)Lio/archinaut/tenter/screen/Style;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Ljava/lang/Boolean;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Style;
+	public final fun copy (Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;)Lio/archinaut/tenter/screen/Style;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Style;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBg ()Lio/archinaut/tenter/palette/ColorRole;
-	public final fun getFg ()Lio/archinaut/tenter/palette/ColorRole;
+	public final fun getBg ()Lio/archinaut/tenter/color/ColorRole;
+	public final fun getFg ()Lio/archinaut/tenter/color/ColorRole;
 	public final fun getStrikethrough ()Ljava/lang/Boolean;
 	public fun hashCode ()I
 	public final fun patch (Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/Style;
@@ -542,9 +540,9 @@ public abstract class io/archinaut/tenter/terminal/Terminal {
 	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun closeScreen (Lio/archinaut/tenter/terminal/Screen;Ljava/lang/Throwable;)V
 	public abstract fun getAnsiLevel ()Lcom/github/ajalt/mordant/rendering/AnsiLevel;
-	public final fun openScreen (Lio/archinaut/tenter/palette/RolePalette;)Lio/archinaut/tenter/terminal/Screen;
-	public final fun withScreen (Lio/archinaut/tenter/palette/RolePalette;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public static synthetic fun withScreen$default (Lio/archinaut/tenter/terminal/Terminal;Lio/archinaut/tenter/palette/RolePalette;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun openScreen (Lio/archinaut/tenter/color/ColorScheme;)Lio/archinaut/tenter/terminal/Screen;
+	public final fun withScreen (Lio/archinaut/tenter/color/ColorScheme;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static synthetic fun withScreen$default (Lio/archinaut/tenter/terminal/Terminal;Lio/archinaut/tenter/color/ColorScheme;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class io/archinaut/tenter/terminal/Terminal$Companion {
@@ -593,16 +591,16 @@ public final class io/archinaut/tenter/text/CellWidth {
 public final class io/archinaut/tenter/widget/Block : io/archinaut/tenter/widget/Widget {
 	public static final field Companion Lio/archinaut/tenter/widget/Block$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun inner (Lio/archinaut/tenter/screen/Canvas;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun inner (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Rect;
 	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
 public final class io/archinaut/tenter/widget/Block$Companion {
-	public final fun bordered (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;)Lio/archinaut/tenter/widget/Block;
-	public static synthetic fun bordered$default (Lio/archinaut/tenter/widget/Block$Companion;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;ILjava/lang/Object;)Lio/archinaut/tenter/widget/Block;
+	public final fun bordered (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/widget/Block;
+	public static synthetic fun bordered$default (Lio/archinaut/tenter/widget/Block$Companion;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;ILjava/lang/Object;)Lio/archinaut/tenter/widget/Block;
 }
 
 public final class io/archinaut/tenter/widget/BlockKt {
@@ -637,14 +635,14 @@ public final class io/archinaut/tenter/widget/CheckState : java/lang/Enum {
 
 public final class io/archinaut/tenter/widget/Checkbox : io/archinaut/tenter/widget/MeasurableWidget {
 	public static final field Companion Lio/archinaut/tenter/widget/Checkbox$Companion;
-	public fun <init> (Lio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;)V
+	public synthetic fun <init> (Lio/archinaut/tenter/widget/CheckState;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 	public fun write (Lio/archinaut/tenter/widget/RowWriter;)V
 }
 
 public final class io/archinaut/tenter/widget/Checkbox$Companion {
-	public final fun intrinsicColor (Lio/archinaut/tenter/widget/CheckState;)Lio/archinaut/tenter/palette/ColorRole;
+	public final fun intrinsicColor (Lio/archinaut/tenter/widget/CheckState;)Lio/archinaut/tenter/color/ColorRole;
 }
 
 public final class io/archinaut/tenter/widget/CheckboxGlyphs {
@@ -783,8 +781,8 @@ public final class io/archinaut/tenter/widget/ScrollState {
 }
 
 public final class io/archinaut/tenter/widget/SelectableRow : io/archinaut/tenter/widget/MeasurableWidget {
-	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;)V
-	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/palette/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/archinaut/tenter/widget/CheckState;ZLjava/lang/String;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/widget/CheckboxGlyphs;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 	public fun write (Lio/archinaut/tenter/widget/RowWriter;)V
 }

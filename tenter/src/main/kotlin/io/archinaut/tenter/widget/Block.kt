@@ -3,8 +3,8 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.palette.ChromeRole
-import io.archinaut.tenter.palette.ColorRole
+import io.archinaut.tenter.color.StandardRole
+import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Padding
@@ -29,8 +29,8 @@ public class Block(
     private val badge: String? = null,
     private val borders: Borders = Borders.NONE,
     private val padding: Padding = Padding.ZERO,
-    private val borderColor: ColorRole = ChromeRole.PANEL_BORDER,
-    private val titleColor: ColorRole = ChromeRole.ACCENT,
+    private val borderColor: ColorRole = StandardRole.PANEL_BORDER,
+    private val titleColor: ColorRole = StandardRole.ACCENT,
 ) : Widget {
 
     /** Everything this block consumes on each side: borders (or the title row) plus [padding]. */
@@ -130,8 +130,8 @@ public class Block(
             title: String = "",
             badge: String? = null,
             padding: Padding = Padding.ZERO,
-            borderColor: ColorRole = ChromeRole.PANEL_BORDER,
-            titleColor: ColorRole = ChromeRole.ACCENT,
+            borderColor: ColorRole = StandardRole.PANEL_BORDER,
+            titleColor: ColorRole = StandardRole.ACCENT,
         ): Block = Block(title, badge, Borders.ALL, padding, borderColor, titleColor)
 
         /** One cell on each side, consumed by every bordered [Block] box. */

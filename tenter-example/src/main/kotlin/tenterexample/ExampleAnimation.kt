@@ -9,7 +9,7 @@ import io.archinaut.tenter.animation.AnimationPlayback
 import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.animation.GlyphGrid
 import io.archinaut.tenter.screen.Style
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.widget.Widget
 
 // --8<-- [start:animation]
@@ -19,13 +19,13 @@ internal class ExampleAnimation : Animation {
     override val frameDuration = 100.milliseconds
 
     private val frames: List<Widget> = listOf(
-        frame('A', ChromeRole.INFO),
-        frame('B', ChromeRole.SUCCESS),
+        frame('A', StandardRole.INFO),
+        frame('B', StandardRole.SUCCESS),
     )
 
     override fun frame(index: Int): Widget = frames[index]
 
-    private fun frame(glyph: Char, role: ChromeRole): Widget = GlyphGrid(
+    private fun frame(glyph: Char, role: StandardRole): Widget = GlyphGrid(
         size = size,
         priority = { if (it == ' ') 0 else 1 },
         style = { if (it == glyph) Style(fg = role) else Style.DEFAULT },

@@ -16,24 +16,24 @@ import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import io.archinaut.tenter.palette.ColorRole
-import io.archinaut.tenter.palette.PaletteColor
-import io.archinaut.tenter.palette.RolePalette
+import io.archinaut.tenter.color.ColorRole
+import io.archinaut.tenter.color.TerminalColor
+import io.archinaut.tenter.color.ColorScheme
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.widget.Widget
 import kotlin.time.TimeMark
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
-private object ScreenTestPalette : RolePalette {
-    override val defaultBackground: PaletteColor = PaletteColor.TrueColor(0, 0, 0)
+private object ScreenTestColorScheme : ColorScheme {
+    override val defaultBackground: TerminalColor = TerminalColor.TrueColor(0, 0, 0)
 
-    override fun foreground(role: ColorRole): PaletteColor = PaletteColor.TrueColor(255, 255, 255)
+    override fun foreground(role: ColorRole): TerminalColor = TerminalColor.TrueColor(255, 255, 255)
 }
 
-private object OtherScreenTestPalette : RolePalette {
-    override val defaultBackground: PaletteColor = PaletteColor.TrueColor(0, 0, 255)
+private object OtherScreenTestColorScheme : ColorScheme {
+    override val defaultBackground: TerminalColor = TerminalColor.TrueColor(0, 0, 255)
 
-    override fun foreground(role: ColorRole): PaletteColor = PaletteColor.TrueColor(255, 255, 0)
+    override fun foreground(role: ColorRole): TerminalColor = TerminalColor.TrueColor(255, 255, 0)
 }
 
 private class ScreenLabel(private val text: String) : Widget {
@@ -49,7 +49,7 @@ internal class TerminalScreenTest {
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder))
 
-        val result = terminal.withScreen(ScreenTestPalette) { 42 }
+        val result = terminal.withScreen(ScreenTestColorScheme) { 42 }
 
         assertEquals(42, result)
         assertEquals(1, recorder.output().countOccurrences("\u001B[?1049h"))
@@ -61,8 +61,8 @@ internal class TerminalScreenTest {
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder))
 
-        terminal.withScreen(ScreenTestPalette) { }
-        terminal.withScreen(ScreenTestPalette) { }
+        terminal.withScreen(ScreenTestColorScheme) { }
+        terminal.withScreen(ScreenTestColorScheme) { }
 
         assertEquals(2, recorder.output().countOccurrences("\u001B[?1049h"))
         assertEquals(2, recorder.output().countOccurrences("\u001B[?1049l"))
@@ -73,8 +73,8 @@ internal class TerminalScreenTest {
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder))
 
-        terminal.withScreen(ScreenTestPalette) { screen ->
-            assertThrows<IllegalStateException> { terminal.withScreen(ScreenTestPalette) { } }
+        terminal.withScreen(ScreenTestColorScheme) { screen ->
+            assertThrows<IllegalStateException> { terminal.withScreen(ScreenTestColorScheme) { } }
             screen.draw { frame -> frame.renderWidget(ScreenLabel("still drawing"), frame.area) }
         }
 
@@ -85,22 +85,22 @@ internal class TerminalScreenTest {
     fun `a screen refuses to draw or read once its scope has returned`() {
         val terminal = Terminal(MordantTerminal(terminalInterface = TerminalRecorder()))
 
-        val leaked = terminal.withScreen(ScreenTestPalette) { it }
+        val leaked = terminal.withScreen(ScreenTestColorScheme) { it }
 
         assertThrows<IllegalStateException> { leaked.draw { } }
         assertThrows<IllegalStateException> { leaked.events() }
     }
 
     @Test
-    fun `a scope draws with its own palette`() {
+    fun `a scope draws with its own color scheme`() {
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder))
 
-        terminal.withScreen(ScreenTestPalette) { }
+        terminal.withScreen(ScreenTestColorScheme) { }
         recorder.clearOutput()
-        terminal.withScreen(OtherScreenTestPalette) { it.draw { frame -> frame.renderWidget(ScreenLabel("x"), frame.area) } }
+        terminal.withScreen(OtherScreenTestColorScheme) { it.draw { frame -> frame.renderWidget(ScreenLabel("x"), frame.area) } }
 
-        assertTrue(recorder.output().contains("48;2;0;0;255"), "expected the second palette's background: ${recorder.output()}")
+        assertTrue(recorder.output().contains("48;2;0;0;255"), "expected the second color scheme's background: ${recorder.output()}")
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class TerminalScreenTest {
         val failure = IllegalStateException("block failed")
 
         val thrown = assertThrows<IllegalStateException> {
-            terminal.withScreen(ScreenTestPalette) { throw failure }
+            terminal.withScreen(ScreenTestColorScheme) { throw failure }
         }
 
         assertSame(failure, thrown)
@@ -127,7 +127,7 @@ internal class TerminalScreenTest {
         )
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.NONE, terminalInterface = recorder))
 
-        terminal.withScreen(ScreenTestPalette) { Unit }
+        terminal.withScreen(ScreenTestColorScheme) { Unit }
 
         assertTrue(recorder.output().none { it == '\u001B' }, "unexpected escape output: ${recorder.output()}")
     }
@@ -139,7 +139,7 @@ internal class TerminalScreenTest {
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = terminalInterface))
 
         val thrown = assertThrows<IllegalStateException> {
-            terminal.withScreen(ScreenTestPalette) { throw AssertionError("unreachable") }
+            terminal.withScreen(ScreenTestColorScheme) { throw AssertionError("unreachable") }
         }
 
         assertEquals("output failed", thrown.message)
@@ -155,7 +155,7 @@ internal class TerminalScreenTest {
         val failure = IllegalStateException("block failed")
 
         val thrown = assertThrows<IllegalStateException> {
-            terminal.withScreen(ScreenTestPalette) { throw failure }
+            terminal.withScreen(ScreenTestColorScheme) { throw failure }
         }
 
         assertSame(failure, thrown)

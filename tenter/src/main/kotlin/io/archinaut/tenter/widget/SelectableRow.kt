@@ -3,8 +3,8 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.palette.ChromeRole
-import io.archinaut.tenter.palette.ColorRole
+import io.archinaut.tenter.color.StandardRole
+import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.screen.Style
 
 /**
@@ -19,7 +19,7 @@ public class SelectableRow(
     private val checkState: CheckState,
     private val selected: Boolean,
     private val right: String? = null,
-    private val textColor: ColorRole = ChromeRole.TEXT_PRIMARY,
+    private val textColor: ColorRole = StandardRole.TEXT_PRIMARY,
     private val checkboxColor: ColorRole? = null,
     private val glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
 ) : MeasurableWidget {
@@ -27,7 +27,7 @@ public class SelectableRow(
     override fun write(writer: RowWriter) {
         if (selected) writer.markReveal()
 
-        val color = if (selected) ChromeRole.ACCENT else textColor
+        val color = if (selected) StandardRole.ACCENT else textColor
         val marker = if (selected) "▶" else " "
         val left = "$marker   $label"
         if (right == null) {
@@ -37,7 +37,7 @@ public class SelectableRow(
         }
 
         val resolvedCheckboxColor = when {
-            selected -> ChromeRole.ACCENT
+            selected -> StandardRole.ACCENT
             checkboxColor != null -> checkboxColor
             else -> Checkbox.intrinsicColor(checkState)
         }

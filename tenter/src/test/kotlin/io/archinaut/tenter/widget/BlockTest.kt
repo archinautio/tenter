@@ -10,7 +10,7 @@ import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Buffer
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.widget.panel.panelViewport
 
 /** Pixel parity for [Block]'s border, title, badge, padding, and scrollbar-thumb decoration. */
@@ -60,17 +60,17 @@ internal class BlockTest {
         assertEquals("S", buffer.get(6, 0).symbol)
         assertEquals("T", buffer.get(7, 0).symbol)
         assertEquals(" ", buffer.get(8, 0).symbol)
-        assertEquals(ChromeRole.ACCENT, buffer.get(4, 0).style.fg)
-        assertEquals(ChromeRole.PANEL_BORDER, buffer.get(0, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(4, 0).style.fg)
+        assertEquals(StandardRole.PANEL_BORDER, buffer.get(0, 0).style.fg)
     }
 
     @Test
     fun `uses specified colors`() {
-        val widget = Block.bordered(borderColor = ChromeRole.DANGER, titleColor = ChromeRole.TEXT_PRIMARY)
+        val widget = Block.bordered(borderColor = StandardRole.DANGER, titleColor = StandardRole.TEXT_PRIMARY)
 
         val buffer = render(widget, 10, 3)
 
-        assertEquals(ChromeRole.DANGER, buffer.get(0, 0).style.fg)
+        assertEquals(StandardRole.DANGER, buffer.get(0, 0).style.fg)
     }
 
     @Test
@@ -88,8 +88,8 @@ internal class BlockTest {
         assertEquals("S", buffer.get(8, 0).symbol)
         assertEquals("T", buffer.get(9, 0).symbol)
         assertEquals(" ", buffer.get(10, 0).symbol)
-        assertEquals(ChromeRole.ACCENT, buffer.get(2, 0).style.fg)
-        assertEquals(ChromeRole.ACCENT, buffer.get(6, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(2, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(6, 0).style.fg)
     }
 
     @Test
@@ -107,8 +107,8 @@ internal class BlockTest {
         assertEquals("L", buffer.get(8, 0).symbol)
         assertEquals("P", buffer.get(9, 0).symbol)
         assertEquals(" ", buffer.get(10, 0).symbol)
-        assertEquals(ChromeRole.ACCENT, buffer.get(3, 0).style.fg)
-        assertEquals(ChromeRole.ACCENT, buffer.get(6, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(3, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(6, 0).style.fg)
     }
 
     @Test
@@ -151,7 +151,7 @@ internal class BlockTest {
         assertEquals("[", buffer.get(2, 0).symbol)
         assertEquals("1", buffer.get(3, 0).symbol)
         assertEquals("]", buffer.get(4, 0).symbol)
-        assertEquals(ChromeRole.ACCENT, buffer.get(3, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(3, 0).style.fg)
     }
 
     @Test
@@ -204,7 +204,7 @@ internal class BlockTest {
             val cell = buffer.get(29, row)
             if ((row - 1) in thumbRange) {
                 assertEquals("▐", cell.symbol, "expected thumb at row $row")
-                assertEquals(ChromeRole.PANEL_BORDER, cell.style.fg)
+                assertEquals(StandardRole.PANEL_BORDER, cell.style.fg)
             } else {
                 assertEquals("│", cell.symbol, "expected border at row $row")
             }
@@ -231,14 +231,14 @@ internal class BlockTest {
             stubContent(20),
             title = "T",
             badge = "0",
-            borderColor = ChromeRole.PANEL_BORDER_FOCUSED,
+            borderColor = StandardRole.PANEL_BORDER_FOCUSED,
         )
 
         val buffer = render(widget, 30, 10, ViewportState())
 
         val thumbRange = ScrollGeometry.thumb(track = 8, contentLength = 21, viewportLength = 8, offset = 0)!!
         val row = 1 + thumbRange.first
-        assertEquals(ChromeRole.PANEL_BORDER_FOCUSED, buffer.get(29, row).style.fg)
+        assertEquals(StandardRole.PANEL_BORDER_FOCUSED, buffer.get(29, row).style.fg)
     }
 
     @Test

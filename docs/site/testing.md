@@ -9,7 +9,7 @@ in the raw output can be split or missing even when the frame is right.
 Create a headless terminal with `Terminal.headless(width, height) { ... }` and pass it to your
 application in place of `Terminal()`. It never touches a real terminal and follows the same
 rules: your application enters `withScreen` and draws through the `Screen`. It reports
-`AnsiLevel.NONE` and ignores the palette.
+`AnsiLevel.NONE` and ignores the color scheme.
 
 ## Check what was drawn
 
@@ -17,7 +17,7 @@ rules: your application enters `withScreen` and draws through the `Screen`. It r
 `terminal.frame` afterwards: it is what the terminal shows, blank before the first draw, and it
 keeps the last frame after the screen scope returns. `frame.lines()` gives each row's text, and
 `frame.get(x, y)` gives a cell with its symbol and style. Styles hold color roles, so a test does
-not depend on the palette. A headless terminal's frames never change after they are drawn.
+not depend on the color scheme. A headless terminal's frames never change after they are drawn.
 
 ## Script the input
 
@@ -41,4 +41,4 @@ and that hello stops reading at `q`:
 --8<-- "tenter-example/src/test/kotlin/tenterexample/HelloExampleTest.kt:test"
 ```
 
-To test a palette, check its colors directly, for example `palette.foreground(ChromeRole.ACCENT)`.
+To test a color scheme, check its colors directly, for example `colorScheme.foreground(StandardRole.ACCENT)`.

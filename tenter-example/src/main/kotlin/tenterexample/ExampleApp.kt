@@ -6,7 +6,7 @@ package tenterexample
 import com.github.ajalt.mordant.input.InputEvent
 import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.input.MouseEvent
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.widget.panel.Panel
 import io.archinaut.tenter.widget.panel.Panels
 import io.archinaut.tenter.widget.panel.PanelSet
@@ -177,10 +177,10 @@ internal class ExampleApp {
         val isChecked = input.selectedRow in input.checkedRows
         return Stack(
             listOf(
-                Paragraph(exampleRowLabel(input.selectedRow), Style(ChromeRole.ACCENT), wrap = true),
+                Paragraph(exampleRowLabel(input.selectedRow), Style(StandardRole.ACCENT), wrap = true),
                 Paragraph(
                     if (isChecked) "checked" else "not checked",
-                    Style(if (isChecked) ChromeRole.SUCCESS else ChromeRole.TEXT_MUTED),
+                    Style(if (isChecked) StandardRole.SUCCESS else StandardRole.TEXT_MUTED),
                 ),
             ),
         )
@@ -188,7 +188,7 @@ internal class ExampleApp {
 
     private fun checkedContent(input: ExampleState): MeasurableWidget =
         if (input.checkedRows.isEmpty()) {
-            Paragraph("nothing checked yet", Style(ChromeRole.TEXT_MUTED))
+            Paragraph("nothing checked yet", Style(StandardRole.TEXT_MUTED))
         } else {
             Paragraph(input.checkedRows.sorted().joinToString("\n") { "row $it" })
         }
@@ -201,7 +201,7 @@ internal class ExampleApp {
             val block = Block.bordered(padding = Padding.horizontal(1))
             block.render(canvas)
             val text = "focus: ${focused.name}  •  selected: row ${state.selectedRow}  •  checked: ${state.checkedRows.size}"
-            Paragraph(text, Style(ChromeRole.TEXT_PRIMARY)).render(block.inner(canvas))
+            Paragraph(text, Style(StandardRole.TEXT_PRIMARY)).render(block.inner(canvas))
         }
     }
 

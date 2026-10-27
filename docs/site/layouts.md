@@ -13,8 +13,8 @@ so it can be stacked, placed in columns, and scrolled.
 val greeting = Paragraph("Hello from Tenter")
 val status = Paragraph(
     listOf(
-        Line("Connected", Style(ChromeRole.SUCCESS)),
-        Line(Span("key ", Style(ChromeRole.INFO)), Span("description")),
+        Line("Connected", Style(StandardRole.SUCCESS)),
+        Line(Span("key ", Style(StandardRole.INFO)), Span("description")),
     ),
     wrap = true,
 )

@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.screen
 
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -26,7 +26,7 @@ internal class BufferTest {
     @Test
     fun `set and get cell`() {
         val buffer = Buffer(5, 5)
-        val cell = Cell("A", Style(ChromeRole.DANGER, ChromeRole.INFO))
+        val cell = Cell("A", Style(StandardRole.DANGER, StandardRole.INFO))
 
         buffer.set(2, 3, cell)
 

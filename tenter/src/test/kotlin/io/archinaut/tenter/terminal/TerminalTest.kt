@@ -8,10 +8,10 @@ import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Style
 
-import io.archinaut.tenter.palette.ChromeRole
-import io.archinaut.tenter.palette.ColorRole
-import io.archinaut.tenter.palette.PaletteColor
-import io.archinaut.tenter.palette.RolePalette
+import io.archinaut.tenter.color.StandardRole
+import io.archinaut.tenter.color.ColorRole
+import io.archinaut.tenter.color.TerminalColor
+import io.archinaut.tenter.color.ColorScheme
 
 import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
@@ -19,44 +19,44 @@ import com.github.ajalt.mordant.terminal.TerminalRecorder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import io.archinaut.tenter.palette.PaletteColor.TrueColor
+import io.archinaut.tenter.color.TerminalColor.TrueColor
 
 /**
- * A minimal, fully-authored [RolePalette] for exercising [Terminal]'s own mechanics —
+ * A minimal, fully-authored [ColorScheme] for exercising [Terminal]'s own mechanics —
  * diffing, run coalescing, alt-screen switching — independent of any host application's actual
- * theme. Every [ChromeRole] is resolved so [Terminal] can be exercised with an arbitrary
+ * theme. Every [StandardRole] is resolved so [Terminal] can be exercised with an arbitrary
  * [Style], not just the handful of roles individual tests reference.
  */
-private fun rgb(r: Int, g: Int, b: Int) = PaletteColor.TrueColor(r, g, b)
+private fun rgb(r: Int, g: Int, b: Int) = TerminalColor.TrueColor(r, g, b)
 
-private object FixturePalette : RolePalette {
-    override val defaultBackground: PaletteColor = rgb(16, 20, 24)
+private object FixtureColorScheme : ColorScheme {
+    override val defaultBackground: TerminalColor = rgb(16, 20, 24)
 
-    override fun foreground(role: ColorRole): PaletteColor = when (role) {
-        is ChromeRole -> when (role) {
-            ChromeRole.DEFAULT -> rgb(221, 226, 229)
-            ChromeRole.TEXT_PRIMARY -> rgb(241, 243, 245)
-            ChromeRole.TEXT_MUTED -> rgb(166, 173, 180)
-            ChromeRole.TEXT_SUBTLE -> rgb(76, 80, 84)
-            ChromeRole.ACCENT -> rgb(255, 209, 102)
-            ChromeRole.INFO -> rgb(119, 212, 232)
-            ChromeRole.SUCCESS -> rgb(139, 209, 124)
-            ChromeRole.WARNING -> rgb(243, 211, 106)
-            ChromeRole.DANGER -> rgb(255, 153, 153)
-            ChromeRole.DISABLED -> rgb(137, 145, 152)
-            ChromeRole.PANEL_BORDER -> rgb(114, 191, 114)
-            ChromeRole.PANEL_BORDER_FOCUSED -> rgb(114, 191, 114)
+    override fun foreground(role: ColorRole): TerminalColor = when (role) {
+        is StandardRole -> when (role) {
+            StandardRole.DEFAULT -> rgb(221, 226, 229)
+            StandardRole.TEXT_PRIMARY -> rgb(241, 243, 245)
+            StandardRole.TEXT_MUTED -> rgb(166, 173, 180)
+            StandardRole.TEXT_SUBTLE -> rgb(76, 80, 84)
+            StandardRole.ACCENT -> rgb(255, 209, 102)
+            StandardRole.INFO -> rgb(119, 212, 232)
+            StandardRole.SUCCESS -> rgb(139, 209, 124)
+            StandardRole.WARNING -> rgb(243, 211, 106)
+            StandardRole.DANGER -> rgb(255, 153, 153)
+            StandardRole.DISABLED -> rgb(137, 145, 152)
+            StandardRole.PANEL_BORDER -> rgb(114, 191, 114)
+            StandardRole.PANEL_BORDER_FOCUSED -> rgb(114, 191, 114)
         }
-        else -> error("FixturePalette only resolves ChromeRole, got: $role")
+        else -> error("FixtureColorScheme only resolves StandardRole, got: $role")
     }
 }
 
-private object AltFixturePalette : RolePalette {
-    override val defaultBackground: PaletteColor = rgb(248, 245, 238)
+private object AltFixtureColorScheme : ColorScheme {
+    override val defaultBackground: TerminalColor = rgb(248, 245, 238)
 
-    override fun foreground(role: ColorRole): PaletteColor = when (role) {
-        is ChromeRole -> rgb(32, 36, 40)
-        else -> error("AltFixturePalette only resolves ChromeRole, got: $role")
+    override fun foreground(role: ColorRole): TerminalColor = when (role) {
+        is StandardRole -> rgb(32, 36, 40)
+        else -> error("AltFixtureColorScheme only resolves StandardRole, got: $role")
     }
 }
 
@@ -64,21 +64,21 @@ internal class TerminalTest {
 
     private val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
     private val backend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder)
-    private val screen = Terminal(backend).openScreen(FixturePalette).also { recorder.clearOutput() }
+    private val screen = Terminal(backend).openScreen(FixtureColorScheme).also { recorder.clearOutput() }
 
     @Test
-    fun `fixed colors render through a custom palette in both channels`() {
-        val customPalette = object : RolePalette {
-            override val defaultBackground: PaletteColor = TrueColor(0, 0, 0)
+    fun `fixed colors render through a custom color scheme in both channels`() {
+        val customColorScheme = object : ColorScheme {
+            override val defaultBackground: TerminalColor = TrueColor(0, 0, 0)
 
-            override fun foreground(role: ColorRole): PaletteColor = when (role) {
-                is ChromeRole -> TrueColor(255, 255, 255)
+            override fun foreground(role: ColorRole): TerminalColor = when (role) {
+                is StandardRole -> TrueColor(255, 255, 255)
                 else -> error("semantic role unexpectedly resolved: $role")
             }
 
-            override fun background(role: ColorRole): PaletteColor = when (role) {
-                ChromeRole.DEFAULT -> defaultBackground
-                is ChromeRole -> TrueColor(0, 0, 0)
+            override fun background(role: ColorRole): TerminalColor = when (role) {
+                StandardRole.DEFAULT -> defaultBackground
+                is StandardRole -> TrueColor(0, 0, 0)
                 else -> error("semantic role unexpectedly resolved: $role")
             }
         }
@@ -88,7 +88,7 @@ internal class TerminalTest {
         val buffer = Buffer(1, 1)
         buffer.set(0, 0, Cell("X", Style(fg = fixed, bg = fixed)))
 
-        Terminal(customBackend).openScreen(customPalette).also { recorder.clearOutput() }.renderBuffer(buffer)
+        Terminal(customBackend).openScreen(customColorScheme).also { recorder.clearOutput() }.renderBuffer(buffer)
 
         assertTrue(recorder.output().contains("38;2;255;0;0"))
         assertTrue(recorder.output().contains("48;2;255;0;0"))
@@ -110,8 +110,8 @@ internal class TerminalTest {
     }
 
     @Test
-    fun `default cell emits the palette's explicit foreground and background truecolor sequences`() {
-        // ChromeRole.DEFAULT resolves to a real color — there is no "unstyled" cell on an
+    fun `default cell emits the color scheme's explicit foreground and background truecolor sequences`() {
+        // StandardRole.DEFAULT resolves to a real color — there is no "unstyled" cell on an
         // ANSI-capable terminal.
         val buffer = Buffer(5, 1)
         Canvas.of(buffer).setString(0, 0, "hello")
@@ -125,9 +125,9 @@ internal class TerminalTest {
     }
 
     @Test
-    fun `a channel no write set renders as the palette default`() {
+    fun `a channel no write set renders as the color scheme default`() {
         val buffer = Buffer(1, 1)
-        Canvas.of(buffer).setString(0, 0, "X", Style(fg = ChromeRole.DANGER))
+        Canvas.of(buffer).setString(0, 0, "X", Style(fg = StandardRole.DANGER))
 
         screen.renderBuffer(buffer)
 
@@ -137,25 +137,25 @@ internal class TerminalTest {
     }
 
     @Test
-    fun `default cell emits a different palette's sequences when constructed with it`() {
+    fun `default cell emits a different color scheme's sequences when constructed with it`() {
         val altRecorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val altBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = altRecorder)
-        val altScreen = Terminal(altBackend).openScreen(AltFixturePalette).also { altRecorder.clearOutput() }
+        val altScreen = Terminal(altBackend).openScreen(AltFixtureColorScheme).also { altRecorder.clearOutput() }
 
         val buffer = Buffer(5, 1)
         Canvas.of(buffer).setString(0, 0, "hello")
         altScreen.renderBuffer(buffer)
 
         val out = altRecorder.output()
-        assertTrue(out.contains("38;2;32;36;40"), "Expected AltFixturePalette's foreground: ${out.repr()}")
-        assertTrue(out.contains("48;2;248;245;238"), "Expected AltFixturePalette's default background: ${out.repr()}")
+        assertTrue(out.contains("38;2;32;36;40"), "Expected AltFixtureColorScheme's foreground: ${out.repr()}")
+        assertTrue(out.contains("48;2;248;245;238"), "Expected AltFixtureColorScheme's default background: ${out.repr()}")
     }
 
     @Test
     fun `colored run emits one style per run not one per cell`() {
         // 4 cells all with fg=DANGER — they should be wrapped in a single SGR open+close pair
         val buffer = Buffer(4, 1)
-        Canvas.of(buffer).setString(0, 0, "ABCD", Style(fg = ChromeRole.DANGER))
+        Canvas.of(buffer).setString(0, 0, "ABCD", Style(fg = StandardRole.DANGER))
 
         screen.renderBuffer(buffer)
 
@@ -165,7 +165,7 @@ internal class TerminalTest {
 
         // Count closing/reset sequences for fg: ESC[39m is always the fg-reset code, regardless
         // of the foreground's own color space (truecolor/256/16) — see AnsiCodes.fgColorReset.
-        // ChromeRole.DEFAULT now sets a real background too, so every style sets both channels and
+        // StandardRole.DEFAULT now sets a real background too, so every style sets both channels and
         // the close tag is always the combined "39;49m" (fg+bg reset in one SGR), never a bare
         // "39m" — see Terminal.renderSpan's KDoc. Each run emits exactly one close tag;
         // with one run we expect exactly one.
@@ -179,7 +179,7 @@ internal class TerminalTest {
         // Contrast: 4 consecutive DANGER cells → 1 reset (run-length) vs 4 resets (per-cell, old).
         val buffer = Buffer(4, 1)
         for (x in 0 until 4) {
-            buffer.set(x, 0, Cell("X", Style(fg = ChromeRole.DANGER)))
+            buffer.set(x, 0, Cell("X", Style(fg = StandardRole.DANGER)))
         }
 
         screen.renderBuffer(buffer)
@@ -195,7 +195,7 @@ internal class TerminalTest {
         // 3 consecutive cells with fg=DANGER + strikethrough — Mordant folds both attributes into
         // one compound SGR open, and one run should emit exactly one.
         val buffer = Buffer(3, 1)
-        Canvas.of(buffer).setString(0, 0, "XYZ", Style(fg = ChromeRole.DANGER, strikethrough = true))
+        Canvas.of(buffer).setString(0, 0, "XYZ", Style(fg = StandardRole.DANGER, strikethrough = true))
 
         screen.renderBuffer(buffer)
 
@@ -220,13 +220,13 @@ internal class TerminalTest {
 
     @Test
     fun `transitions between default and semantic roles do not leak either color channel`() {
-        // Every open tag now sets BOTH channels explicitly (ChromeRole.DEFAULT resolves to real
+        // Every open tag now sets BOTH channels explicitly (StandardRole.DEFAULT resolves to real
         // colors too), so the run-length skip-close optimization never needs to special-case
         // DEFAULT — see Terminal.renderSpan's KDoc. Regression guard: a cell that follows a
         // differently-colored one must still get its own explicit fg AND bg, not inherit either
         // channel from the previous run.
         val buffer = Buffer(2, 1)
-        buffer.set(0, 0, Cell("A", Style(fg = ChromeRole.DANGER, bg = ChromeRole.SUCCESS)))
+        buffer.set(0, 0, Cell("A", Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS)))
         buffer.set(1, 0, Cell("B", Style.DEFAULT))
 
         screen.renderBuffer(buffer)
@@ -271,7 +271,7 @@ internal class TerminalTest {
 
         val out = recorder.output()
         // Rows joined with \r\n, last row has no trailing \r\n. Each row is its own styled run
-        // now (ChromeRole.DEFAULT sets real colors), so "AB" and "CD" are no longer literally
+        // now (StandardRole.DEFAULT sets real colors), so "AB" and "CD" are no longer literally
         // adjacent to the \r\n — a close tag sits between the text and the separator — so this
         // checks ordering and separator count rather than one contiguous substring.
         val firstBreak = out.indexOf("\r\n")
@@ -374,10 +374,10 @@ internal class TerminalTest {
     @Test
     fun `changing a wide glyph style repaints its complete terminal footprint`() {
         val buffer = Buffer(3, 1)
-        Canvas.of(buffer).setString(0, 0, "中", Style(fg = ChromeRole.DANGER))
+        Canvas.of(buffer).setString(0, 0, "中", Style(fg = StandardRole.DANGER))
         screen.renderBuffer(buffer)
 
-        Canvas.of(buffer).setString(0, 0, "中", Style(fg = ChromeRole.SUCCESS))
+        Canvas.of(buffer).setString(0, 0, "中", Style(fg = StandardRole.SUCCESS))
         recorder.clearOutput()
         screen.renderBuffer(buffer)
 
@@ -435,19 +435,19 @@ internal class TerminalTest {
     // ---- entering a screen ----
 
     @Test
-    fun `entering a screen paints the palette's default background before erasing, not the terminal's own`() {
+    fun `entering a screen paints the color scheme's default background before erasing, not the terminal's own`() {
         // Regression guard for a cross-fade flash: the default-style SGR tag must be emitted before
-        // the erase-display sequence, so ED erases using the palette's background rather than
+        // the erase-display sequence, so ED erases using the color scheme's background rather than
         // whatever the terminal itself defaults to.
         val altRecorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val altBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = altRecorder)
 
-        Terminal(altBackend).openScreen(AltFixturePalette)
+        Terminal(altBackend).openScreen(AltFixtureColorScheme)
 
         val out = altRecorder.output()
         val bgIndex = out.indexOf("48;2;248;245;238")
         val eraseIndex = out.indexOf("[2J")
-        assertTrue(bgIndex >= 0, "Expected AltFixturePalette's default background before clearing: ${out.repr()}")
+        assertTrue(bgIndex >= 0, "Expected AltFixtureColorScheme's default background before clearing: ${out.repr()}")
         assertTrue(eraseIndex >= 0, "Expected an erase-display sequence: ${out.repr()}")
         assertTrue(bgIndex < eraseIndex, "Expected the background tag before the erase sequence: ${out.repr()}")
     }
@@ -456,10 +456,10 @@ internal class TerminalTest {
     fun `AnsiLevel NONE emits no SGR codes at all`() {
         val noneRecorder = TerminalRecorder(ansiLevel = AnsiLevel.NONE)
         val noneBackend = MordantTerminal(ansiLevel = AnsiLevel.NONE, terminalInterface = noneRecorder)
-        val noneScreen = Terminal(noneBackend).openScreen(FixturePalette).also { noneRecorder.clearOutput() }
+        val noneScreen = Terminal(noneBackend).openScreen(FixtureColorScheme).also { noneRecorder.clearOutput() }
 
         val buffer = Buffer(3, 1)
-        Canvas.of(buffer).setString(0, 0, "abc", Style(fg = ChromeRole.DANGER, strikethrough = true))
+        Canvas.of(buffer).setString(0, 0, "abc", Style(fg = StandardRole.DANGER, strikethrough = true))
         noneScreen.renderBuffer(buffer)
 
         val out = noneRecorder.output()

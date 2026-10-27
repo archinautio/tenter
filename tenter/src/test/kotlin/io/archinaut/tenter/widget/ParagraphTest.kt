@@ -5,7 +5,7 @@ package io.archinaut.tenter.widget
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Line
 import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Span
@@ -15,13 +15,13 @@ internal class ParagraphTest {
 
     @Test
     fun `splits a string into lines and keeps empty lines as blank rows`() {
-        val paragraph = Paragraph("first\n\nthird", Style(ChromeRole.INFO))
+        val paragraph = Paragraph("first\n\nthird", Style(StandardRole.INFO))
 
         val buffer = render(paragraph, 10, 4)
 
         assertEquals(Size(10, 3), paragraph.measure(10))
         assertEquals(listOf("first", "", "third"), (0 until 3).map { buffer.line(it) })
-        assertEquals(ChromeRole.INFO, buffer.get(0, 2).style.fg)
+        assertEquals(StandardRole.INFO, buffer.get(0, 2).style.fg)
     }
 
     @Test
@@ -45,14 +45,14 @@ internal class ParagraphTest {
     @Test
     fun `wrapping keeps each span's style and an empty line stays a blank row`() {
         val paragraph = Paragraph(
-            listOf(Line(Span("key ", Style(ChromeRole.INFO)), Span("description")), Line("")),
+            listOf(Line(Span("key ", Style(StandardRole.INFO)), Span("description")), Line("")),
             wrap = true,
         )
 
         val buffer = render(paragraph, 20, 3)
 
         assertEquals(2, paragraph.measure(20).height)
-        assertEquals(ChromeRole.INFO, buffer.get(0, 0).style.fg)
+        assertEquals(StandardRole.INFO, buffer.get(0, 0).style.fg)
         assertEquals(Style.DEFAULT, buffer.get(4, 0).style)
     }
 

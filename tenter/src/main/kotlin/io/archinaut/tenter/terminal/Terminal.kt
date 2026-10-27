@@ -3,9 +3,8 @@
 
 package io.archinaut.tenter.terminal
 
-import io.archinaut.tenter.palette.ColorRole
-import io.archinaut.tenter.palette.DefaultRolePalette
-import io.archinaut.tenter.palette.RolePalette
+import io.archinaut.tenter.color.ColorRole
+import io.archinaut.tenter.color.ColorScheme
 import io.archinaut.tenter.screen.Rect
 
 import com.github.ajalt.mordant.input.MouseTracking
@@ -21,7 +20,7 @@ import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
  * [Terminal.headless] is a [HeadlessTerminal] that never touches one, for tests and headless
  * rendering. Both follow the same rules: creating one writes nothing, and only a [Screen] draws.
  *
- * Picking *which* palette to pass to [withScreen] (a light/dark choice, [ansiLevel], letting the
+ * Picking *which* color scheme to pass to [withScreen] (a light/dark choice, [ansiLevel], letting the
  * user override it) is the host application's job. A terminal is not thread-safe.
  */
 public sealed class Terminal(
@@ -29,7 +28,7 @@ public sealed class Terminal(
     height: Int,
 ) {
 
-    /** The color level this terminal supports, for choosing the palette to pass to [withScreen]. */
+    /** The color level this terminal supports, for choosing the color scheme to pass to [withScreen]. */
     public abstract val ansiLevel: AnsiLevel
 
     private var width: Int = width.coerceAtLeast(0)
@@ -53,18 +52,18 @@ public sealed class Terminal(
     /** Brings [area] up to date before a draw. */
     internal open fun followSize() {}
 
-    /** Starts a scope drawing with [palette]: enters the screen and returns what presents its frames. */
-    internal abstract fun open(palette: RolePalette): Session
+    /** Starts a scope drawing with [colorScheme]: enters the screen and returns what presents its frames. */
+    internal abstract fun open(colorScheme: ColorScheme): Session
 
     /** Backs [Screen.events]. */
     internal abstract fun events(mouseTracking: MouseTracking): Flow<TerminalEvent>
 
     /**
-     * Runs [block] with this terminal's [Screen], drawing with [palette], whose [ColorRole]s resolve
+     * Runs [block] with this terminal's [Screen], drawing with [colorScheme], whose [ColorRole]s resolve
      * every color the application draws with.
      *
      * Entry clears the screen, so the first [Screen.draw] repaints fully. Entering again after an
-     * earlier scope has returned is fine, also with another palette; a nested scope on the same
+     * earlier scope has returned is fine, also with another color scheme; a nested scope on the same
      * terminal throws [IllegalStateException]. The [Screen] closes when [block] returns.
      *
      * This operation does not collect input, run an event loop, or make the terminal safe to use from
@@ -77,9 +76,9 @@ public sealed class Terminal(
      * the terminal. If the block or entry fails and cleanup fails as well, the original failure is
      * rethrown and the cleanup failure is suppressed on it.
      */
-    public inline fun <T> withScreen(palette: RolePalette = DefaultRolePalette, block: (Screen) -> T): T {
+    public inline fun <T> withScreen(colorScheme: ColorScheme = ColorScheme.Default, block: (Screen) -> T): T {
         // Kept minimal: this body is copied into callers, so the logic lives in the two calls.
-        val screen = openScreen(palette)
+        val screen = openScreen(colorScheme)
         var failure: Throwable? = null
         try {
             return block(screen)
@@ -93,9 +92,9 @@ public sealed class Terminal(
 
     /** Opens the [Screen] that [withScreen] runs its block with. */
     @PublishedApi
-    internal fun openScreen(palette: RolePalette): Screen {
+    internal fun openScreen(colorScheme: ColorScheme): Screen {
         check(!screenOpen) { "withScreen is already active on this terminal" }
-        val session = open(palette)
+        val session = open(colorScheme)
         screenOpen = true
         return Screen(this, session)
     }

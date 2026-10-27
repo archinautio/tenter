@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Style
@@ -247,7 +247,7 @@ internal class ContentLayoutTest {
     fun `fixed content preserves raw paint order and reveal`() {
         val content = object : Widget {
                 override fun render(canvas: Canvas) {
-                    canvas.set(0, 0, Cell("X", Style(fg = ChromeRole.SUCCESS)))
+                    canvas.set(0, 0, Cell("X", Style(fg = StandardRole.SUCCESS)))
                     canvas.markReveal(Rect(0, 0, 1, 1))
                 }
             }.fixedSize(5, 1)

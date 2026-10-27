@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.terminal
 
-import io.archinaut.tenter.palette.RolePalette
+import io.archinaut.tenter.color.ColorScheme
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Size
 
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.flow
  * [Terminal.headless].
  *
  * It follows a real terminal's rules: only a [Screen] draws, and nested scopes throw. It reports
- * [AnsiLevel.NONE] and ignores the palette, since frames hold color roles, not colors. Its screen's
+ * [AnsiLevel.NONE] and ignores the color scheme, since frames hold color roles, not colors. Its screen's
  * events come from the script it was created with; see [HeadlessInput].
  */
 public class HeadlessTerminal internal constructor(
@@ -38,7 +38,7 @@ public class HeadlessTerminal internal constructor(
 
     override val ansiLevel: AnsiLevel get() = AnsiLevel.NONE
 
-    override fun open(palette: RolePalette): Session {
+    override fun open(colorScheme: ColorScheme): Session {
         frame = CompletedFrame.blank(area.width, area.height)
         return HeadlessSession()
     }

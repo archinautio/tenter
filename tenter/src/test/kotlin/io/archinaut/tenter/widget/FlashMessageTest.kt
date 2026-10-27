@@ -5,7 +5,7 @@ package io.archinaut.tenter.widget
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 
 internal class FlashMessageTest {
 
@@ -17,6 +17,6 @@ internal class FlashMessageTest {
 
         assertEquals(1, message.measure(10).height)
         assertEquals("saved all…", buffer.line(0))
-        assertEquals(ChromeRole.INFO, buffer.get(0, 0).style.fg)
+        assertEquals(StandardRole.INFO, buffer.get(0, 0).style.fg)
     }
 }

@@ -3,13 +3,13 @@
 
 package io.archinaut.tenter.screen
 
-import io.archinaut.tenter.palette.ColorRole
+import io.archinaut.tenter.color.ColorRole
 
 /**
  * Foreground and background roles plus text attributes for a [Cell]. A null channel is unset: a
  * write leaves that channel of the painted cell as it is (see [patch]), so a glyph drawn with only
  * a foreground keeps the background already under it. A channel no write ever set renders as
- * [io.archinaut.tenter.palette.ChromeRole.DEFAULT], or without strikethrough.
+ * [io.archinaut.tenter.color.StandardRole.DEFAULT], or without strikethrough.
  */
 public data class Style(
     val fg: ColorRole? = null,

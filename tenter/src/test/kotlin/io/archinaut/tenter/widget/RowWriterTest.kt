@@ -6,7 +6,7 @@ package io.archinaut.tenter.widget
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Line
 import io.archinaut.tenter.screen.Span
 import io.archinaut.tenter.screen.Style
@@ -63,13 +63,13 @@ internal class RowWriterTest {
     @Test
     fun `writeLine paints each span in its own style at the right column`() {
         val canvas = paint(20, 3) { writer ->
-            writer.writeLine(Line(Span("foo", Style(ChromeRole.DANGER)), Span("bar", Style(ChromeRole.SUCCESS))))
+            writer.writeLine(Line(Span("foo", Style(StandardRole.DANGER)), Span("bar", Style(StandardRole.SUCCESS))))
         }
 
-        assertEquals(Style(ChromeRole.DANGER), canvas.get(0, 0).style)
-        assertEquals(Style(ChromeRole.DANGER), canvas.get(2, 0).style)
-        assertEquals(Style(ChromeRole.SUCCESS), canvas.get(3, 0).style)
-        assertEquals(Style(ChromeRole.SUCCESS), canvas.get(5, 0).style)
+        assertEquals(Style(StandardRole.DANGER), canvas.get(0, 0).style)
+        assertEquals(Style(StandardRole.DANGER), canvas.get(2, 0).style)
+        assertEquals(Style(StandardRole.SUCCESS), canvas.get(3, 0).style)
+        assertEquals(Style(StandardRole.SUCCESS), canvas.get(5, 0).style)
         assertEquals("f", canvas.get(0, 0).symbol)
         assertEquals("b", canvas.get(3, 0).symbol)
     }
@@ -77,18 +77,18 @@ internal class RowWriterTest {
     @Test
     fun `writeLine advances a wide codepoint's column by two cells`() {
         val canvas = paint(20, 3) { writer ->
-            writer.writeLine(Line(Span("中", Style(ChromeRole.DANGER)), Span("A", Style(ChromeRole.SUCCESS))))
+            writer.writeLine(Line(Span("中", Style(StandardRole.DANGER)), Span("A", Style(StandardRole.SUCCESS))))
         }
 
         assertEquals("中", canvas.get(0, 0).symbol)
         assertEquals("", canvas.get(1, 0).symbol, "filler reserves the wide glyph's second cell")
         assertEquals("A", canvas.get(2, 0).symbol)
-        assertEquals(Style(ChromeRole.SUCCESS), canvas.get(2, 0).style)
+        assertEquals(Style(StandardRole.SUCCESS), canvas.get(2, 0).style)
     }
 
     @Test
     fun `writeLine ellipsizes at the available width`() {
-        val canvas = paint(5, 1) { writer -> writer.writeLine("hello world", Style(ChromeRole.DANGER)) }
+        val canvas = paint(5, 1) { writer -> writer.writeLine("hello world", Style(StandardRole.DANGER)) }
 
         assertEquals("hell…", (0 until 5).joinToString("") { canvas.get(it, 0).symbol })
     }

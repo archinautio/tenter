@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.textClusters
 
@@ -14,7 +14,7 @@ import io.archinaut.tenter.text.textClusters
  */
 public class VerticalText(
     private val text: String,
-    private val style: Style = Style(ChromeRole.TEXT_PRIMARY),
+    private val style: Style = Style(StandardRole.TEXT_PRIMARY),
 ) : MeasurableWidget {
 
     override fun write(writer: RowWriter) {

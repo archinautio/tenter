@@ -3,8 +3,8 @@
 
 package io.archinaut.tenter.terminal
 
-import io.archinaut.tenter.palette.ChromeRole
-import io.archinaut.tenter.palette.RolePalette
+import io.archinaut.tenter.color.StandardRole
+import io.archinaut.tenter.color.ColorScheme
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Style
@@ -27,7 +27,7 @@ import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
  *
  * The drawing area follows [backend]'s size: whenever Mordant reports a new size (for example after
  * [events] polls it), the next draw resizes. At [AnsiLevel.NONE] every SGR tag is suppressed
- * regardless of the palette, since the terminal cannot render color at all.
+ * regardless of the color scheme, since the terminal cannot render color at all.
  */
 internal class AnsiTerminal(
     private val backend: MordantTerminal,
@@ -46,9 +46,9 @@ internal class AnsiTerminal(
         resize(size.width.coerceAtLeast(0), size.height.coerceAtLeast(0))
     }
 
-    override fun open(palette: RolePalette): Session {
+    override fun open(colorScheme: ColorScheme): Session {
         val lifecycle = ScreenLifecycle(backend)
-        val session = AnsiSession(StyleTagCache(palette, ansiLevel), lifecycle)
+        val session = AnsiSession(StyleTagCache(colorScheme, ansiLevel), lifecycle)
         try {
             lifecycle.enter()
             session.clear()
@@ -98,7 +98,7 @@ internal class AnsiTerminal(
         /**
          * Clears the screen so the next frame repaints fully. The default style's SGR tag is emitted
          * before `clearScreen()` (which erases using whatever SGR is currently active) so the cleared
-         * screen uses the palette's background immediately.
+         * screen uses the color scheme's background immediately.
          */
         fun clear() {
             val defaultStyle = styles.tagsFor(Style.DEFAULT)?.open.orEmpty()
@@ -163,7 +163,7 @@ internal class AnsiTerminal(
          *
          * Closing the previous run before opening the next is skippable whenever both runs have tags
          * at all: every opening tag now establishes BOTH foreground and background explicitly (even
-         * for [ChromeRole.DEFAULT], which resolves to the palette's default surface rather than leaving
+         * for [StandardRole.DEFAULT], which resolves to the color scheme's default surface rather than leaving
          * a channel unset), so the next run's open tag always fully overwrites whatever the previous
          * run set — nothing can bleed through. Only a strikethrough-state change still needs the
          * close, since strikethrough has no "close" bundled into every open tag the way color does.

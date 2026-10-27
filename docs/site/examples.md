@@ -56,7 +56,7 @@ an interactive terminal. Avoid IDE output consoles for interactive checks.
 ## Glyphs look wrong
 
 Check the [glyph choices](styling.md#choose-glyphs) and
-[palette behavior](styling.md#apply-colors) against your terminal configuration.
+[color scheme behavior](styling.md#apply-colors) against your terminal configuration.
 
 ## Content does not follow selection or resizing
 

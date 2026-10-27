@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.screen
 
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -14,7 +14,7 @@ internal class CanvasTest {
     @Test
     fun `get and set within bounds`() {
         val canvas = Canvas.offscreen(5, 5)
-        val cell = Cell("A", Style(ChromeRole.DANGER, ChromeRole.INFO))
+        val cell = Cell("A", Style(StandardRole.DANGER, StandardRole.INFO))
 
         canvas.set(2, 3, cell)
 
@@ -24,33 +24,33 @@ internal class CanvasTest {
     @Test
     fun `a write changes only the channels its style sets`() {
         val canvas = Canvas.offscreen(3, 1)
-        canvas.set(0, 0, Cell(" ", Style(bg = ChromeRole.SUCCESS)))
-        canvas.set(1, 0, Cell(" ", Style(fg = ChromeRole.INFO, strikethrough = true)))
+        canvas.set(0, 0, Cell(" ", Style(bg = StandardRole.SUCCESS)))
+        canvas.set(1, 0, Cell(" ", Style(fg = StandardRole.INFO, strikethrough = true)))
 
-        canvas.setString(0, 0, "AB", Style(fg = ChromeRole.DANGER))
+        canvas.setString(0, 0, "AB", Style(fg = StandardRole.DANGER))
 
-        assertEquals(Cell("A", Style(fg = ChromeRole.DANGER, bg = ChromeRole.SUCCESS)), canvas.get(0, 0))
-        assertEquals(Cell("B", Style(fg = ChromeRole.DANGER, strikethrough = true)), canvas.get(1, 0))
+        assertEquals(Cell("A", Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS)), canvas.get(0, 0))
+        assertEquals(Cell("B", Style(fg = StandardRole.DANGER, strikethrough = true)), canvas.get(1, 0))
     }
 
     @Test
     fun `a write that sets a channel to the default replaces what was painted`() {
         val canvas = Canvas.offscreen(1, 1)
-        canvas.set(0, 0, Cell("A", Style(bg = ChromeRole.SUCCESS, strikethrough = true)))
+        canvas.set(0, 0, Cell("A", Style(bg = StandardRole.SUCCESS, strikethrough = true)))
 
-        canvas.set(0, 0, Cell("B", Style(bg = ChromeRole.DEFAULT, strikethrough = false)))
+        canvas.set(0, 0, Cell("B", Style(bg = StandardRole.DEFAULT, strikethrough = false)))
 
-        assertEquals(Cell("B", Style(bg = ChromeRole.DEFAULT, strikethrough = false)), canvas.get(0, 0))
+        assertEquals(Cell("B", Style(bg = StandardRole.DEFAULT, strikethrough = false)), canvas.get(0, 0))
     }
 
     @Test
     fun `a wide glyph keeps the background painted under it`() {
         val canvas = Canvas.offscreen(2, 1)
-        canvas.setString(0, 0, "  ", Style(bg = ChromeRole.SUCCESS))
+        canvas.setString(0, 0, "  ", Style(bg = StandardRole.SUCCESS))
 
-        canvas.setString(0, 0, "中", Style(fg = ChromeRole.DANGER))
+        canvas.setString(0, 0, "中", Style(fg = StandardRole.DANGER))
 
-        assertEquals(Cell("中", Style(fg = ChromeRole.DANGER, bg = ChromeRole.SUCCESS)), canvas.get(0, 0))
+        assertEquals(Cell("中", Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS)), canvas.get(0, 0))
     }
 
     @Test
@@ -79,10 +79,10 @@ internal class CanvasTest {
     fun `setString places characters horizontally`() {
         val canvas = Canvas.offscreen(10, 1)
 
-        canvas.setString(2, 0, "Hi", Style(ChromeRole.SUCCESS, ChromeRole.TEXT_MUTED))
+        canvas.setString(2, 0, "Hi", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED))
 
-        assertEquals(Cell("H", Style(ChromeRole.SUCCESS, ChromeRole.TEXT_MUTED)), canvas.get(2, 0))
-        assertEquals(Cell("i", Style(ChromeRole.SUCCESS, ChromeRole.TEXT_MUTED)), canvas.get(3, 0))
+        assertEquals(Cell("H", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED)), canvas.get(2, 0))
+        assertEquals(Cell("i", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED)), canvas.get(3, 0))
         assertEquals(Cell(), canvas.get(4, 0))
     }
 
@@ -249,9 +249,9 @@ internal class CanvasTest {
         val buffer = Buffer(4, 1)
         val child = Canvas.of(buffer).region(Rect(1, 0, 1, 1))
 
-        child.setString(0, 0, "中", Style(fg = ChromeRole.ACCENT))
+        child.setString(0, 0, "中", Style(fg = StandardRole.ACCENT))
 
-        assertEquals(Cell(" ", Style(fg = ChromeRole.ACCENT)), buffer.get(1, 0))
+        assertEquals(Cell(" ", Style(fg = StandardRole.ACCENT)), buffer.get(1, 0))
         assertEquals(Cell(), buffer.get(2, 0))
     }
 
@@ -259,9 +259,9 @@ internal class CanvasTest {
     fun `a wide glyph clipped on the left paints only a blank surviving slot`() {
         val canvas = Canvas.offscreen(3, 1)
 
-        canvas.setString(-1, 0, "中", Style(fg = ChromeRole.ACCENT))
+        canvas.setString(-1, 0, "中", Style(fg = StandardRole.ACCENT))
 
-        assertEquals(Cell(" ", Style(fg = ChromeRole.ACCENT)), canvas.get(0, 0))
+        assertEquals(Cell(" ", Style(fg = StandardRole.ACCENT)), canvas.get(0, 0))
         assertEquals(Cell(), canvas.get(1, 0))
     }
 
@@ -280,37 +280,37 @@ internal class CanvasTest {
     @Test
     fun `blit copies cell char fg and bg from source to destination`() {
         val src = Canvas.offscreen(5, 5)
-        src.set(1, 2, Cell("X", Style(ChromeRole.DANGER, ChromeRole.INFO)))
+        src.set(1, 2, Cell("X", Style(StandardRole.DANGER, StandardRole.INFO)))
         val dest = Canvas.offscreen(10, 10)
 
         dest.blit(src.region(Rect(1, 2, 1, 1)), 3, 4)
 
-        assertEquals(Cell("X", Style(ChromeRole.DANGER, ChromeRole.INFO)), dest.get(3, 4))
+        assertEquals(Cell("X", Style(StandardRole.DANGER, StandardRole.INFO)), dest.get(3, 4))
     }
 
     @Test
     fun `blit clips at destination right and bottom edges`() {
         val src = Canvas.offscreen(5, 5)
-        src.set(0, 0, Cell("A", Style(ChromeRole.SUCCESS)))
-        src.set(1, 0, Cell("B", Style(ChromeRole.SUCCESS)))
-        src.set(2, 0, Cell("C", Style(ChromeRole.SUCCESS)))
+        src.set(0, 0, Cell("A", Style(StandardRole.SUCCESS)))
+        src.set(1, 0, Cell("B", Style(StandardRole.SUCCESS)))
+        src.set(2, 0, Cell("C", Style(StandardRole.SUCCESS)))
         val dest = Canvas.offscreen(4, 4)
 
         dest.blit(src.region(Rect(0, 0, 3, 1)), 3, 0)
 
-        assertEquals(Cell("A", Style(ChromeRole.SUCCESS)), dest.get(3, 0))
+        assertEquals(Cell("A", Style(StandardRole.SUCCESS)), dest.get(3, 0))
         assertEquals(Cell(), dest.get(2, 0))
     }
 
     @Test
     fun `blit of a source region larger than its canvas copies only the canvas`() {
         val src = Canvas.offscreen(2, 2)
-        src.set(0, 0, Cell("Z", Style(ChromeRole.ACCENT)))
+        src.set(0, 0, Cell("Z", Style(StandardRole.ACCENT)))
         val dest = Canvas.offscreen(10, 10)
 
         dest.blit(src.region(Rect(0, 0, 5, 5)))
 
-        assertEquals(Cell("Z", Style(ChromeRole.ACCENT)), dest.get(0, 0))
+        assertEquals(Cell("Z", Style(StandardRole.ACCENT)), dest.get(0, 0))
         assertEquals(Cell(), dest.get(2, 0))
         assertEquals(Cell(), dest.get(0, 2))
     }
@@ -387,9 +387,9 @@ internal class CanvasTest {
         val canvas = Canvas.offscreen(4, 1)
         val window = canvas.window(Rect(-1, 0, 5, 1))
 
-        window.setString(0, 0, "中x", Style(fg = ChromeRole.ACCENT))
+        window.setString(0, 0, "中x", Style(fg = StandardRole.ACCENT))
 
-        assertEquals(Cell(" ", Style(fg = ChromeRole.ACCENT)), canvas.get(0, 0))
+        assertEquals(Cell(" ", Style(fg = StandardRole.ACCENT)), canvas.get(0, 0))
         assertEquals("x", canvas.get(1, 0).symbol)
     }
 

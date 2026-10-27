@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
 
@@ -15,8 +15,8 @@ import io.archinaut.tenter.text.CellWidth
 public class Gauge(
     private val ratio: Double,
     private val label: String = "",
-    private val filledStyle: Style = Style(ChromeRole.INFO),
-    private val unfilledStyle: Style = Style(ChromeRole.TEXT_MUTED),
+    private val filledStyle: Style = Style(StandardRole.INFO),
+    private val unfilledStyle: Style = Style(StandardRole.TEXT_MUTED),
 ) : MeasurableWidget {
 
     init {

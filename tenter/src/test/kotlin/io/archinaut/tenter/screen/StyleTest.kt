@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.screen
 
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -11,22 +11,22 @@ internal class StyleTest {
 
     @Test
     fun `patching keeps every channel the patch leaves unset`() {
-        val painted = Style(fg = ChromeRole.INFO, bg = ChromeRole.SUCCESS, strikethrough = true)
+        val painted = Style(fg = StandardRole.INFO, bg = StandardRole.SUCCESS, strikethrough = true)
 
         assertEquals(painted, painted.patch(Style.DEFAULT))
         assertEquals(
-            Style(fg = ChromeRole.DANGER, bg = ChromeRole.SUCCESS, strikethrough = true),
-            painted.patch(Style(fg = ChromeRole.DANGER)),
+            Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS, strikethrough = true),
+            painted.patch(Style(fg = StandardRole.DANGER)),
         )
     }
 
     @Test
     fun `patching replaces every channel the patch sets, including back to the default`() {
-        val painted = Style(fg = ChromeRole.INFO, bg = ChromeRole.SUCCESS, strikethrough = true)
+        val painted = Style(fg = StandardRole.INFO, bg = StandardRole.SUCCESS, strikethrough = true)
 
         assertEquals(
-            Style(fg = ChromeRole.INFO, bg = ChromeRole.DEFAULT, strikethrough = false),
-            painted.patch(Style(bg = ChromeRole.DEFAULT, strikethrough = false)),
+            Style(fg = StandardRole.INFO, bg = StandardRole.DEFAULT, strikethrough = false),
+            painted.patch(Style(bg = StandardRole.DEFAULT, strikethrough = false)),
         )
     }
 }

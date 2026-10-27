@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import io.archinaut.tenter.screen.Cell
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.widget.render
@@ -19,8 +19,8 @@ internal class GlyphGridTest {
     private val size = Size(width = 3, height = 2)
     private val priority: (Char) -> Int = { char -> if (char == 'X') 10 else 0 }
     private val style: (Char) -> Style = { char ->
-        if (char == 'X') Style(fg = ChromeRole.DANGER, bg = ChromeRole.INFO)
-        else Style(fg = ChromeRole.SUCCESS, bg = ChromeRole.TEXT_MUTED)
+        if (char == 'X') Style(fg = StandardRole.DANGER, bg = StandardRole.INFO)
+        else Style(fg = StandardRole.SUCCESS, bg = StandardRole.TEXT_MUTED)
     }
 
     private fun grid(priority: (Char) -> Int = this.priority): GlyphGrid = GlyphGrid(size, priority, style)

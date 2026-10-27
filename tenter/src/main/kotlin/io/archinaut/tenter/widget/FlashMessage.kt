@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Style
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -15,7 +15,7 @@ import kotlin.time.Duration.Companion.seconds
 public data class FlashMessage(
     val text: String,
     val duration: Duration = 3.seconds,
-    val style: Style = Style(ChromeRole.INFO),
+    val style: Style = Style(StandardRole.INFO),
 ) : MeasurableWidget {
 
     override fun write(writer: RowWriter) {

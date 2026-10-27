@@ -3,9 +3,9 @@
 
 package io.archinaut.tenter.terminal
 
-import io.archinaut.tenter.palette.ColorRole
-import io.archinaut.tenter.palette.PaletteColor
-import io.archinaut.tenter.palette.RolePalette
+import io.archinaut.tenter.color.ColorRole
+import io.archinaut.tenter.color.TerminalColor
+import io.archinaut.tenter.color.ColorScheme
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.widget.StatefulWidget
@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
-private object PlainPalette : RolePalette {
-    override val defaultBackground: PaletteColor = PaletteColor.TrueColor(0, 0, 0)
+private object PlainColorScheme : ColorScheme {
+    override val defaultBackground: TerminalColor = TerminalColor.TrueColor(0, 0, 0)
 
-    override fun foreground(role: ColorRole): PaletteColor = PaletteColor.TrueColor(255, 255, 255)
+    override fun foreground(role: ColorRole): TerminalColor = TerminalColor.TrueColor(255, 255, 255)
 }
 
 /** A recorder whose reported size a test can change, like a user resizing a real terminal. */
@@ -53,7 +53,7 @@ internal class TerminalDrawTest {
 
     private val device = ResizableRecorder(6, 2)
     private val terminal = Terminal(device.backend)
-    private val screen = terminal.openScreen(PlainPalette)
+    private val screen = terminal.openScreen(PlainColorScheme)
 
     @Test
     fun `the area starts at the backend's size`() {
@@ -153,7 +153,7 @@ internal class TerminalDrawTest {
     fun `a new screen repaints its first frame fully`() {
         screen.draw { it.renderWidget(Label("x"), it.area) }
         terminal.closeScreen(screen, failure = null)
-        val next = terminal.openScreen(PlainPalette)
+        val next = terminal.openScreen(PlainColorScheme)
         device.recorder.clearOutput()
 
         next.draw { it.renderWidget(Label("x"), it.area) }

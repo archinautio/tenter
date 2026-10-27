@@ -6,7 +6,7 @@ package io.archinaut.tenter.widget
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import io.archinaut.tenter.palette.ChromeRole
+import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Style
 
@@ -35,10 +35,10 @@ internal class GaugeTest {
 
     @Test
     fun `the caller chooses the filled and unfilled styles`() {
-        val buffer = render(Gauge(0.5, filledStyle = Style(ChromeRole.DANGER), unfilledStyle = Style(ChromeRole.INFO)), 4, 1)
+        val buffer = render(Gauge(0.5, filledStyle = Style(StandardRole.DANGER), unfilledStyle = Style(StandardRole.INFO)), 4, 1)
 
-        assertEquals(ChromeRole.DANGER, buffer.get(0, 0).style.fg)
-        assertEquals(ChromeRole.INFO, buffer.get(3, 0).style.fg)
+        assertEquals(StandardRole.DANGER, buffer.get(0, 0).style.fg)
+        assertEquals(StandardRole.INFO, buffer.get(3, 0).style.fg)
     }
 
     @Test

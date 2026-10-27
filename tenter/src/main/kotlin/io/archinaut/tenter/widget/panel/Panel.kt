@@ -3,8 +3,8 @@
 
 package io.archinaut.tenter.widget.panel
 
-import io.archinaut.tenter.palette.ChromeRole
-import io.archinaut.tenter.palette.ColorRole
+import io.archinaut.tenter.color.StandardRole
+import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.widget.MeasurableWidget
 import io.archinaut.tenter.widget.ViewportState
@@ -88,7 +88,7 @@ public class Panel<K : PanelId, I>(
         focused: Boolean,
     ): ViewportState {
         val candidate = viewportState.fork()
-        val role = if (focused) ChromeRole.PANEL_BORDER_FOCUSED else ChromeRole.PANEL_BORDER
+        val role = if (focused) StandardRole.PANEL_BORDER_FOCUSED else StandardRole.PANEL_BORDER
         panelViewport(content, title, badge, borderColor = role, titleColor = role).render(canvas, candidate)
         return candidate
     }
@@ -107,8 +107,8 @@ internal fun panelViewport(
     content: MeasurableWidget,
     title: String,
     badge: String?,
-    borderColor: ColorRole = ChromeRole.PANEL_BORDER,
-    titleColor: ColorRole = ChromeRole.ACCENT,
+    borderColor: ColorRole = StandardRole.PANEL_BORDER,
+    titleColor: ColorRole = StandardRole.ACCENT,
 ): Viewport = Viewport(
     content.block(Block(padding = Block.PADDING.verticalEdges())),
     block = Block.bordered(
