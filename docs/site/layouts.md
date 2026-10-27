@@ -71,7 +71,8 @@ Widths are display cells, so a wide character such as `中` occupies more than o
 
 A `Block` holds borders, a title, and padding, as Ratatui's `Block` does. `Block()` has
 no border and `Block.bordered(...)` draws all four sides; choose sides with `borders`,
-such as `Borders.TOP` for a titled divider. A block without borders adds padding alone.
+such as `Borders.TOP` for a titled divider, and their glyphs with `borderType`, one of
+Mordant's `BorderType` sets. A block without borders adds padding alone.
 
 Surround measurable content with a block using `.block(...)`. The result is still
 measurable. This excerpt frames a label in a bordered block with one cell of padding,

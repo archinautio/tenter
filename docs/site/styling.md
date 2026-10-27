@@ -21,6 +21,9 @@ line, and `KeyHelp` for [keyboard hints](input.md#map-keys-to-application-action
 - `CheckboxGlyphs.DEFAULT` uses Unicode glyphs.
 - `CheckboxGlyphs.ASCII` is a conservative choice for varied terminal fonts.
 - `CheckboxGlyphs.NERD_FONT` requires an appropriate Nerd Font and is opt-in.
+- Borders use Mordant's `BorderType` sets. `Block` and `Panel` default to
+  `BorderType.ROUNDED`; pass `borderType = BorderType.ASCII` for terminals or fonts
+  without box-drawing characters, or another set such as `SQUARE`, `HEAVY`, or `DOUBLE`.
 
 Tenter does not require Nerd Fonts. Text widths account for wide characters and
 combined Unicode characters. Prefer terminal-cell measurements over Kotlin string
@@ -37,7 +40,14 @@ A style sets only the channels you give it. Writing `Style(fg = StandardRole.DAN
 an already painted cell changes its glyph and foreground and keeps its background, so a
 marker drawn over a colored area keeps the color under it. Set a channel explicitly to
 replace it, including back to the default: `Style(bg = StandardRole.DEFAULT)` or
-`Style(strikethrough = false)`. A channel no write sets renders as `StandardRole.DEFAULT`.
+`Style(strikethrough = false)`. A channel no write sets renders as `StandardRole.DEFAULT`,
+or with the attribute off.
+
+Besides the two colors, a style carries the text attributes `bold`, `dim`, `italic`,
+`underline`, `inverse`, and `strikethrough`, each a channel of its own:
+`Style(fg = StandardRole.WARNING, bold = true)`. Tenter renders them through Mordant, so
+each looks however the terminal draws that attribute; some terminals ignore italic or
+render dim at normal intensity.
 
 To draw a popup, such as a dialog or a banner, over content without it showing through, render
 the `Clear` widget into the popup's area first: it resets every cell there to a blank that sets

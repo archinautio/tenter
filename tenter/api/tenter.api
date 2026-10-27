@@ -481,17 +481,27 @@ public final class io/archinaut/tenter/screen/Span {
 public final class io/archinaut/tenter/screen/Style {
 	public static final field Companion Lio/archinaut/tenter/screen/Style$Companion;
 	public fun <init> ()V
-	public fun <init> (Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lio/archinaut/tenter/color/ColorRole;
 	public final fun component2 ()Lio/archinaut/tenter/color/ColorRole;
 	public final fun component3 ()Ljava/lang/Boolean;
-	public final fun copy (Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;)Lio/archinaut/tenter/screen/Style;
-	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Style;
+	public final fun component4 ()Ljava/lang/Boolean;
+	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun component6 ()Ljava/lang/Boolean;
+	public final fun component7 ()Ljava/lang/Boolean;
+	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun copy (Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;)Lio/archinaut/tenter/screen/Style;
+	public static synthetic fun copy$default (Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Style;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBg ()Lio/archinaut/tenter/color/ColorRole;
+	public final fun getBold ()Ljava/lang/Boolean;
+	public final fun getDim ()Ljava/lang/Boolean;
 	public final fun getFg ()Lio/archinaut/tenter/color/ColorRole;
+	public final fun getInverse ()Ljava/lang/Boolean;
+	public final fun getItalic ()Ljava/lang/Boolean;
 	public final fun getStrikethrough ()Ljava/lang/Boolean;
+	public final fun getUnderline ()Ljava/lang/Boolean;
 	public fun hashCode ()I
 	public final fun patch (Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/Style;
 	public fun toString ()Ljava/lang/String;
@@ -591,16 +601,16 @@ public final class io/archinaut/tenter/text/CellWidth {
 public final class io/archinaut/tenter/widget/Block : io/archinaut/tenter/widget/Widget {
 	public static final field Companion Lio/archinaut/tenter/widget/Block$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun inner (Lio/archinaut/tenter/screen/Canvas;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun inner (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Rect;
 	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
 public final class io/archinaut/tenter/widget/Block$Companion {
-	public final fun bordered (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/widget/Block;
-	public static synthetic fun bordered$default (Lio/archinaut/tenter/widget/Block$Companion;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;ILjava/lang/Object;)Lio/archinaut/tenter/widget/Block;
+	public final fun bordered (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;)Lio/archinaut/tenter/widget/Block;
+	public static synthetic fun bordered$default (Lio/archinaut/tenter/widget/Block$Companion;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;ILjava/lang/Object;)Lio/archinaut/tenter/widget/Block;
 }
 
 public final class io/archinaut/tenter/widget/BlockKt {
@@ -824,8 +834,8 @@ public abstract interface class io/archinaut/tenter/widget/Widget {
 }
 
 public final class io/archinaut/tenter/widget/panel/Panel {
-	public fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;)V
+	public synthetic fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class io/archinaut/tenter/widget/panel/PanelHit {

@@ -219,6 +219,39 @@ internal class TerminalTest {
     }
 
     @Test
+    fun `text attributes render through their SGR codes`() {
+        val buffer = Buffer(5, 1)
+        buffer.set(0, 0, Cell("B", Style(bold = true)))
+        buffer.set(1, 0, Cell("D", Style(dim = true)))
+        buffer.set(2, 0, Cell("I", Style(italic = true)))
+        buffer.set(3, 0, Cell("U", Style(underline = true)))
+        buffer.set(4, 0, Cell("V", Style(inverse = true)))
+
+        screen.renderBuffer(buffer)
+
+        val out = recorder.output()
+        for ((code, glyph) in listOf(1 to "B", 2 to "D", 3 to "I", 4 to "U", 7 to "V")) {
+            val opening = Regex("((?:\u001B\\[[\\d;]*m)+)$glyph").find(out)?.groupValues?.get(1).orEmpty()
+            assertTrue(code in sgrAttributes(opening), "Expected SGR $code right before '$glyph': ${out.repr()}")
+        }
+    }
+
+    @Test
+    fun `an attribute does not bleed into a following run that only changes color`() {
+        // The run-length skip-close optimization only holds for colors; a bold run followed by a
+        // plain run of another color must still close bold.
+        val buffer = Buffer(2, 1)
+        buffer.set(0, 0, Cell("◆", Style(fg = StandardRole.DANGER, bold = true)))
+        buffer.set(1, 0, Cell("◇", Style(fg = StandardRole.INFO)))
+
+        screen.renderBuffer(buffer)
+
+        val out = recorder.output()
+        val between = out.substring(out.indexOf("◆") + 1, out.indexOf("◇"))
+        assertTrue(22 in sgrAttributes(between), "Expected bold to close between runs: ${out.repr()}")
+    }
+
+    @Test
     fun `transitions between default and semantic roles do not leak either color channel`() {
         // Every open tag now sets BOTH channels explicitly (StandardRole.DEFAULT resolves to real
         // colors too), so the run-length skip-close optimization never needs to special-case
@@ -471,6 +504,20 @@ internal class TerminalTest {
     }
 
     // ---- helpers ----
+
+    /** The attribute codes in [escapes]' SGR sequences, skipping extended `38`/`48` color arguments. */
+    private fun sgrAttributes(escapes: String): Set<Int> = buildSet {
+        for (match in Regex("\u001B\\[([\\d;]*)m").findAll(escapes)) {
+            val params = match.groupValues[1].split(';').mapNotNull(String::toIntOrNull)
+            var i = 0
+            while (i < params.size) {
+                when (params[i]) {
+                    38, 48 -> i += if (params.getOrNull(i + 1) == 2) 5 else 3
+                    else -> add(params[i]).also { i++ }
+                }
+            }
+        }
+    }
 
     private fun String.repr(): String = this.replace("\u001B", "ESC").replace("\r", "\\r").replace("\n", "\\n")
 

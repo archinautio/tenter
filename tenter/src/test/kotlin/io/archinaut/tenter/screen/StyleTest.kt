@@ -29,4 +29,14 @@ internal class StyleTest {
             painted.patch(Style(bg = StandardRole.DEFAULT, strikethrough = false)),
         )
     }
+
+    @Test
+    fun `patching merges text attributes channel by channel`() {
+        val painted = Style(bold = true, underline = true, inverse = true)
+
+        assertEquals(
+            Style(bold = false, dim = true, italic = true, underline = true, inverse = true),
+            painted.patch(Style(bold = false, dim = true, italic = true)),
+        )
+    }
 }

@@ -165,8 +165,9 @@ internal class AnsiTerminal(
          * at all: every opening tag now establishes BOTH foreground and background explicitly (even
          * for [StandardRole.DEFAULT], which resolves to the color scheme's default surface rather than leaving
          * a channel unset), so the next run's open tag always fully overwrites whatever the previous
-         * run set — nothing can bleed through. Only a strikethrough-state change still needs the
-         * close, since strikethrough has no "close" bundled into every open tag the way color does.
+         * run set — nothing can bleed through. Only an attribute change (bold, dim, italic, underline,
+         * inverse, strikethrough) still needs the close, since attributes have no "close" bundled into
+         * every open tag the way color does.
          */
         private fun renderSpan(sb: StringBuilder, buffer: Buffer, y: Int, xStart: Int, xEnd: Int) {
             var x = xStart
@@ -187,8 +188,7 @@ internal class AnsiTerminal(
                     activeStyle = null
                     activeTags = null
                 } else {
-                    val skipClose = activeStyle != null &&
-                        (activeStyle.strikethrough ?: false) == (runStyle.strikethrough ?: false)
+                    val skipClose = activeStyle != null && activeStyle.rendersSameAttributes(runStyle)
                     if (!skipClose) activeTags?.let { sb.append(it.close) }
                     sb.append(tags.open)
                     activeStyle = runStyle

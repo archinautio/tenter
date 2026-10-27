@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget.panel
 
+import com.github.ajalt.mordant.rendering.BorderType
 import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.screen.Canvas
@@ -18,7 +19,8 @@ import io.archinaut.tenter.widget.block
  * builder returns the panel's content for one frame.
  *
  * A panel has no size: where it goes and how big it is in each mode is the host application's
- * decision, made every frame by the areas it passes to [Panels].
+ * decision, made every frame by the areas it passes to [Panels]. [borderType] picks the frame's
+ * glyphs, as for [Block].
  */
 public class Panel<K : PanelId, I>(
     internal val id: K,
@@ -27,6 +29,7 @@ public class Panel<K : PanelId, I>(
     private val normal: (I) -> MeasurableWidget,
     private val minimized: ((I) -> MeasurableWidget)? = null,
     private val maximized: ((I) -> MeasurableWidget)? = null,
+    private val borderType: BorderType = BorderType.ROUNDED,
 ) {
     private val viewportState: ViewportState = ViewportState()
     private var restoreMode: PanelMode = PanelMode.NORMAL
@@ -89,7 +92,8 @@ public class Panel<K : PanelId, I>(
     ): ViewportState {
         val candidate = viewportState.fork()
         val role = if (focused) StandardRole.PANEL_BORDER_FOCUSED else StandardRole.PANEL_BORDER
-        panelViewport(content, title, badge, borderColor = role, titleColor = role).render(canvas, candidate)
+        panelViewport(content, title, badge, borderColor = role, titleColor = role, borderType = borderType)
+            .render(canvas, candidate)
         return candidate
     }
 
@@ -109,6 +113,7 @@ internal fun panelViewport(
     badge: String?,
     borderColor: ColorRole = StandardRole.PANEL_BORDER,
     titleColor: ColorRole = StandardRole.ACCENT,
+    borderType: BorderType = BorderType.ROUNDED,
 ): Viewport = Viewport(
     content.block(Block(padding = Block.PADDING.verticalEdges())),
     block = Block.bordered(
@@ -117,5 +122,6 @@ internal fun panelViewport(
         padding = Block.PADDING.horizontalEdges(),
         borderColor = borderColor,
         titleColor = titleColor,
+        borderType = borderType,
     ),
 )

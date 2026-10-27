@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget
 
+import com.github.ajalt.mordant.rendering.BorderType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
@@ -46,6 +47,15 @@ internal class BlockTest {
             assertEquals("│", buffer.get(0, i).symbol)
             assertEquals("│", buffer.get(5, i).symbol)
         }
+    }
+
+    @Test
+    fun `draws the glyphs of the chosen border type`() {
+        val square = render(Block.bordered(borderType = BorderType.SQUARE), 4, 3)
+        val ascii = render(Block.bordered(borderType = BorderType.ASCII), 4, 3)
+
+        assertEquals(listOf("┌──┐", "│  │", "└──┘"), rows(square))
+        assertEquals(listOf("+--+", "|  |", "+--+"), rows(ascii))
     }
 
     @Test
@@ -333,4 +343,7 @@ internal class BlockTest {
         assertEquals(Size(8, 3), content.block(Block.bordered()).measure(8))
         assertEquals(Size(8, 1), content.measure(8))
     }
+
+    private fun rows(buffer: Buffer): List<String> =
+        (0 until buffer.height).map { y -> (0 until buffer.width).joinToString("") { x -> buffer.get(x, y).symbol } }
 }

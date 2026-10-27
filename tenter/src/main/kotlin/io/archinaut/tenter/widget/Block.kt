@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget
 
+import com.github.ajalt.mordant.rendering.BorderType
 import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.screen.Canvas
@@ -19,7 +20,9 @@ import io.archinaut.tenter.text.CellWidth
  * A block paints only its own chrome. In an allocated area, render it and then render the content
  * into [inner]; around measurable content, use [MeasurableWidget.block]. The title sits on the top
  * border, or on its own top row when there is no top border. [padding] is space between the
- * borders and the content.
+ * borders and the content. [borderType] picks the glyphs from one of Mordant's border sets, such as
+ * [BorderType.SQUARE] or [BorderType.ASCII]; a box uses its head section's corners on the top row,
+ * its body's vertical on the sides, and its foot's corners on the bottom row.
  *
  * The single place every framed widget gets its box from — no widget should draw its own border.
  * A [Viewport] given a block paints scrollbar thumbs on it from its settled [ScrollState].
@@ -31,6 +34,7 @@ public class Block(
     private val padding: Padding = Padding.ZERO,
     private val borderColor: ColorRole = StandardRole.PANEL_BORDER,
     private val titleColor: ColorRole = StandardRole.ACCENT,
+    private val borderType: BorderType = BorderType.ROUNDED,
 ) : Widget {
 
     /** Everything this block consumes on each side: borders (or the title row) plus [padding]. */
@@ -54,18 +58,21 @@ public class Block(
         if ((borders.left && borders.right && width < 2) || (borders.top && borders.bottom && height < 2)) return
 
         val style = Style(borderColor)
+        val head = borderType.head
+        val body = borderType.body
+        val foot = borderType.foot
         for (i in 0 until width) {
-            if (borders.top) canvas.set(i, 0, Cell("─", style))
-            if (borders.bottom) canvas.set(i, height - 1, Cell("─", style))
+            if (borders.top) canvas.set(i, 0, Cell(head.ew, style))
+            if (borders.bottom) canvas.set(i, height - 1, Cell(foot.ew, style))
         }
         for (i in 0 until height) {
-            if (borders.left) canvas.set(0, i, Cell("│", style))
-            if (borders.right) canvas.set(width - 1, i, Cell("│", style))
+            if (borders.left) canvas.set(0, i, Cell(body.ns, style))
+            if (borders.right) canvas.set(width - 1, i, Cell(body.ns, style))
         }
-        if (borders.top && borders.left) canvas.set(0, 0, Cell("╭", style))
-        if (borders.top && borders.right) canvas.set(width - 1, 0, Cell("╮", style))
-        if (borders.bottom && borders.left) canvas.set(0, height - 1, Cell("╰", style))
-        if (borders.bottom && borders.right) canvas.set(width - 1, height - 1, Cell("╯", style))
+        if (borders.top && borders.left) canvas.set(0, 0, Cell(head.es, style))
+        if (borders.top && borders.right) canvas.set(width - 1, 0, Cell(head.sw, style))
+        if (borders.bottom && borders.left) canvas.set(0, height - 1, Cell(foot.ne, style))
+        if (borders.bottom && borders.right) canvas.set(width - 1, height - 1, Cell(foot.nw, style))
 
         drawTitle(canvas)
     }
@@ -132,7 +139,8 @@ public class Block(
             padding: Padding = Padding.ZERO,
             borderColor: ColorRole = StandardRole.PANEL_BORDER,
             titleColor: ColorRole = StandardRole.ACCENT,
-        ): Block = Block(title, badge, Borders.ALL, padding, borderColor, titleColor)
+            borderType: BorderType = BorderType.ROUNDED,
+        ): Block = Block(title, badge, Borders.ALL, padding, borderColor, titleColor, borderType)
 
         /** One cell on each side, consumed by every bordered [Block] box. */
         internal val BORDER: Padding = Padding.uniform(1)

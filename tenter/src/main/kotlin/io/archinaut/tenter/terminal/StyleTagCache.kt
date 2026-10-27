@@ -62,13 +62,18 @@ internal class StyleTagCache(private val colorScheme: ColorScheme, private val a
         return tags
     }
 
-    /** A channel no write set renders as [StandardRole.DEFAULT], or without strikethrough. */
+    /** A channel no write set renders as [StandardRole.DEFAULT], or with the attribute off. */
     private fun buildStyle(style: Style): TextStyle {
         val fg = style.fg ?: StandardRole.DEFAULT
         val bg = style.bg ?: StandardRole.DEFAULT
         return TextStyle(
             color = foregroundCache.getOrPut(fg) { resolve(fg, background = false).toColormathColor() },
             bgColor = backgroundCache.getOrPut(bg) { resolve(bg, background = true).toColormathColor() },
+            bold = style.bold ?: false,
+            dim = style.dim ?: false,
+            italic = style.italic ?: false,
+            underline = style.underline ?: false,
+            inverse = style.inverse ?: false,
             strikethrough = style.strikethrough ?: false,
         )
     }
