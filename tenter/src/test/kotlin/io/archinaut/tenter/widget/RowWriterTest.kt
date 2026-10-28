@@ -55,6 +55,27 @@ internal class RowWriterTest {
     }
 
     @Test
+    fun `a plain widget drawn with a height spans the writer width and advances past it`() {
+        var area: Rect? = null
+        val plain = object : Widget {
+            override fun render(canvas: Canvas) {
+                area = canvas.area
+                canvas.setString(0, 1, "plain")
+            }
+        }
+        var rowAfter = -1
+        val canvas = paint(6, 4) { writer ->
+            writer.writeLine("top")
+            writer.draw(plain, height = 2)
+            rowAfter = writer.row
+        }
+
+        assertEquals(Rect(0, 0, 6, 2), area)
+        assertEquals(3, rowAfter)
+        assertEquals("plain", (0 until 5).joinToString("") { canvas.get(it, 2).symbol })
+    }
+
+    @Test
     fun `text past the writer width does not widen the widget`() {
         val written = MeasurableWidget { it.write(8, "overflowing") }.measure(10)
 

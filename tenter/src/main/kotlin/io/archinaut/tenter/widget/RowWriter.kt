@@ -43,6 +43,14 @@ public class RowWriter internal constructor(
     }
 
     /**
+     * Paints a plain [widget] across [width] and [height] rows starting at the current row, and
+     * advances past it. Give it a different width with [fixedSize] and the other [draw].
+     */
+    public fun draw(widget: Widget, height: Int) {
+        draw(widget.fixedSize(width, height))
+    }
+
+    /**
      * Writes [text] on the current row, ellipsized to [width], and advances. Returns where the text
      * ended: the column after it, on the row written.
      */

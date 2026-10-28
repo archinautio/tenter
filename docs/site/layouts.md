@@ -42,7 +42,8 @@ name an earlier one; `writer.width` is the available width. `write` and `writeLi
 return the `Point` where the text ended, as Ratatui's `Buffer::set_line` does, so the next
 piece can follow it: `writer.write(label.x + 1, value)`. Place a child with
 `writer.draw(child)`; never call a child's `write` yourself, since it would write into
-your rows instead of its own. A child wider than `writer.width`, such as a large
+your rows instead of its own. Paint a plain `Widget` across the full width with
+`writer.draw(widget, height)`. A child wider than `writer.width`, such as a large
 `fixedSize` drawing, makes your widget that wide too, so a viewport can scroll to it; text
 past the edge is clipped instead. `widget.measure(width)` returns the `Size` content takes.
 

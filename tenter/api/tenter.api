@@ -765,6 +765,7 @@ public final class io/archinaut/tenter/widget/Paragraph : io/archinaut/tenter/wi
 
 public final class io/archinaut/tenter/widget/RowWriter {
 	public final fun draw (Lio/archinaut/tenter/widget/MeasurableWidget;)V
+	public final fun draw (Lio/archinaut/tenter/widget/Widget;I)V
 	public final fun getRow ()I
 	public final fun getWidth ()I
 	public final fun markReveal (II)V
