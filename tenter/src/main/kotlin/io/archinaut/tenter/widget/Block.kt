@@ -176,7 +176,6 @@ public fun MeasurableWidget.block(block: Block): MeasurableWidget {
     val content = this
     return object : LayoutWidget {
         override fun layout(availableWidth: Int): ContentLayout {
-            require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
             val insets = block.insets
             val innerWidth = (availableWidth.toLong() - insets.left - insets.right).coerceAtLeast(0).toInt()
             val child = content.prepare(innerWidth)

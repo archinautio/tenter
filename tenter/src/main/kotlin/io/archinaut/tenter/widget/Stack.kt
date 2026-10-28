@@ -19,7 +19,6 @@ private class StackLayout(
 ) : LayoutWidget {
 
     override fun layout(availableWidth: Int): ContentLayout {
-        require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
         val prepared = children.map { child ->
             child.prepare(availableWidth)
         }

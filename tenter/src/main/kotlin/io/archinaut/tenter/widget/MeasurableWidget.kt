@@ -54,6 +54,7 @@ public fun Widget.fixedSize(width: Int, height: Int): MeasurableWidget {
  * rows through a [RowWriter].
  */
 internal interface LayoutWidget : MeasurableWidget {
+    /** Lays out this widget for [availableWidth], which [prepare] has already checked is not negative. */
     fun layout(availableWidth: Int): ContentLayout
 
     override fun write(writer: RowWriter) {
@@ -65,10 +66,7 @@ internal interface LayoutWidget : MeasurableWidget {
 internal fun MeasurableWidget.prepare(availableWidth: Int): ContentLayout {
     require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
     if (this is LayoutWidget) return layout(availableWidth)
-    val sink = RecordingTextSink(availableWidth)
-    val writer = RowWriter(sink)
-    write(writer)
-    return ContentLayout(sink.occupiedWidth, writer.occupiedHeight, sink.snapshot())
+    return RowWriter(availableWidth).also(::write).build()
 }
 
 /** Builds a fixed-size prepared composition from placement instructions. */
@@ -76,8 +74,4 @@ internal fun contentLayout(
     width: Int,
     height: Int,
     block: ContentLayout.Builder.() -> Unit,
-): ContentLayout {
-    val builder = ContentLayout.Builder()
-    builder.block()
-    return ContentLayout(width, height, builder.snapshot())
-}
+): ContentLayout = ContentLayout.Builder().apply(block).build(width, height)

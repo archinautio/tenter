@@ -15,17 +15,18 @@ import io.archinaut.tenter.text.TextTruncation
  * width, so a caller never computes where text must stop.
  */
 public class RowWriter internal constructor(
-    private val sink: RecordingTextSink,
+    public val width: Int,
 ) {
-
-    public val width: Int get() = sink.width
+    private val builder = ContentLayout.Builder()
 
     /** The row the next [writeLine] or [writeRow] lands on. */
     public var row: Int = 0
         private set
 
-    internal var occupiedHeight: Int = 0
-        private set
+    /** How far the content reaches: [width], or further when a drawn child is wider. */
+    private var occupiedWidth: Int = width
+
+    private var occupiedHeight: Int = 0
 
     /**
      * Writes [content] in its own area starting at the current row, clipped to its measured size,
@@ -35,7 +36,8 @@ public class RowWriter internal constructor(
      */
     public fun draw(content: MeasurableWidget): Int {
         val layout = content.prepare(width)
-        sink.place(layout, 0, row)
+        builder.place(0, row, layout)
+        occupiedWidth = maxOf(occupiedWidth, layout.width)
         repeat(layout.height) { newLine() }
         return layout.height
     }
@@ -48,7 +50,7 @@ public class RowWriter internal constructor(
         val written = row
         var column = 0
         for (span in line.ellipsize(width).spans) {
-            sink.write(column, written, span.text, span.style)
+            builder.text(column, written, span.text, span.style)
             column += CellWidth.of(span.text)
         }
         row += 1
@@ -66,8 +68,8 @@ public class RowWriter internal constructor(
         val rightWidth = CellWidth.of(visibleRight)
         val maxLeft = (width - rightWidth - 1).coerceAtLeast(0)
         val written = row
-        sink.write(0, written, TextTruncation.ellipsize(left, maxLeft), leftStyle)
-        sink.write(width - rightWidth, written, visibleRight, rightStyle)
+        builder.text(0, written, TextTruncation.ellipsize(left, maxLeft), leftStyle)
+        builder.text(width - rightWidth, written, visibleRight, rightStyle)
         row += 1
         occupy(row)
         return written
@@ -78,7 +80,7 @@ public class RowWriter internal constructor(
      * without advancing. The text is not ellipsized; anything past the widget's edge is clipped.
      */
     public fun write(column: Int, text: String, style: Style = Style.DEFAULT, row: Int = this.row) {
-        sink.write(column, row, text, style)
+        builder.text(column, row, text, style)
         occupy(row + 1)
     }
 
@@ -90,8 +92,11 @@ public class RowWriter internal constructor(
 
     /** Marks [height] full-width rows from [row] as the content an enclosing viewport should keep visible. */
     public fun markReveal(row: Int = this.row, height: Int = 1) {
-        sink.reveal(Rect(0, row, width, height))
+        builder.reveal(Rect(0, row, width, height))
     }
+
+    /** The content written so far, sized to how far it reaches. */
+    internal fun build(): ContentLayout = builder.build(occupiedWidth, occupiedHeight)
 
     private fun occupy(height: Int) {
         if (height > occupiedHeight) occupiedHeight = height

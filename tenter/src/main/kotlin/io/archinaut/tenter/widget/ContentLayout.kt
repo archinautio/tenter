@@ -26,9 +26,14 @@ internal class ContentLayout(
         require(height >= 0) { "content height must not be negative: $height" }
     }
 
-    /** Placement instructions for the library's composites; children are already prepared. */
+    /** Records instructions for a layout; children are already prepared. */
     class Builder {
         private val instructions = mutableListOf<Instruction>()
+
+        /** Writes [text] at layout coordinate ([x], [y]); anything past the layout's edge is clipped. */
+        fun text(x: Int, y: Int, text: String, style: Style) {
+            instructions += Instruction.Text(x, y, text, style)
+        }
 
         /** Places [content] at the declared layout coordinate ([x], [y]). */
         fun place(x: Int, y: Int, content: ContentLayout) {
@@ -45,7 +50,8 @@ internal class ContentLayout(
             instructions += Instruction.Decoration(widget)
         }
 
-        fun snapshot(): List<Instruction> = instructions.toList()
+        /** A [width] by [height] layout of what was recorded so far; later operations do not change it. */
+        fun build(width: Int, height: Int): ContentLayout = ContentLayout(width, height, instructions.toList())
     }
 
     override fun render(canvas: Canvas) {
