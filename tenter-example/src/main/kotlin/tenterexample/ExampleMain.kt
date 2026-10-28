@@ -15,11 +15,12 @@ import io.archinaut.tenter.terminal.Terminal
 import io.archinaut.tenter.terminal.TerminalEvent
 import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.Widget
-import io.archinaut.tenter.widget.MeasurableWidget
+import io.archinaut.tenter.widget.Paragraph
 import io.archinaut.tenter.widget.ViewportState
 import io.archinaut.tenter.widget.Viewport
 import io.archinaut.tenter.widget.block
 import io.archinaut.tenter.widget.measure
+import io.archinaut.tenter.widget.revealed
 
 /**
  * Runs the separate-consumer smoke scenario without raw input or terminal lifecycle escapes.
@@ -28,10 +29,7 @@ import io.archinaut.tenter.widget.measure
  */
 public fun runHeadlessSmoke(): SmokeResult {
     // --8<-- [start:padding]
-    val framed = MeasurableWidget { writer ->
-        writer.writeLine("OK")
-        writer.markReveal(row = 0)
-    }.block(Block.bordered(padding = Padding.uniform(1)))
+    val framed = Paragraph("OK").revealed().block(Block.bordered(padding = Padding.uniform(1)))
     val size = framed.measure(8)
     // --8<-- [end:padding]
     val framedCanvas = Canvas.offscreen(size.width, size.height)

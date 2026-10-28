@@ -752,6 +752,7 @@ public final class io/archinaut/tenter/widget/MeasurableWidget$DefaultImpls {
 public final class io/archinaut/tenter/widget/MeasurableWidgetKt {
 	public static final fun fixedSize (Lio/archinaut/tenter/widget/Widget;II)Lio/archinaut/tenter/widget/MeasurableWidget;
 	public static final fun measure (Lio/archinaut/tenter/widget/MeasurableWidget;I)Lio/archinaut/tenter/screen/Size;
+	public static final fun revealed (Lio/archinaut/tenter/widget/MeasurableWidget;)Lio/archinaut/tenter/widget/MeasurableWidget;
 }
 
 public final class io/archinaut/tenter/widget/Paragraph : io/archinaut/tenter/widget/MeasurableWidget {
@@ -773,8 +774,6 @@ public final class io/archinaut/tenter/widget/RowWriter {
 	public final fun draw (Lio/archinaut/tenter/widget/Widget;I)V
 	public final fun getRow ()I
 	public final fun getWidth ()I
-	public final fun markReveal (II)V
-	public static synthetic fun markReveal$default (Lio/archinaut/tenter/widget/RowWriter;IIILjava/lang/Object;)V
 	public final fun newLine ()V
 	public final fun write (ILjava/lang/String;Lio/archinaut/tenter/screen/Style;I)Lio/archinaut/tenter/screen/Point;
 	public static synthetic fun write$default (Lio/archinaut/tenter/widget/RowWriter;ILjava/lang/String;Lio/archinaut/tenter/screen/Style;IILjava/lang/Object;)Lio/archinaut/tenter/screen/Point;
@@ -837,8 +836,8 @@ public final class io/archinaut/tenter/widget/Viewport : io/archinaut/tenter/wid
 
 public final class io/archinaut/tenter/widget/ViewportState {
 	public fun <init> ()V
-	public fun <init> (Lio/archinaut/tenter/screen/Point;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/screen/Point;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/archinaut/tenter/screen/Point;Z)V
+	public synthetic fun <init> (Lio/archinaut/tenter/screen/Point;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getSettled ()Lio/archinaut/tenter/widget/ScrollState;
 	public final fun requestRecenter ()V
 	public final fun scrollBy (II)V
@@ -849,8 +848,8 @@ public abstract interface class io/archinaut/tenter/widget/Widget {
 }
 
 public final class io/archinaut/tenter/widget/panel/Panel {
-	public fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;Z)V
+	public synthetic fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class io/archinaut/tenter/widget/panel/PanelHit {

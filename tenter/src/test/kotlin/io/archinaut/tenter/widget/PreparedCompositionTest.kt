@@ -130,8 +130,8 @@ internal class PreparedCompositionTest {
         val state = ViewportState()
         val viewport = Viewport(MeasurableWidget { writer ->
             repeat(20) {
-                writer.writeLine("row$it")
-                if (it == 19) writer.markReveal(row = it)
+                val line = Paragraph("row$it")
+                writer.draw(if (it == 19) line.revealed() else line)
             }
         })
 
@@ -150,8 +150,10 @@ internal class PreparedCompositionTest {
     fun `recenter is queued and snapshot remains unchanged until a drawable frame`() {
         val state = ViewportState()
         val viewport = Viewport(MeasurableWidget { writer ->
-            repeat(20) { writer.writeLine("row$it") }
-            writer.markReveal(row = 10)
+            repeat(20) {
+                val line = Paragraph("row$it")
+                writer.draw(if (it == 10) line.revealed() else line)
+            }
         })
         viewport.render(Canvas.offscreen(10, 5), state)
         val before = state.settled
@@ -202,8 +204,8 @@ internal class PreparedCompositionTest {
     fun `inner viewport consumes its reveal instead of moving the outer viewport`() {
         val inner = Viewport(
             MeasurableWidget { writer ->
-                repeat(20) { writer.writeLine("inner$it") }
-                writer.markReveal(row = 19)
+                repeat(19) { writer.writeLine("inner$it") }
+                writer.draw(Paragraph("inner19").revealed())
             },
         )
         val outerState = ViewportState()

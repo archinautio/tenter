@@ -137,8 +137,8 @@ internal class ContentLayoutTest {
         var prepareCount = 0
         val child = MeasurableWidget { writer ->
             prepareCount++
-            writer.markReveal()
-        }
+            writer.writeLine("child")
+        }.revealed()
         val parent = MeasurableWidget { writer -> writer.draw(child) }
 
         val layout = parent.prepare(10)
@@ -271,11 +271,11 @@ internal class ContentLayoutTest {
     }
 
     @Test
-    fun `drawing a child without a request keeps the parent's earlier request`() {
+    fun `drawing a child without a request keeps an earlier child's request`() {
         val canvas = Canvas.offscreen(6, 3)
         val parent = MeasurableWidget { writer ->
-            writer.markReveal()
-            writer.draw(MeasurableWidget { it.writeLine("child") })
+            writer.draw(Paragraph("child").revealed())
+            writer.draw(Paragraph("plain"))
         }
 
         parent.render(canvas)

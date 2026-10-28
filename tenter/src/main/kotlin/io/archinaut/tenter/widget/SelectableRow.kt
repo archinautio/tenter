@@ -25,8 +25,11 @@ public class SelectableRow(
 ) : MeasurableWidget {
 
     override fun write(writer: RowWriter) {
-        if (selected) writer.markReveal()
+        val row = MeasurableWidget(::writeRow)
+        writer.draw(if (selected) row.revealed() else row)
+    }
 
+    private fun writeRow(writer: RowWriter) {
         val color = if (selected) StandardRole.ACCENT else textColor
         val marker = if (selected) "▶" else " "
         val left = "$marker   $label"

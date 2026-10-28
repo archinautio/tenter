@@ -106,8 +106,8 @@ then measures it for an available width of eight cells:
 ```
 
 See the [complete source and imports](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt).
-`markReveal(row = 0)` asks an enclosing viewport to keep the marked row visible; omit
-it for a static label. In an allocated area, render the block and then render the
+`.revealed()` asks an enclosing viewport to keep the label visible; omit it for a static
+label. In an allocated area, render the block and then render the
 content into `block.inner(area)`:
 
 ```kotlin

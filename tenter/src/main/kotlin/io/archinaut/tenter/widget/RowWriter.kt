@@ -5,7 +5,6 @@ package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Line
 import io.archinaut.tenter.screen.Point
-import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.text.TextTruncation
@@ -103,11 +102,6 @@ public class RowWriter internal constructor(
     public fun newLine() {
         row += 1
         occupy(row)
-    }
-
-    /** Marks [height] full-width rows from [row] as the content an enclosing viewport should keep visible. */
-    public fun markReveal(row: Int = this.row, height: Int = 1) {
-        builder.reveal(Rect(0, row, width, height))
     }
 
     /** The content written so far, sized to how far it reaches. */

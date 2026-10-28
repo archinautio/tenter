@@ -11,8 +11,15 @@ import io.archinaut.tenter.screen.Size
  * Mutable scrolling intent and the last immutable frame observation for one viewport. Commands
  * are queued until a drawable frame; they never rewrite [settled]. A state belongs to one
  * viewport and is confined to the application's rendering context.
+ *
+ * With [stickToBottom], the viewport keeps its last row visible as the content grows, as a log
+ * does. Scrolling up stops that; scrolling back to the bottom resumes it. A changed reveal target
+ * is still followed first.
  */
-public class ViewportState(initialOffset: Point = Point.ORIGIN) {
+public class ViewportState(
+    initialOffset: Point = Point.ORIGIN,
+    private val stickToBottom: Boolean = false,
+) {
 
     /**
      * Every value a frame carries forward, in one immutable record. [fork] and [adopt] copy this
@@ -31,7 +38,7 @@ public class ViewportState(initialOffset: Point = Point.ORIGIN) {
     public val settled: ScrollState? get() = carried.settled
 
     /** Stages a managed frame without consuming the owner's queued intent. */
-    internal fun fork(): ViewportState = ViewportState().also { it.carried = carried }
+    internal fun fork(): ViewportState = ViewportState(stickToBottom = stickToBottom).also { it.carried = carried }
 
     internal fun adopt(candidate: ViewportState) {
         carried = candidate.carried
@@ -61,6 +68,13 @@ public class ViewportState(initialOffset: Point = Point.ORIGIN) {
     }
 
     internal fun recenterRequested(): Boolean = carried.pendingRecenter
+
+    /** Whether this frame should show the content's last row: at the bottom before, and not scrolled up since. */
+    internal fun stuckToBottom(): Boolean {
+        if (!stickToBottom) return false
+        val previous = carried.settled ?: return true
+        return carried.requestedOffset.y >= previous.maxOffset.y
+    }
 
     internal fun settle(snapshot: ScrollState) {
         carried = Carried(

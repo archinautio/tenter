@@ -20,7 +20,8 @@ import io.archinaut.tenter.widget.block
  *
  * A panel has no size: where it goes and how big it is in each mode is the host application's
  * decision, made every frame by the areas it passes to [Panels]. [borderType] picks the frame's
- * glyphs, as for [Block].
+ * glyphs, as for [Block]. With [stickToBottom], the panel keeps its last row visible as its
+ * content grows, as [ViewportState] describes.
  */
 public class Panel<K : PanelId, I>(
     internal val id: K,
@@ -30,8 +31,9 @@ public class Panel<K : PanelId, I>(
     private val minimized: ((I) -> MeasurableWidget)? = null,
     private val maximized: ((I) -> MeasurableWidget)? = null,
     private val borderType: BorderType = BorderType.ROUNDED,
+    stickToBottom: Boolean = false,
 ) {
-    private val viewportState: ViewportState = ViewportState()
+    private val viewportState: ViewportState = ViewportState(stickToBottom = stickToBottom)
     private var restoreMode: PanelMode = PanelMode.NORMAL
     private var attached: Boolean = false
 

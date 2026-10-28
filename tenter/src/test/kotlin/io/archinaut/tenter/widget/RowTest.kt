@@ -64,8 +64,7 @@ internal class RowTest {
     fun `a child's reveal request is offset to its segment`() {
         val revealing = MeasurableWidget { writer ->
             writer.newLine()
-            writer.markReveal()
-            writer.writeLine("R")
+            writer.draw(Paragraph("R").revealed())
         }
         val row = Row(listOf(Length(3) to filled("A"), Fill(1) to revealing))
         val canvas = Canvas.offscreen(8, 2)

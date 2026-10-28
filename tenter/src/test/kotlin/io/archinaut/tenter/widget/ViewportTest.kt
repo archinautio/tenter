@@ -17,8 +17,8 @@ internal class ViewportTest {
 
     private fun content(lines: Int, revealRow: Int? = null): MeasurableWidget = MeasurableWidget {
         repeat(lines) { row ->
-            it.writeLine("line$row")
-            if (row == revealRow) it.markReveal(row = row)
+            val line = Paragraph("line$row")
+            it.draw(if (row == revealRow) line.revealed() else line)
         }
     }
 
@@ -157,5 +157,41 @@ internal class ViewportTest {
         val buffer = render(Viewport(content(5).block(Block.bordered())), 10, 3, state)
 
         assertEquals("│line0", buffer.line(0, width = 6))
+    }
+
+    @Test
+    fun `a state stuck to the bottom keeps the last row visible as content grows`() {
+        val state = ViewportState(stickToBottom = true)
+
+        Viewport(content(20)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        assertEquals(12, state.frame().offset.y)
+        Viewport(content(30)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+
+        assertEquals(22, state.frame().offset.y)
+    }
+
+    @Test
+    fun `scrolling up stops sticking to the bottom and scrolling back resumes it`() {
+        val state = ViewportState(stickToBottom = true)
+        Viewport(content(20)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+
+        state.scrollBy(0, -5)
+        Viewport(content(30)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        assertEquals(7, state.frame().offset.y)
+
+        state.scrollBy(0, 100)
+        Viewport(content(30)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        Viewport(content(40)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        assertEquals(32, state.frame().offset.y)
+    }
+
+    @Test
+    fun `without sticking to the bottom growing content keeps the offset`() {
+        val state = ViewportState()
+
+        Viewport(content(20)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        Viewport(content(30)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+
+        assertEquals(0, state.frame().offset.y)
     }
 }

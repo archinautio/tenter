@@ -4,6 +4,7 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Canvas
+import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 
 /**
@@ -45,6 +46,24 @@ public fun Widget.fixedSize(width: Int, height: Int): MeasurableWidget {
     val widget = this
     return object : LayoutWidget {
         override fun layout(availableWidth: Int): ContentLayout = ContentLayout.raw(width, height, widget)
+    }
+}
+
+/**
+ * This widget asking an enclosing [Viewport] to keep all of it visible, as a selected row does.
+ * Its request comes after any made inside it, so it wins over them; as with every request, a
+ * later sibling's still wins over it.
+ */
+public fun MeasurableWidget.revealed(): MeasurableWidget {
+    val content = this
+    return object : LayoutWidget {
+        override fun layout(availableWidth: Int): ContentLayout {
+            val child = content.prepare(availableWidth)
+            return contentLayout(child.width, child.height) {
+                place(0, 0, child)
+                reveal(Rect(0, 0, child.width, child.height))
+            }
+        }
     }
 }
 

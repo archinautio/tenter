@@ -25,7 +25,7 @@ internal class RowWriterTest {
         val cases = listOf(
             EmptyWidget.fixedSize(4, 1) to Rect(0, 0, 4, 1),
             EmptyWidget.fixedSize(0, 0) to Rect(0, 0, 4, 1),
-            MeasurableWidget { it.writeLine("child"); it.markReveal(row = 0) } to Rect(0, 1, 4, 1),
+            Paragraph("child").revealed() to Rect(0, 1, 4, 1),
             object : Widget {
                 override fun render(canvas: Canvas) { canvas.markReveal(Rect(-2, 0, 3, 1)) }
             }.fixedSize(4, 1) to Rect(0, 1, 1, 1),
@@ -35,8 +35,7 @@ internal class RowWriterTest {
         )
         for ((child, expected) in cases) {
             val canvas = paint(4, 3) { writer ->
-                writer.writeLine("parent")
-                writer.markReveal(row = 0)
+                writer.draw(Paragraph("parent").revealed())
                 writer.draw(child)
             }
 
@@ -162,20 +161,24 @@ internal class RowWriterTest {
     }
 
     @Test
-    fun `markReveal defaults to the current row and accepts an explicit one`() {
-        val current = paint(4, 3) { writer ->
-            writer.newLine()
-            writer.markReveal(height = 2)
-            writer.newLine()
-            writer.newLine()
-        }
-        val explicit = paint(4, 3) { writer ->
-            writer.newLine()
-            writer.newLine()
-            writer.markReveal(row = 0)
+    fun `a revealed child asks to keep all of its rows visible`() {
+        val canvas = paint(4, 4) { writer ->
+            writer.writeLine("top")
+            writer.draw(Paragraph("a\nb").revealed())
+            writer.writeLine("end")
         }
 
-        assertEquals(Rect(0, 1, 4, 2), current.revealRect())
-        assertEquals(Rect(0, 0, 4, 1), explicit.revealRect())
+        assertEquals(Rect(0, 1, 4, 2), canvas.revealRect())
+    }
+
+    @Test
+    fun `a revealed widget's request wins over the ones inside it`() {
+        val inner = MeasurableWidget { writer ->
+            writer.draw(Paragraph("a").revealed())
+            writer.writeLine("b")
+        }
+        val canvas = paint(4, 3) { writer -> writer.draw(inner.revealed()) }
+
+        assertEquals(Rect(0, 0, 4, 2), canvas.revealRect())
     }
 }

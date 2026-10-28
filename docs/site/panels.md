@@ -18,6 +18,13 @@ scrolling. A changed reveal target or either viewport dimension re-engages follo
 unchanged dimensions and targets preserve manual scrolling. Use `requestRecenter()` to center the content's current reveal target on
 the next drawable frame.
 
+Mark the content to follow with `.revealed()`, such as the selected item:
+`writer.draw(if (selected) item.revealed() else item)`. When several requests are
+made, the last one wins. For a log, create the state with
+`ViewportState(stickToBottom = true)`, or pass `stickToBottom = true` to a `Panel`: the
+viewport keeps the last row visible as content grows, stops when the user scrolls up, and
+resumes once they scroll back to the bottom.
+
 ## Create a panel layout
 
 Panels combine content with a title, border, and scrolling. Keep one `PanelSet` for

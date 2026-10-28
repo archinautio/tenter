@@ -69,6 +69,7 @@ public class Viewport(
         val follow = viewportState.shouldFollow(reveal, Size(viewportWidth, viewportHeight))
         val base = viewportState.requestedOffset()
         val recenter = viewportState.recenterRequested()
+        val stuck = viewportState.stuckToBottom()
         val offsetX = resolveAxis(
             base = base.x,
             revealRange = reveal?.let { it.x to it.x + it.width },
@@ -76,6 +77,7 @@ public class Viewport(
             maxOffset = maxOffsetX,
             shouldFollow = follow,
             recenter = recenter,
+            stuckToEnd = false,
         )
         val offsetY = resolveAxis(
             base = base.y,
@@ -84,6 +86,7 @@ public class Viewport(
             maxOffset = maxOffsetY,
             shouldFollow = follow,
             recenter = recenter,
+            stuckToEnd = stuck,
         )
         return Point(offsetX, offsetY)
     }
@@ -95,10 +98,11 @@ public class Viewport(
         maxOffset: Int,
         shouldFollow: Boolean,
         recenter: Boolean,
+        stuckToEnd: Boolean,
     ): Int = when {
-        revealRange == null -> base.coerceIn(0, maxOffset)
-        recenter -> ScrollGeometry.center(revealRange.first, revealRange.second, viewportSize, maxOffset)
-        shouldFollow -> ScrollGeometry.follow(base, revealRange.first, revealRange.second, viewportSize, maxOffset)
+        revealRange != null && recenter -> ScrollGeometry.center(revealRange.first, revealRange.second, viewportSize, maxOffset)
+        revealRange != null && shouldFollow -> ScrollGeometry.follow(base, revealRange.first, revealRange.second, viewportSize, maxOffset)
+        stuckToEnd -> maxOffset
         else -> base.coerceIn(0, maxOffset)
     }
 }

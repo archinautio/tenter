@@ -62,7 +62,8 @@ Check the [glyph choices](styling.md#choose-glyphs) and
 
 Review [viewport state and reveal following](panels.md#scroll-a-single-widget) and
 [resize handling](input.md#collect-events-and-repaint). `SelectableRow` marks its
-selected row for reveal; custom selectable content must mark its own target.
+selected row for reveal; custom selectable content must mark its own target with
+`.revealed()`, and a log should stick to the bottom instead.
 
 ## Leaving the terminal cleanly
 

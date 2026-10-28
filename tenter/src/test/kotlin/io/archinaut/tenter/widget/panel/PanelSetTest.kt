@@ -15,6 +15,8 @@ import io.archinaut.tenter.screen.Layout
 import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.widget.MeasurableWidget
+import io.archinaut.tenter.widget.Paragraph
+import io.archinaut.tenter.widget.revealed
 import io.archinaut.tenter.widget.fixedSize
 import io.archinaut.tenter.widget.Widget
 
@@ -23,13 +25,37 @@ private enum class SetPanelId : PanelId { MAIN, A, B }
 internal class PanelSetTest {
 
     @Test
+    fun `a panel stuck to the bottom follows its growing content`() {
+        var rows = 50
+        val set = PanelSet(
+            listOf(
+                Panel<SetPanelId, Unit>(
+                    SetPanelId.A,
+                    "A",
+                    normal = { MeasurableWidget { writer -> repeat(rows) { writer.writeLine("row$it") } } },
+                    stickToBottom = true,
+                ),
+            ),
+        )
+        val first = render(set, setOf(SetPanelId.A)).offsetOf(SetPanelId.A).y
+
+        rows = 60
+        val grown = render(set, setOf(SetPanelId.A)).offsetOf(SetPanelId.A).y
+
+        assertTrue(first > 0)
+        assertEquals(first + 10, grown)
+    }
+
+    @Test
     fun `multiple hidden panels retain independent recenter requests until drawable`() {
         val ids = setOf(SetPanelId.A, SetPanelId.B)
         val set = PanelSet(ids.map { id ->
             Panel<SetPanelId, Unit>(id, id.name, normal = {
                 MeasurableWidget { writer ->
-                    repeat(100) { writer.writeLine("row$it") }
-                    writer.markReveal(row = 40)
+                    repeat(100) {
+                        val line = Paragraph("row$it")
+                        writer.draw(if (it == 40) line.revealed() else line)
+                    }
                 }
             })
         })
@@ -112,8 +138,10 @@ internal class PanelSetTest {
         var fail = false
         val a = Panel<SetPanelId, Unit>(SetPanelId.A, "A", normal = {
             MeasurableWidget { writer ->
-                repeat(100) { writer.writeLine("row$it") }
-                writer.markReveal(row = 40)
+                repeat(100) {
+                    val line = Paragraph("row$it")
+                    writer.draw(if (it == 40) line.revealed() else line)
+                }
             }
         })
         val b = Panel<SetPanelId, Unit>(SetPanelId.B, "B", normal = {
