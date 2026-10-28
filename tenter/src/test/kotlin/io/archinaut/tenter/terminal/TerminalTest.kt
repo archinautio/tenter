@@ -12,6 +12,7 @@ import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.color.TerminalColor
 import io.archinaut.tenter.color.ColorScheme
+import io.archinaut.tenter.color.ColorSpace
 
 import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
@@ -501,6 +502,17 @@ internal class TerminalTest {
             !Regex("\\[[\\d;]+m").containsMatchIn(out),
             "Expected no SGR codes at all at AnsiLevel.NONE: ${out.repr()}",
         )
+    }
+
+    @Test
+    fun `a terminal reports the color space its backend shows, or none`() {
+        fun colorSpaceAt(level: AnsiLevel): ColorSpace? =
+            Terminal(MordantTerminal(ansiLevel = level, terminalInterface = TerminalRecorder(ansiLevel = level))).colorSpace
+
+        assertEquals(ColorSpace.TRUECOLOR, colorSpaceAt(AnsiLevel.TRUECOLOR))
+        assertEquals(ColorSpace.ANSI256, colorSpaceAt(AnsiLevel.ANSI256))
+        assertEquals(ColorSpace.ANSI16, colorSpaceAt(AnsiLevel.ANSI16))
+        assertEquals(null, colorSpaceAt(AnsiLevel.NONE))
     }
 
     // ---- helpers ----

@@ -5,6 +5,7 @@ package io.archinaut.tenter.terminal
 
 import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.color.ColorScheme
+import io.archinaut.tenter.color.ColorSpace
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Style
@@ -26,8 +27,9 @@ import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
  * size to diff against and falls back to a full repaint.
  *
  * The drawing area follows [backend]'s size: whenever Mordant reports a new size (for example after
- * [events] polls it), the next draw resizes. At [AnsiLevel.NONE] every SGR tag is suppressed
- * regardless of the color scheme, since the terminal cannot render color at all.
+ * [events] polls it), the next draw resizes. When the backend reports [AnsiLevel.NONE] there is no
+ * [colorSpace] and every SGR tag is suppressed regardless of the color scheme, since the terminal
+ * cannot render color at all.
  */
 internal class AnsiTerminal(
     private val backend: MordantTerminal,
@@ -35,7 +37,12 @@ internal class AnsiTerminal(
 
     private var backendSize: Size = backend.size
 
-    override val ansiLevel: AnsiLevel get() = backend.terminalInfo.ansiLevel
+    override val colorSpace: ColorSpace? = when (backend.terminalInfo.ansiLevel) {
+        AnsiLevel.TRUECOLOR -> ColorSpace.TRUECOLOR
+        AnsiLevel.ANSI256 -> ColorSpace.ANSI256
+        AnsiLevel.ANSI16 -> ColorSpace.ANSI16
+        AnsiLevel.NONE -> null
+    }
 
     override fun followSize() {
         // Mordant's Size compares by identity and the backend refreshes it on every print, so
@@ -48,7 +55,8 @@ internal class AnsiTerminal(
 
     override fun open(colorScheme: ColorScheme): Session {
         val lifecycle = ScreenLifecycle(backend)
-        val session = AnsiSession(StyleTagCache(colorScheme, ansiLevel), lifecycle)
+        val styles = if (colorSpace == null) NoStyleTags else StyleTagCache(colorScheme)
+        val session = AnsiSession(styles, lifecycle)
         try {
             lifecycle.enter()
             session.clear()
@@ -66,7 +74,7 @@ internal class AnsiTerminal(
     override fun events(mouseTracking: MouseTracking): Flow<TerminalEvent> = backend.events(mouseTracking)
 
     private inner class AnsiSession(
-        private val styles: StyleTagCache,
+        private val styles: StyleTags,
         private val lifecycle: ScreenLifecycle,
     ) : Session {
 
@@ -101,7 +109,7 @@ internal class AnsiTerminal(
          * screen uses the color scheme's background immediately.
          */
         fun clear() {
-            val defaultStyle = styles.tagsFor(Style.DEFAULT)?.open.orEmpty()
+            val defaultStyle = styles.tagsFor(Style.DEFAULT).open
             backend.rawPrint(defaultStyle + backend.cursor.getMoves { clearScreen(); setPosition(0, 0) })
             previous = null
         }
@@ -145,7 +153,7 @@ internal class AnsiTerminal(
                     if (last != null && start <= last.last + 1) {
                         dirty[dirty.lastIndex] = last.first..maxOf(last.last, end - 1)
                     } else {
-                        dirty += start..(end - 1)
+                        dirty += start..<end
                     }
                 }
                 for (span in dirty) {
@@ -161,18 +169,20 @@ internal class AnsiTerminal(
          * Appends styled text for `buffer[xStart, xEnd)` on row [y] to [sb], grouping consecutive
          * same-style cells into runs and emitting only the ANSI tags needed at each run boundary.
          *
-         * Closing the previous run before opening the next is skippable whenever both runs have tags
-         * at all: every opening tag now establishes BOTH foreground and background explicitly (even
+         * Closing the previous run before opening the next is skippable when both runs render the same
+         * attributes: every opening tag establishes BOTH foreground and background explicitly (even
          * for [StandardRole.DEFAULT], which resolves to the color scheme's default surface rather than leaving
          * a channel unset), so the next run's open tag always fully overwrites whatever the previous
          * run set — nothing can bleed through. Only an attribute change (bold, dim, italic, underline,
          * inverse, strikethrough) still needs the close, since attributes have no "close" bundled into
-         * every open tag the way color does.
+         * every open tag the way color does. On a terminal without color every tag is [Tags.NONE], so
+         * the same logic emits no escapes at all.
          */
         private fun renderSpan(sb: StringBuilder, buffer: Buffer, y: Int, xStart: Int, xEnd: Int) {
             var x = xStart
-            var activeStyle: Style? = null
-            var activeTags: StyleTagCache.Tags? = null
+            // No run is open yet: NONE closes nothing, so the starting style never affects the output.
+            var activeStyle: Style = Style.DEFAULT
+            var activeTags: Tags = Tags.NONE
             while (x < xEnd) {
                 val runStyle = buffer.get(x, y).style
                 val runChars = StringBuilder()
@@ -183,20 +193,13 @@ internal class AnsiTerminal(
                     x++
                 }
                 val tags = styles.tagsFor(runStyle)
-                if (tags == null) {
-                    activeTags?.let { sb.append(it.close) }
-                    activeStyle = null
-                    activeTags = null
-                } else {
-                    val skipClose = activeStyle != null && activeStyle.rendersSameAttributes(runStyle)
-                    if (!skipClose) activeTags?.let { sb.append(it.close) }
-                    sb.append(tags.open)
-                    activeStyle = runStyle
-                    activeTags = tags
-                }
+                if (!activeStyle.rendersSameAttributes(runStyle)) sb.append(activeTags.close)
+                sb.append(tags.open)
+                activeStyle = runStyle
+                activeTags = tags
                 sb.append(runChars)
             }
-            activeTags?.let { sb.append(it.close) }
+            sb.append(activeTags.close)
         }
     }
 }

@@ -8,8 +8,8 @@ in the raw output can be split or missing even when the frame is right.
 
 Create a headless terminal with `Terminal.headless(width, height) { ... }` and pass it to your
 application in place of `Terminal()`. It never touches a real terminal and follows the same
-rules: your application enters `withScreen` and draws through the `Screen`. It reports
-`AnsiLevel.NONE` and ignores the color scheme.
+rules: your application enters `withScreen` and draws through the `Screen`. Its
+`colorSpace` is `null` and it ignores the color scheme.
 
 ## Check what was drawn
 

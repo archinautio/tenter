@@ -3,7 +3,6 @@
 
 package io.archinaut.tenter.color
 
-import com.github.ajalt.mordant.rendering.AnsiLevel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -18,7 +17,7 @@ internal class MapColorSchemeTest {
         val exception = assertThrows<IllegalArgumentException> {
             MapColorScheme(
                 name = "test",
-                level = AnsiLevel.TRUECOLOR,
+                space = ColorSpace.TRUECOLOR,
                 defaultBackground = TerminalColor.TrueColor(0, 0, 0),
                 colors = emptyMap(),
             )
@@ -28,11 +27,11 @@ internal class MapColorSchemeTest {
     }
 
     @Test
-    fun `a map color scheme validates its declared color tier`() {
+    fun `a map color scheme rejects a default background outside its color space`() {
         assertThrows<IllegalArgumentException> {
             MapColorScheme(
                 name = "test",
-                level = AnsiLevel.TRUECOLOR,
+                space = ColorSpace.TRUECOLOR,
                 defaultBackground = TerminalColor.Ansi16(30),
                 colors = standardColors(TerminalColor.TrueColor(255, 255, 255)),
             )
@@ -40,17 +39,17 @@ internal class MapColorSchemeTest {
     }
 
     @Test
-    fun `a map color scheme rejects NONE, which names a terminal rather than an authoring tier`() {
+    fun `a map color scheme rejects a role color outside its color space`() {
         val exception = assertThrows<IllegalArgumentException> {
             MapColorScheme(
                 name = "test",
-                level = AnsiLevel.NONE,
+                space = ColorSpace.ANSI16,
                 defaultBackground = TerminalColor.Ansi16(30),
-                colors = standardColors(TerminalColor.Ansi16(97)),
+                colors = standardColors(TerminalColor.Ansi16(97)) + (StandardRole.ACCENT to TerminalColor.Ansi256(208)),
             )
         }
 
-        assertEquals(true, exception.message?.contains("AnsiLevel.NONE"))
+        assertEquals(true, exception.message?.contains("ANSI16"))
     }
 
     @Test
@@ -60,7 +59,7 @@ internal class MapColorSchemeTest {
         source[StandardRole.ACCENT] = accent
         val colorScheme = MapColorScheme(
             name = "test",
-            level = AnsiLevel.TRUECOLOR,
+            space = ColorSpace.TRUECOLOR,
             defaultBackground = TerminalColor.TrueColor(0, 0, 0),
             colors = source,
         )

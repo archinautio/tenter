@@ -4,11 +4,11 @@
 package io.archinaut.tenter.terminal
 
 import io.archinaut.tenter.color.ColorScheme
+import io.archinaut.tenter.color.ColorSpace
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Size
 
 import com.github.ajalt.mordant.input.MouseTracking
-import com.github.ajalt.mordant.rendering.AnsiLevel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.flow
  * [Terminal.headless].
  *
  * It follows a real terminal's rules: only a [Screen] draws, and nested scopes throw. It reports
- * [AnsiLevel.NONE] and ignores the color scheme, since frames hold color roles, not colors. Its screen's
+ * no [colorSpace] and ignores the color scheme, since frames hold color roles, not colors. Its screen's
  * events come from the script it was created with; see [HeadlessInput].
  */
 public class HeadlessTerminal internal constructor(
@@ -36,7 +36,7 @@ public class HeadlessTerminal internal constructor(
     public var frame: CompletedFrame = CompletedFrame.blank(area.width, area.height)
         private set
 
-    override val ansiLevel: AnsiLevel get() = AnsiLevel.NONE
+    override val colorSpace: ColorSpace? get() = null
 
     override fun open(colorScheme: ColorScheme): Session {
         frame = CompletedFrame.blank(area.width, area.height)

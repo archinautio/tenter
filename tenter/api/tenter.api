@@ -84,12 +84,22 @@ public final class io/archinaut/tenter/color/ColorScheme$DefaultImpls {
 	public static fun background (Lio/archinaut/tenter/color/ColorScheme;Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/color/TerminalColor;
 }
 
+public abstract class io/archinaut/tenter/color/ColorSpace : java/lang/Enum {
+	public static final field ANSI16 Lio/archinaut/tenter/color/ColorSpace;
+	public static final field ANSI256 Lio/archinaut/tenter/color/ColorSpace;
+	public static final field TRUECOLOR Lio/archinaut/tenter/color/ColorSpace;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public abstract fun parse (Ljava/lang/String;)Lio/archinaut/tenter/color/TerminalColor;
+	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/color/ColorSpace;
+	public static fun values ()[Lio/archinaut/tenter/color/ColorSpace;
+}
+
 public final class io/archinaut/tenter/color/MapColorScheme : io/archinaut/tenter/color/ColorScheme {
-	public fun <init> (Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/AnsiLevel;Lio/archinaut/tenter/color/TerminalColor;Ljava/util/Map;)V
+	public fun <init> (Ljava/lang/String;Lio/archinaut/tenter/color/ColorSpace;Lio/archinaut/tenter/color/TerminalColor;Ljava/util/Map;)V
 	public fun background (Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/color/TerminalColor;
 	public fun foreground (Lio/archinaut/tenter/color/ColorRole;)Lio/archinaut/tenter/color/TerminalColor;
 	public fun getDefaultBackground ()Lio/archinaut/tenter/color/TerminalColor;
-	public final fun getLevel ()Lcom/github/ajalt/mordant/rendering/AnsiLevel;
+	public final fun getSpace ()Lio/archinaut/tenter/color/ColorSpace;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -112,7 +122,7 @@ public final class io/archinaut/tenter/color/StandardRole : java/lang/Enum, io/a
 }
 
 public abstract interface class io/archinaut/tenter/color/TerminalColor : io/archinaut/tenter/color/ColorRole {
-	public static final field Companion Lio/archinaut/tenter/color/TerminalColor$Companion;
+	public abstract fun getSpace ()Lio/archinaut/tenter/color/ColorSpace;
 }
 
 public final class io/archinaut/tenter/color/TerminalColor$Ansi16 : io/archinaut/tenter/color/TerminalColor {
@@ -122,6 +132,7 @@ public final class io/archinaut/tenter/color/TerminalColor$Ansi16 : io/archinaut
 	public static synthetic fun copy$default (Lio/archinaut/tenter/color/TerminalColor$Ansi16;IILjava/lang/Object;)Lio/archinaut/tenter/color/TerminalColor$Ansi16;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCode ()I
+	public fun getSpace ()Lio/archinaut/tenter/color/ColorSpace;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -133,12 +144,9 @@ public final class io/archinaut/tenter/color/TerminalColor$Ansi256 : io/archinau
 	public static synthetic fun copy$default (Lio/archinaut/tenter/color/TerminalColor$Ansi256;IILjava/lang/Object;)Lio/archinaut/tenter/color/TerminalColor$Ansi256;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIndex ()I
+	public fun getSpace ()Lio/archinaut/tenter/color/ColorSpace;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/archinaut/tenter/color/TerminalColor$Companion {
-	public final fun parse (Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/AnsiLevel;)Lio/archinaut/tenter/color/TerminalColor;
 }
 
 public final class io/archinaut/tenter/color/TerminalColor$TrueColor : io/archinaut/tenter/color/TerminalColor {
@@ -152,6 +160,7 @@ public final class io/archinaut/tenter/color/TerminalColor$TrueColor : io/archin
 	public final fun getBlue ()I
 	public final fun getGreen ()I
 	public final fun getRed ()I
+	public fun getSpace ()Lio/archinaut/tenter/color/ColorSpace;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -534,7 +543,7 @@ public final class io/archinaut/tenter/terminal/HeadlessInput {
 }
 
 public final class io/archinaut/tenter/terminal/HeadlessTerminal : io/archinaut/tenter/terminal/Terminal {
-	public fun getAnsiLevel ()Lcom/github/ajalt/mordant/rendering/AnsiLevel;
+	public fun getColorSpace ()Lio/archinaut/tenter/color/ColorSpace;
 	public final fun getFrame ()Lio/archinaut/tenter/terminal/CompletedFrame;
 }
 
@@ -549,7 +558,7 @@ public abstract class io/archinaut/tenter/terminal/Terminal {
 	public static final field Companion Lio/archinaut/tenter/terminal/Terminal$Companion;
 	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun closeScreen (Lio/archinaut/tenter/terminal/Screen;Ljava/lang/Throwable;)V
-	public abstract fun getAnsiLevel ()Lcom/github/ajalt/mordant/rendering/AnsiLevel;
+	public abstract fun getColorSpace ()Lio/archinaut/tenter/color/ColorSpace;
 	public final fun openScreen (Lio/archinaut/tenter/color/ColorScheme;)Lio/archinaut/tenter/terminal/Screen;
 	public final fun withScreen (Lio/archinaut/tenter/color/ColorScheme;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 	public static synthetic fun withScreen$default (Lio/archinaut/tenter/terminal/Terminal;Lio/archinaut/tenter/color/ColorScheme;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;

@@ -4,7 +4,6 @@
 package io.archinaut.tenter.terminal
 
 import com.github.ajalt.mordant.input.KeyboardEvent
-import com.github.ajalt.mordant.rendering.AnsiLevel
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
@@ -15,6 +14,7 @@ import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -42,7 +42,7 @@ internal class HeadlessTerminalTest {
     fun `a headless terminal has its own size and no color`() {
         val terminal = Terminal.headless(width = 6, height = 2)
 
-        assertEquals(AnsiLevel.NONE, terminal.ansiLevel)
+        assertNull(terminal.colorSpace)
         assertEquals(Rect(0, 0, 6, 2), terminal.withScreen { it.area })
     }
 

@@ -5,10 +5,10 @@ package io.archinaut.tenter.terminal
 
 import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.color.ColorScheme
+import io.archinaut.tenter.color.ColorSpace
 import io.archinaut.tenter.screen.Rect
 
 import com.github.ajalt.mordant.input.MouseTracking
-import com.github.ajalt.mordant.rendering.AnsiLevel
 import kotlinx.coroutines.flow.Flow
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
@@ -20,7 +20,7 @@ import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
  * [Terminal.headless] is a [HeadlessTerminal] that never touches one, for tests and headless
  * rendering. Both follow the same rules: creating one writes nothing, and only a [Screen] draws.
  *
- * Picking *which* color scheme to pass to [withScreen] (a light/dark choice, [ansiLevel], letting the
+ * Picking *which* color scheme to pass to [withScreen] (a light/dark choice, [colorSpace], letting the
  * user override it) is the host application's job. A terminal is not thread-safe.
  */
 public sealed class Terminal(
@@ -28,8 +28,11 @@ public sealed class Terminal(
     height: Int,
 ) {
 
-    /** The color level this terminal supports, for choosing the color scheme to pass to [withScreen]. */
-    public abstract val ansiLevel: AnsiLevel
+    /**
+     * The color space this terminal shows, for choosing the color scheme to pass to [withScreen], or
+     * `null` if it shows no color at all, in which case every color scheme draws without color.
+     */
+    public abstract val colorSpace: ColorSpace?
 
     private var width: Int = width.coerceAtLeast(0)
     private var height: Int = height.coerceAtLeast(0)
