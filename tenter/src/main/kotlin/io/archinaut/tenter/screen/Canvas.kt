@@ -78,18 +78,24 @@ public class Canvas private constructor(
         buffer.writeCell(bounds.x + x, bounds.y + y, cell, clip)
     }
 
+    /**
+     * Writes [text] from ([x], [y]), one cell per column a glyph occupies; cells outside this canvas
+     * are skipped. Returns where the text ended: the column after it, on row [y], so the next piece
+     * can follow it.
+     */
     public fun setString(
         x: Int,
         y: Int,
         text: String,
         style: Style = Style.DEFAULT,
-    ) {
+    ): Point {
         var column = x
         for (cluster in textClusters(text)) {
             if (cluster.width == 0) continue
             buffer.writeCell(bounds.x + column, bounds.y + y, Cell(cluster.drawableText, style), clip)
             column += cluster.width
         }
+        return Point(column, y)
     }
 
     /** Resets every cell this canvas can write to a blank that sets no style channel. */

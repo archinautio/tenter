@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Line
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Span
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.screen.Rect
@@ -94,16 +95,35 @@ internal class RowWriterTest {
     }
 
     @Test
-    fun `writeLine advances row by one and returns the row written`() {
-        var written = -1
+    fun `writeLine advances row by one and returns where the line ended`() {
+        var ended: Point? = null
         var rowAfter = -1
         paint(10, 3) { writer ->
-            written = writer.writeLine("a")
+            writer.newLine()
+            ended = writer.writeLine("中a")
             rowAfter = writer.row
         }
 
-        assertEquals(0, written)
-        assertEquals(1, rowAfter)
+        assertEquals(Point(3, 1), ended)
+        assertEquals(2, rowAfter)
+    }
+
+    @Test
+    fun `writeLine reports the ellipsized end`() {
+        var ended: Point? = null
+        paint(5, 1) { writer -> ended = writer.writeLine("hello world") }
+
+        assertEquals(Point(5, 0), ended)
+    }
+
+    @Test
+    fun `write returns the column after the text so pieces can follow each other`() {
+        val canvas = paint(8, 1) { writer ->
+            val label = writer.write(0, "HP:")
+            writer.write(label.x + 1, "中!")
+        }
+
+        assertEquals("HP: 中!", (0 until 8).joinToString("") { canvas.get(it, 0).symbol }.trimEnd())
     }
 
     @Test

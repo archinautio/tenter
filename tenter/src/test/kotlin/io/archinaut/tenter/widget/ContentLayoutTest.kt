@@ -156,16 +156,14 @@ internal class ContentLayoutTest {
             content.writeLine("A")
             content.newLine()
         }
-        var used = 0
         var rowAfter = 0
         val parent = MeasurableWidget { writer ->
-            used = writer.draw(child)
+            writer.draw(child)
             rowAfter = writer.row
         }
 
         val buffer = render(parent, 10, 5)
 
-        assertEquals(2, used)
         assertEquals(2, rowAfter)
         assertEquals("A", buffer.get(0, 0).symbol)
     }

@@ -4,6 +4,7 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Line
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
@@ -30,23 +31,28 @@ public class RowWriter internal constructor(
 
     /**
      * Writes [content] in its own area starting at the current row, clipped to its measured size,
-     * and advances past it. This is how a measurable widget places a child; returns the rows used.
+     * and advances past it. This is how a measurable widget places a child.
      * A child measured wider than [width] widens this widget too, as it would a [Stack], so an
      * enclosing [Viewport] can scroll to it.
      */
-    public fun draw(content: MeasurableWidget): Int {
+    public fun draw(content: MeasurableWidget) {
         val layout = content.prepare(width)
         builder.place(0, row, layout)
         occupiedWidth = maxOf(occupiedWidth, layout.width)
         repeat(layout.height) { newLine() }
-        return layout.height
     }
 
-    /** Writes [text] on the current row, ellipsized to [width], and advances. Returns the row written. */
-    public fun writeLine(text: String, style: Style = Style.DEFAULT): Int = writeLine(Line(text, style))
+    /**
+     * Writes [text] on the current row, ellipsized to [width], and advances. Returns where the text
+     * ended: the column after it, on the row written.
+     */
+    public fun writeLine(text: String, style: Style = Style.DEFAULT): Point = writeLine(Line(text, style))
 
-    /** Writes [line] on the current row, ellipsized to [width], each span in its own style, and advances. */
-    public fun writeLine(line: Line): Int {
+    /**
+     * Writes [line] on the current row, ellipsized to [width], each span in its own style, and
+     * advances. Returns where the line ended: the column after it, on the row written.
+     */
+    public fun writeLine(line: Line): Point {
         val written = row
         var column = 0
         for (span in line.ellipsize(width).spans) {
@@ -55,15 +61,15 @@ public class RowWriter internal constructor(
         }
         row += 1
         occupy(row)
-        return written
+        return Point(column, written)
     }
 
     /**
      * Writes [left] flush to the left edge (truncated with an ellipsis if it would collide with
      * [right]) and [right] flush to the right edge, then advances. [rightStyle] defaults to
-     * [leftStyle] for a single-color row. Returns the row written.
+     * [leftStyle] for a single-color row.
      */
-    public fun writeRow(left: String, right: String, leftStyle: Style = Style.DEFAULT, rightStyle: Style = leftStyle): Int {
+    public fun writeRow(left: String, right: String, leftStyle: Style = Style.DEFAULT, rightStyle: Style = leftStyle) {
         val visibleRight = TextTruncation.ellipsize(right, width)
         val rightWidth = CellWidth.of(visibleRight)
         val maxLeft = (width - rightWidth - 1).coerceAtLeast(0)
@@ -72,16 +78,17 @@ public class RowWriter internal constructor(
         builder.text(width - rightWidth, written, visibleRight, rightStyle)
         row += 1
         occupy(row)
-        return written
     }
 
     /**
      * Writes [text] at [column] on [row] — the current one unless an earlier row is being overlaid —
      * without advancing. The text is not ellipsized; anything past the widget's edge is clipped.
+     * Returns where the text ended: the column after it, on [row], so the next piece can follow it.
      */
-    public fun write(column: Int, text: String, style: Style = Style.DEFAULT, row: Int = this.row) {
+    public fun write(column: Int, text: String, style: Style = Style.DEFAULT, row: Int = this.row): Point {
         builder.text(column, row, text, style)
         occupy(row + 1)
+        return Point(column + CellWidth.of(text), row)
     }
 
     /** Advances to the next row, leaving the current one blank if nothing was written to it. */

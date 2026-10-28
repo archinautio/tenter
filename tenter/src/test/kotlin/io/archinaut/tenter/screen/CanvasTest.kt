@@ -79,8 +79,9 @@ internal class CanvasTest {
     fun `setString places characters horizontally`() {
         val canvas = Canvas.offscreen(10, 1)
 
-        canvas.setString(2, 0, "Hi", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED))
+        val ended = canvas.setString(2, 0, "Hi", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED))
 
+        assertEquals(Point(4, 0), ended)
         assertEquals(Cell("H", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED)), canvas.get(2, 0))
         assertEquals(Cell("i", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED)), canvas.get(3, 0))
         assertEquals(Cell(), canvas.get(4, 0))

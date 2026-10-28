@@ -257,8 +257,8 @@ public final class io/archinaut/tenter/screen/Canvas {
 	public final fun markReveal (Lio/archinaut/tenter/screen/Rect;)V
 	public final fun region (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun set (IILio/archinaut/tenter/screen/Cell;)V
-	public final fun setString (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;)V
-	public static synthetic fun setString$default (Lio/archinaut/tenter/screen/Canvas;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
+	public final fun setString (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/Point;
+	public static synthetic fun setString$default (Lio/archinaut/tenter/screen/Canvas;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Point;
 }
 
 public final class io/archinaut/tenter/screen/Canvas$Companion {
@@ -764,19 +764,19 @@ public final class io/archinaut/tenter/widget/Paragraph : io/archinaut/tenter/wi
 }
 
 public final class io/archinaut/tenter/widget/RowWriter {
-	public final fun draw (Lio/archinaut/tenter/widget/MeasurableWidget;)I
+	public final fun draw (Lio/archinaut/tenter/widget/MeasurableWidget;)V
 	public final fun getRow ()I
 	public final fun getWidth ()I
 	public final fun markReveal (II)V
 	public static synthetic fun markReveal$default (Lio/archinaut/tenter/widget/RowWriter;IIILjava/lang/Object;)V
 	public final fun newLine ()V
-	public final fun write (ILjava/lang/String;Lio/archinaut/tenter/screen/Style;I)V
-	public static synthetic fun write$default (Lio/archinaut/tenter/widget/RowWriter;ILjava/lang/String;Lio/archinaut/tenter/screen/Style;IILjava/lang/Object;)V
-	public final fun writeLine (Lio/archinaut/tenter/screen/Line;)I
-	public final fun writeLine (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)I
-	public static synthetic fun writeLine$default (Lio/archinaut/tenter/widget/RowWriter;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)I
-	public final fun writeRow (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;)I
-	public static synthetic fun writeRow$default (Lio/archinaut/tenter/widget/RowWriter;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)I
+	public final fun write (ILjava/lang/String;Lio/archinaut/tenter/screen/Style;I)Lio/archinaut/tenter/screen/Point;
+	public static synthetic fun write$default (Lio/archinaut/tenter/widget/RowWriter;ILjava/lang/String;Lio/archinaut/tenter/screen/Style;IILjava/lang/Object;)Lio/archinaut/tenter/screen/Point;
+	public final fun writeLine (Lio/archinaut/tenter/screen/Line;)Lio/archinaut/tenter/screen/Point;
+	public final fun writeLine (Ljava/lang/String;Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/Point;
+	public static synthetic fun writeLine$default (Lio/archinaut/tenter/widget/RowWriter;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Point;
+	public final fun writeRow (Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;)V
+	public static synthetic fun writeRow$default (Lio/archinaut/tenter/widget/RowWriter;Ljava/lang/String;Ljava/lang/String;Lio/archinaut/tenter/screen/Style;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)V
 }
 
 public final class io/archinaut/tenter/widget/ScrollState {

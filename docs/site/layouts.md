@@ -38,7 +38,9 @@ class Summary(private val items: List<String>) : MeasurableWidget {
 
 `writeLine` writes a `String` or a `Line` and advances; `newLine` leaves a blank row;
 `write(column, text, row = …)` places text at a column, on the current row unless you
-name an earlier one; `writer.width` is the available width. Place a child with
+name an earlier one; `writer.width` is the available width. `write` and `writeLine`
+return the `Point` where the text ended, as Ratatui's `Buffer::set_line` does, so the next
+piece can follow it: `writer.write(label.x + 1, value)`. Place a child with
 `writer.draw(child)`; never call a child's `write` yourself, since it would write into
 your rows instead of its own. A child wider than `writer.width`, such as a large
 `fixedSize` drawing, makes your widget that wide too, so a viewport can scroll to it; text
