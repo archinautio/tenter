@@ -54,6 +54,22 @@ internal class ContentLayout(
         fun build(width: Int, height: Int): ContentLayout = ContentLayout(width, height, instructions.toList())
     }
 
+    /**
+     * This layout resized to [width] by [height]: content past the new edges is clipped, and
+     * decorations stretch to the new area. A raw widget keeps the size it was given.
+     */
+    fun fitTo(width: Int, height: Int): ContentLayout {
+        if (width == this.width && height == this.height) return this
+        val fitted = instructions.map { instruction ->
+            if (instruction is Instruction.Raw) {
+                Instruction.Child(0, 0, ContentLayout(this.width, this.height, listOf(instruction)))
+            } else {
+                instruction
+            }
+        }
+        return ContentLayout(width, height, fitted)
+    }
+
     override fun render(canvas: Canvas) {
         canvas.clearReveal()
         paintAt(canvas) { Point(0, 0) }?.let(canvas::markReveal)

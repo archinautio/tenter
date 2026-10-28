@@ -763,6 +763,11 @@ public final class io/archinaut/tenter/widget/Paragraph : io/archinaut/tenter/wi
 	public fun write (Lio/archinaut/tenter/widget/RowWriter;)V
 }
 
+public final class io/archinaut/tenter/widget/RowKt {
+	public static final fun Row (Ljava/util/List;I)Lio/archinaut/tenter/widget/MeasurableWidget;
+	public static synthetic fun Row$default (Ljava/util/List;IILjava/lang/Object;)Lio/archinaut/tenter/widget/MeasurableWidget;
+}
+
 public final class io/archinaut/tenter/widget/RowWriter {
 	public final fun draw (Lio/archinaut/tenter/widget/MeasurableWidget;)V
 	public final fun draw (Lio/archinaut/tenter/widget/Widget;I)V

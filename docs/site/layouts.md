@@ -70,6 +70,26 @@ widgets defined earlier in that file; the widths account for the available space
 between bands. Combine the resulting columns with other content using `Stack`.
 Widths are display cells, so a wide character such as `中` occupies more than one.
 
+## Size columns with constraints
+
+`Row` places measurable widgets side by side with the same `Constraint`s as `Layout`, and
+never wraps. Use it when a column should take a share of the width rather than a fixed
+count of cells:
+
+```kotlin
+val split = Row(
+    listOf(
+        Constraint.Length(24) to list,
+        Constraint.Fill(1) to detail.block(Block(borders = Borders.LEFT, padding = Padding(left = 2))),
+    ),
+    spacing = 2,
+)
+```
+
+The row is as tall as its tallest child, and each child gets that full height, so a block's
+border reaches the bottom of the row; a left border divides a child from its neighbour.
+A child wider than its share is clipped.
+
 ## Add borders and padding
 
 A `Block` holds borders, a title, and padding, as Ratatui's `Block` does. `Block()` has
