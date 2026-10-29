@@ -5,12 +5,15 @@ package io.archinaut.tenter.widget.panel
 
 import com.github.ajalt.mordant.rendering.BorderType
 import io.archinaut.tenter.color.StandardRole
-import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.widget.MeasurableWidget
-import io.archinaut.tenter.widget.ViewportState
+import io.archinaut.tenter.screen.Padding
+import io.archinaut.tenter.screen.Rect
+import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.widget.Block
+import io.archinaut.tenter.widget.MeasurableWidget
+import io.archinaut.tenter.widget.Scrollbar
 import io.archinaut.tenter.widget.Viewport
+import io.archinaut.tenter.widget.ViewportState
 import io.archinaut.tenter.widget.block
 
 /**
@@ -20,8 +23,9 @@ import io.archinaut.tenter.widget.block
  *
  * A panel has no size: where it goes and how big it is in each mode is the host application's
  * decision, made every frame by the areas it passes to [Panels]. [borderType] picks the frame's
- * glyphs, as for [Block]. With [stickToBottom], the panel keeps its last row visible as its
- * content grows, as [ViewportState] describes.
+ * glyphs, as for [Block]. The content scrolls inside the frame, which shows scrollbar thumbs on its
+ * right and bottom borders; to follow a selection or a log's end, the content asks for it, with
+ * [io.archinaut.tenter.widget.revealed] or [io.archinaut.tenter.widget.followingEnd].
  */
 public class Panel<K : PanelId, I>(
     internal val id: K,
@@ -31,9 +35,8 @@ public class Panel<K : PanelId, I>(
     private val minimized: ((I) -> MeasurableWidget)? = null,
     private val maximized: ((I) -> MeasurableWidget)? = null,
     private val borderType: BorderType = BorderType.ROUNDED,
-    stickToBottom: Boolean = false,
 ) {
-    private val viewportState: ViewportState = ViewportState(stickToBottom = stickToBottom)
+    private val viewportState: ViewportState = ViewportState()
     private var restoreMode: PanelMode = PanelMode.NORMAL
     private var attached: Boolean = false
 
@@ -84,46 +87,50 @@ public class Panel<K : PanelId, I>(
     }
 
     /**
-     * Renders the already-built [content] into [canvas]. Building happens in [PanelSet] so the
-     * application builder runs exactly once per rendered frame.
+     * Renders the already-built [content] into [canvas] and returns what it painted, in [canvas]'s
+     * coordinates. Building happens in [PanelSet] so the application builder runs exactly once per
+     * rendered frame.
      */
     internal fun render(
         canvas: Canvas,
         content: MeasurableWidget,
         focused: Boolean,
-    ): ViewportState {
-        val candidate = viewportState.fork()
+    ): PanelLayout.Slot<K> {
         val role = if (focused) StandardRole.PANEL_BORDER_FOCUSED else StandardRole.PANEL_BORDER
-        panelViewport(content, title, badge, borderColor = role, titleColor = role, borderType = borderType)
-            .render(canvas, candidate)
-        return candidate
+        val frame = Block.bordered(
+            title = title,
+            badge = badge,
+            padding = Padding.horizontal(FRAME_PADDING),
+            borderColor = role,
+            titleColor = role,
+            borderType = borderType,
+        )
+        frame.render(canvas)
+        val viewportArea = frame.inner(canvas.area)
+        val outer = PanelLayout.Slot(id, outer = canvas.area, content = viewportArea, scroll = null, contentBounds = null)
+        if (viewportArea.isEmpty) return outer
+
+        // The spacer row belongs to the content, so it shows at rest and is reclaimed on scrolling.
+        Viewport(content.block(Block(padding = Padding(top = SPACER_ROWS)))).render(canvas.region(viewportArea), viewportState)
+        val scroll = checkNotNull(viewportState.settled) { "a drawable viewport settles" }
+        val thumbs = Style(role)
+        Scrollbar.vertical(thumbs).render(canvas.region(Rect(canvas.width - 1, viewportArea.y, 1, viewportArea.height)), scroll)
+        Scrollbar.horizontal(thumbs).render(canvas.region(Rect(viewportArea.x, canvas.height - 1, viewportArea.width, 1)), scroll)
+
+        val contentBounds = Rect(
+            viewportArea.x - scroll.offset.x,
+            viewportArea.y - scroll.offset.y + SPACER_ROWS,
+            scroll.content.width,
+            (scroll.content.height - SPACER_ROWS).coerceAtLeast(0),
+        )
+        return outer.copy(scroll = scroll, contentBounds = contentBounds)
     }
 
-    internal fun settle(candidate: ViewportState) {
-        viewportState.adopt(candidate)
+    private companion object {
+        /** Blank columns between the frame's side borders and the content. */
+        const val FRAME_PADDING = 1
+
+        /** Blank rows written above the content, under the title. */
+        const val SPACER_ROWS = 1
     }
 }
-
-/**
- * The scrolling viewport every panel renders through: a bordered frame with horizontal padding
- * around [content]. The frame's padding is fixed, but the top spacer row is written into the
- * content stream, so it shows at rest and the content reclaims it the moment it scrolls.
- */
-internal fun panelViewport(
-    content: MeasurableWidget,
-    title: String,
-    badge: String?,
-    borderColor: ColorRole = StandardRole.PANEL_BORDER,
-    titleColor: ColorRole = StandardRole.ACCENT,
-    borderType: BorderType = BorderType.ROUNDED,
-): Viewport = Viewport(
-    content.block(Block(padding = Block.PADDING.verticalEdges())),
-    block = Block.bordered(
-        title = title,
-        badge = badge,
-        padding = Block.PADDING.horizontalEdges(),
-        borderColor = borderColor,
-        titleColor = titleColor,
-        borderType = borderType,
-    ),
-)

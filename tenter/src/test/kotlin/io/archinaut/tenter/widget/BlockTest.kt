@@ -12,9 +12,8 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.color.StandardRole
-import io.archinaut.tenter.widget.panel.panelViewport
 
-/** Pixel parity for [Block]'s border, title, badge, padding, and scrollbar-thumb decoration. */
+/** Pixel parity for [Block]'s border, title, badge, and padding. */
 internal class BlockTest {
 
     private val blank: Widget = object : Widget {
@@ -195,62 +194,6 @@ internal class BlockTest {
         assertEquals("X", buffer.get(6, 4).symbol)
     }
 
-    // ── scrollbar thumbs, synchronized with a Viewport ─────────────────────────────────────────
-
-    private fun stubContent(lines: Int): MeasurableWidget = MeasurableWidget { writer ->
-        repeat(lines) { row -> writer.writeLine("line$row") }
-    }
-
-    @Test
-    fun `scrollbar block cells appear on right border only when content overflows`() {
-        val widget = panelViewport(stubContent(20), title = "T", badge = "0")
-
-        val buffer = render(widget, 30, 10, ViewportState())
-
-        // The viewport spans the whole inner height (rows 1..8) — the padding row is part of the
-        // scrollable stream, not a fixed offset — so the thumb can occupy row 1 too.
-        val thumbRange = ScrollGeometry.thumb(track = 8, contentLength = 21, viewportLength = 8, offset = 0)!!
-        for (row in 1..8) {
-            val cell = buffer.get(29, row)
-            if ((row - 1) in thumbRange) {
-                assertEquals("▐", cell.symbol, "expected thumb at row $row")
-                assertEquals(StandardRole.PANEL_BORDER, cell.style.fg)
-            } else {
-                assertEquals("│", cell.symbol, "expected border at row $row")
-            }
-        }
-    }
-
-    @Test
-    fun `no scrollbar cells when content exactly fits viewport`() {
-        val viewportHeight = 8
-        // The stream includes one extra row for the reclaimable top padding, so
-        // `viewportHeight - 1` content lines exactly fill it with no overflow.
-        val widget = panelViewport(stubContent(viewportHeight - 1), title = "T", badge = "0")
-
-        val buffer = render(widget, 30, 10, ViewportState())
-
-        for (row in 1..8) {
-            assertEquals("│", buffer.get(29, row).symbol, "expected plain border at row $row")
-        }
-    }
-
-    @Test
-    fun `scrollbar thumb uses the box's own borderColor, not a hardcoded one`() {
-        val widget = panelViewport(
-            stubContent(20),
-            title = "T",
-            badge = "0",
-            borderColor = StandardRole.PANEL_BORDER_FOCUSED,
-        )
-
-        val buffer = render(widget, 30, 10, ViewportState())
-
-        val thumbRange = ScrollGeometry.thumb(track = 8, contentLength = 21, viewportLength = 8, offset = 0)!!
-        val row = 1 + thumbRange.first
-        assertEquals(StandardRole.PANEL_BORDER_FOCUSED, buffer.get(29, row).style.fg)
-    }
-
     @Test
     fun `a plain block never draws a thumb, however tall its content`() {
         val block = Block.bordered()
@@ -258,10 +201,10 @@ internal class BlockTest {
         val canvas = Canvas.of(buffer)
 
         block.render(canvas)
-        stubContent(20).render(block.inner(canvas))
+        MeasurableWidget { writer -> repeat(20) { row -> writer.writeLine("line$row") } }.render(block.inner(canvas))
 
         for (row in 1..8) {
-            assertEquals("│", buffer.get(29, row).symbol, "expected plain border, no thumb without a Viewport")
+            assertEquals("│", buffer.get(29, row).symbol, "expected plain border: a block draws no scrollbar")
         }
     }
 

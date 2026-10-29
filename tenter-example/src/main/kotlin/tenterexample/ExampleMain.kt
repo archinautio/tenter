@@ -19,7 +19,6 @@ import io.archinaut.tenter.widget.Paragraph
 import io.archinaut.tenter.widget.ViewportState
 import io.archinaut.tenter.widget.Viewport
 import io.archinaut.tenter.widget.block
-import io.archinaut.tenter.widget.measure
 import io.archinaut.tenter.widget.revealed
 
 /**
@@ -30,13 +29,13 @@ import io.archinaut.tenter.widget.revealed
 public fun runHeadlessSmoke(): SmokeResult {
     // --8<-- [start:padding]
     val framed = Paragraph("OK").revealed().block(Block.bordered(padding = Padding.uniform(1)))
-    val size = framed.measure(8)
     // --8<-- [end:padding]
-    val framedCanvas = Canvas.offscreen(size.width, size.height)
+    val framedCanvas = Canvas.offscreen(8, 5)
     framed.render(framedCanvas)
-    check(size.height == 5 && framedCanvas.get(2, 2).symbol == "O")
+    check(framedCanvas.get(2, 2).symbol == "O")
     val followed = ViewportState()
-    Viewport(framed).render(Canvas.offscreen(size.width, 3), followed)
+    Viewport(framed).render(Canvas.offscreen(8, 3), followed)
+    check(followed.settled?.content?.height == 5) { "the block did not add its border and padding" }
     check(followed.settled?.revealed?.y == 2) { "the block lost the child's reveal" }
 
     val app = ExampleApp()

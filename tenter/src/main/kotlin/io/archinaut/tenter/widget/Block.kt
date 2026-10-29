@@ -25,7 +25,7 @@ import io.archinaut.tenter.text.CellWidth
  * its body's vertical on the sides, and its foot's corners on the bottom row.
  *
  * The single place every framed widget gets its box from — no widget should draw its own border.
- * A [Viewport] given a block paints scrollbar thumbs on it from its settled [ScrollState].
+ * A [Scrollbar] can paint over a border beside a [Viewport] rendered into [inner].
  */
 public class Block(
     private val title: String = "",
@@ -101,36 +101,6 @@ public class Block(
         }
     }
 
-    /**
-     * Draws a scrollbar thumb on the right border ([ScrollState.maxOffset]`.y > 0`) and/or bottom
-     * border (`.x > 0`), on whichever of those sides this block has a border, at the ranges [ScrollGeometry.thumb] computes from [scroll]'s settled
-     * values and this box's own viewport size — the same region [inner] gives the content.
-     */
-    internal fun drawThumbs(canvas: Canvas, scroll: ScrollState) {
-        val viewportWidth = canvas.width - insets.left - insets.right
-        val viewportHeight = canvas.height - insets.top - insets.bottom
-
-        val thumbStyle = Style(borderColor)
-
-        if (borders.right) {
-            ScrollGeometry.thumb(
-                track = viewportHeight,
-                contentLength = scroll.maxOffset.y + viewportHeight,
-                viewportLength = viewportHeight,
-                offset = scroll.offset.y,
-            )?.forEach { i -> canvas.set(canvas.width - 1, insets.top + i, Cell("▐", thumbStyle)) }
-        }
-
-        if (borders.bottom) {
-            ScrollGeometry.thumb(
-                track = viewportWidth,
-                contentLength = scroll.maxOffset.x + viewportWidth,
-                viewportLength = viewportWidth,
-                offset = scroll.offset.x,
-            )?.forEach { i -> canvas.set(insets.left + i, canvas.height - 1, Cell("▬", thumbStyle)) }
-        }
-    }
-
     public companion object {
         /** A block with all four borders. */
         public fun bordered(
@@ -141,29 +111,6 @@ public class Block(
             titleColor: ColorRole = StandardRole.ACCENT,
             borderType: BorderType = BorderType.ROUNDED,
         ): Block = Block(title, badge, Borders.ALL, padding, borderColor, titleColor, borderType)
-
-        /** One cell on each side, consumed by every bordered [Block] box. */
-        internal val BORDER: Padding = Padding.uniform(1)
-
-        /**
-         * Breathing room between the border and the content. `top = 1` is the blank spacer row
-         * under the title, uniform with the left/right padding; `bottom = 0` leaves content
-         * flush against the bottom border.
-         *
-         * The horizontal padding is frame — fixed for a scrolling panel's lifetime — but [top]
-         * is NOT: it is prepended to the content stream (see [io.archinaut.tenter.widget.panel.Panel]) rather than baked
-         * into the viewport, so it is visible at rest and the content reclaims its row the moment
-         * the user scrolls.
-         */
-        internal val PADDING: Padding = Padding(left = 1, top = 1, right = 1)
-
-        /**
-         * A scrolling panel's viewport: border plus the horizontal padding, at full inner height.
-         * Deliberately not public: a caller translating a screen click into content-stream
-         * coordinates asks [io.archinaut.tenter.widget.panel.PanelSet.hitTest], which reads the completed frame's own
-         * geometry, rather than re-deriving it from this constant and a scroll offset.
-         */
-        internal val VIEWPORT_INSET: Padding = BORDER + PADDING.horizontalEdges()
     }
 }
 
@@ -182,7 +129,7 @@ public fun MeasurableWidget.block(block: Block): MeasurableWidget {
             val width = checkedAdd(checkedAdd(child.width, insets.left, BLOCK_SIZE), insets.right, BLOCK_SIZE)
             val height = checkedAdd(checkedAdd(child.height, insets.top, BLOCK_SIZE), insets.bottom, BLOCK_SIZE)
             return contentLayout(width, height) {
-                decorate(block)
+                paint(block)
                 place(insets.left, insets.top, child)
             }
         }

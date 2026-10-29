@@ -19,9 +19,9 @@ import io.archinaut.tenter.widget.StatefulWidget
  * coordinates, like the rectangles [io.archinaut.tenter.screen.Layout] splits from the frame's
  * area, and are clipped to the canvas this widget renders into.
  *
- * Managed offsets and hit geometry publish together only after every panel paints successfully.
- * A failed frame retains queued scrolling intent; application callbacks and canvas writes are
- * not rolled back, so discard the failed frame's canvas.
+ * Each panel's viewport settles as it paints; [PanelSet.layout] is published once every panel has
+ * painted. A failed frame keeps the previous layout and rolls nothing back, so discard its canvas;
+ * the next frame resolves every panel again.
  */
 public class Panels<K : PanelId, I>(
     private val inputs: I,

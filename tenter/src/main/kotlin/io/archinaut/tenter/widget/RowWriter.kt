@@ -38,7 +38,8 @@ public class RowWriter internal constructor(
         val layout = content.prepare(width)
         builder.place(0, row, layout)
         occupiedWidth = maxOf(occupiedWidth, layout.width)
-        repeat(layout.height) { newLine() }
+        row = checkedAdd(row, layout.height, "written height")
+        occupy(row)
     }
 
     /**

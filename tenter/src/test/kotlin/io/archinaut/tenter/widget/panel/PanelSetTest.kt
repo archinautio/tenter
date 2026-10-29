@@ -18,6 +18,7 @@ import io.archinaut.tenter.widget.MeasurableWidget
 import io.archinaut.tenter.widget.Paragraph
 import io.archinaut.tenter.widget.revealed
 import io.archinaut.tenter.widget.fixedSize
+import io.archinaut.tenter.widget.followingEnd
 import io.archinaut.tenter.widget.Widget
 
 private enum class SetPanelId : PanelId { MAIN, A, B }
@@ -25,15 +26,14 @@ private enum class SetPanelId : PanelId { MAIN, A, B }
 internal class PanelSetTest {
 
     @Test
-    fun `a panel stuck to the bottom follows its growing content`() {
+    fun `a panel whose content follows its end follows its growing content`() {
         var rows = 50
         val set = PanelSet(
             listOf(
                 Panel<SetPanelId, Unit>(
                     SetPanelId.A,
                     "A",
-                    normal = { MeasurableWidget { writer -> repeat(rows) { writer.writeLine("row$it") } } },
-                    stickToBottom = true,
+                    normal = { MeasurableWidget { writer -> repeat(rows) { writer.writeLine("row$it") } }.followingEnd() },
                 ),
             ),
         )
@@ -134,7 +134,7 @@ internal class PanelSetTest {
     }
 
     @Test
-    fun `failed later paint retains all offsets and queued scrolling and recenter until retry`() {
+    fun `a failed later paint keeps the published layout and the failed panel's queued scrolling`() {
         var fail = false
         val a = Panel<SetPanelId, Unit>(SetPanelId.A, "A", normal = {
             MeasurableWidget { writer ->

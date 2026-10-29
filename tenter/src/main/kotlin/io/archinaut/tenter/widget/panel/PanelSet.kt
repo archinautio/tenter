@@ -6,9 +6,7 @@ package io.archinaut.tenter.widget.panel
 import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Rect
-import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.MeasurableWidget
-import io.archinaut.tenter.widget.ViewportState
 
 /**
  * The state of one screen's stateful panels, which the [Panels] widget renders. It owns focus and
@@ -100,21 +98,13 @@ public class PanelSet<K : PanelId, I>(panels: List<Panel<K, I>>) {
     /**
      * Resolves frame coordinate ([x], [y]) against the last completed frame; where panels overlap,
      * the last-painted one wins. Border and padding hits identify the panel but have no content
-     * point; a content point is translated through the settled offset and the scrolling panel's
-     * reclaimable top spacer.
+     * point; a content point is in the panel content's own coordinates, as it was painted.
      */
     public fun hitTest(x: Int, y: Int): PanelHit<K>? {
         val slot = layout?.panelAt(x, y) ?: return null
-        val scroll = slot.scroll ?: return PanelHit(slot.id, null)
-        if (!slot.content.contains(x, y)) return PanelHit(slot.id, null)
-
-        val contentX = x - slot.content.x + scroll.offset.x
-        val contentY = y - slot.content.y + scroll.offset.y - Block.PADDING.verticalEdges().top
-        val contentHeight = scroll.content.height - Block.PADDING.verticalEdges().top
-        if (contentX !in 0 until scroll.content.width || contentY !in 0 until contentHeight) {
-            return PanelHit(slot.id, null)
-        }
-        return PanelHit(slot.id, Point(contentX, contentY))
+        val bounds = slot.contentBounds
+        if (bounds == null || !slot.content.contains(x, y) || !bounds.contains(x, y)) return PanelHit(slot.id, null)
+        return PanelHit(slot.id, Point(x - bounds.x, y - bounds.y))
     }
 
     /**
@@ -136,26 +126,10 @@ public class PanelSet<K : PanelId, I>(panels: List<Panel<K, I>>) {
         val slots = areas.map { (id, area) ->
             // Clipped to the canvas, so the published geometry is exactly what was painted.
             val local = area.offset(-origin.x, -origin.y).clipTo(canvas.area)
-            PanelLayout.slot(id, local)
+            val painted = panelFor(id).render(canvas.region(local), contents.getValue(id), focused = id == focusedId)
+            painted.offset(local.x + origin.x, local.y + origin.y)
         }
-        val candidates = slots.associate { slot ->
-            slot.id to panelFor(slot.id).render(
-                canvas.region(slot.outer),
-                contents.getValue(slot.id),
-                focused = slot.id == focusedId,
-            )
-        }
-        candidates.forEach { (id, candidate) -> panelFor(id).settle(candidate) }
-        layout = PanelLayout(
-            slots.map { slot ->
-                val drawable = !slot.content.isEmpty
-                slot.copy(
-                    outer = slot.outer.offset(origin.x, origin.y),
-                    content = slot.content.offset(origin.x, origin.y),
-                    scroll = if (drawable) candidates.getValue(slot.id).settled else null,
-                )
-            },
-        )
+        layout = PanelLayout(slots)
     }
 
     /**

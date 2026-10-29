@@ -5,7 +5,6 @@ package io.archinaut.tenter.widget.panel
 
 import java.util.Collections
 import io.archinaut.tenter.screen.Rect
-import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.ScrollState
 
 /**
@@ -25,17 +24,23 @@ public class PanelLayout<K : PanelId> internal constructor(slots: List<Slot<K>>)
         public val content: Rect,
         /** The settled viewport observation, or null when this slot had no drawable frame. */
         public val scroll: ScrollState?,
-    )
+        /**
+         * Where the panel's content lay in this frame, extending past [content] where it is
+         * scrolled out of view, or null when this slot had no drawable frame.
+         */
+        public val contentBounds: Rect?,
+    ) {
+        /** This slot moved by ([dx], [dy]). */
+        internal fun offset(dx: Int, dy: Int): Slot<K> = copy(
+            outer = outer.offset(dx, dy),
+            content = content.offset(dx, dy),
+            contentBounds = contentBounds?.offset(dx, dy),
+        )
+    }
 
     /** The slot for [id], or null when that panel was not rendered in this frame. */
     public fun slotOf(id: K): Slot<K>? = slots.firstOrNull { it.id == id }
 
     /** The last-painted panel whose outer rectangle contains ([x], [y]), or null. */
     internal fun panelAt(x: Int, y: Int): Slot<K>? = slots.lastOrNull { it.outer.contains(x, y) }
-
-    internal companion object {
-        /** A slot for a panel painted into [outer], before its viewport has settled. */
-        fun <K : PanelId> slot(id: K, outer: Rect): Slot<K> =
-            Slot(id = id, outer = outer, content = outer.inner(Block.VIEWPORT_INSET), scroll = null)
-    }
 }

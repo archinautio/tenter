@@ -20,26 +20,25 @@ internal class RowWriterTest {
     private fun paint(width: Int, height: Int, block: (RowWriter) -> Unit): Canvas =
         Canvas.offscreen(width, height).also { MeasurableWidget(block).render(it) }
 
+    /** The area the content [block] writes at [width] asks to keep visible, or null when it makes no request. */
+    private fun requested(width: Int, block: (RowWriter) -> Unit): Rect? = MeasurableWidget(block).prepare(width).request()?.area
+
     @Test
     fun `child insertion retains the last nonempty visible reveal`() {
         val cases = listOf(
             EmptyWidget.fixedSize(4, 1) to Rect(0, 0, 4, 1),
             EmptyWidget.fixedSize(0, 0) to Rect(0, 0, 4, 1),
             Paragraph("child").revealed() to Rect(0, 1, 4, 1),
-            object : Widget {
-                override fun render(canvas: Canvas) { canvas.markReveal(Rect(-2, 0, 3, 1)) }
-            }.fixedSize(4, 1) to Rect(0, 1, 1, 1),
-            object : Widget {
-                override fun render(canvas: Canvas) { canvas.markReveal(Rect(8, 0, 1, 1)) }
-            }.fixedSize(4, 1) to Rect(0, 0, 4, 1),
+            EmptyWidget.fixedSize(4, 1).revealed(Rect(-2, 0, 3, 1)) to Rect(0, 1, 1, 1),
+            EmptyWidget.fixedSize(4, 1).revealed(Rect(8, 0, 1, 1)) to Rect(0, 0, 4, 1),
         )
         for ((child, expected) in cases) {
-            val canvas = paint(4, 3) { writer ->
+            val requested = requested(4) { writer ->
                 writer.draw(Paragraph("parent").revealed())
                 writer.draw(child)
             }
 
-            assertEquals(expected, canvas.revealRect())
+            assertEquals(expected, requested)
         }
     }
 
@@ -50,7 +49,7 @@ internal class RowWriterTest {
         val written = MeasurableWidget { it.writeLine("list"); it.draw(wide) }.measure(10)
 
         assertEquals(Size(30, 3), written)
-        assertEquals(Stack(listOf(wide), gutter = 0).measure(10).width, written.width)
+        assertEquals(Stack(listOf(wide), spacing = 0).measure(10).width, written.width)
     }
 
     @Test
@@ -162,13 +161,13 @@ internal class RowWriterTest {
 
     @Test
     fun `a revealed child asks to keep all of its rows visible`() {
-        val canvas = paint(4, 4) { writer ->
+        val requested = requested(4) { writer ->
             writer.writeLine("top")
             writer.draw(Paragraph("a\nb").revealed())
             writer.writeLine("end")
         }
 
-        assertEquals(Rect(0, 1, 4, 2), canvas.revealRect())
+        assertEquals(Rect(0, 1, 4, 2), requested)
     }
 
     @Test
@@ -177,8 +176,6 @@ internal class RowWriterTest {
             writer.draw(Paragraph("a").revealed())
             writer.writeLine("b")
         }
-        val canvas = paint(4, 3) { writer -> writer.draw(inner.revealed()) }
-
-        assertEquals(Rect(0, 0, 4, 2), canvas.revealRect())
+        assertEquals(Rect(0, 0, 4, 2), requested(4) { writer -> writer.draw(inner.revealed()) })
     }
 }

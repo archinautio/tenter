@@ -4,36 +4,17 @@
 package io.archinaut.tenter.widget
 
 /**
- * Stacks [children] top to bottom, each at its measured height, with [gutter] blank rows between
+ * Stacks [children] top to bottom, each at its measured height, with [spacing] blank rows between
  * them. Give a plain widget a size with [fixedSize] to stack it.
  */
 @Suppress("FunctionName") // A factory named like the widget it builds, as Kotlin's List() is.
-public fun Stack(children: List<MeasurableWidget>, gutter: Int = 1): MeasurableWidget {
-    require(gutter >= 0) { "gutter must not be negative: $gutter" }
-    return StackLayout(children.toList(), gutter)
-}
-
-private class StackLayout(
-    private val children: List<MeasurableWidget>,
-    private val gutter: Int,
-) : LayoutWidget {
-
-    override fun layout(availableWidth: Int): ContentLayout {
-        val prepared = children.map { child ->
-            child.prepare(availableWidth)
-        }
-        val width = prepared.maxOfOrNull { it.width } ?: 0
-        val height = prepared.foldIndexed(0) { index, total, child ->
-            val withChild = checkedAdd(total, child.height, "stack height")
-            if (index < prepared.lastIndex) checkedAdd(withChild, gutter, "stack height") else withChild
-        }
-        return contentLayout(width, height) {
-            var row = 0
-            prepared.forEachIndexed { index, child ->
-                place(0, row, child)
-                row = checkedAdd(row, child.height, "stack placement")
-                if (index < prepared.lastIndex) row = checkedAdd(row, gutter, "stack placement")
-            }
+public fun Stack(children: List<MeasurableWidget>, spacing: Int = 1): MeasurableWidget {
+    require(spacing >= 0) { "spacing must not be negative: $spacing" }
+    val stacked = children.toList()
+    return MeasurableWidget { writer ->
+        stacked.forEachIndexed { index, child ->
+            if (index > 0) repeat(spacing) { writer.newLine() }
+            writer.draw(child)
         }
     }
 }

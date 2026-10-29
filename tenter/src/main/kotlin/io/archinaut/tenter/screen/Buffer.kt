@@ -20,13 +20,9 @@ internal class Buffer(
     // Declared after `init` so its size checks report before Rect's own.
     private val area: Rect = Rect(0, 0, width, height)
 
-    /** The reveal rect last marked via [Canvas.markReveal], in this buffer's own absolute coords. */
-    internal var reveal: Rect? = null
-
-    /** Blanks every cell to [Cell.EMPTY] and drops any reveal request, so the buffer can be redrawn from scratch. */
+    /** Blanks every cell to [Cell.EMPTY], so the buffer can be redrawn from scratch. */
     fun reset() {
         for (row in cells) row.fill(EMPTY_STORED)
-        reveal = null
     }
 
     fun get(x: Int, y: Int): Cell {
@@ -90,12 +86,6 @@ internal class Buffer(
         return copy
     }
 
-    /** A defensive copy, for a reader that writes back into this same buffer while iterating. */
-    internal fun snapshotCells(): Array<Array<StoredCell>> = Array(height) { y -> cells[y].copyOf() }
-
-    /** Direct read access for a reader whose writes land in a different buffer. */
-    internal fun cellRows(): Array<Array<StoredCell>> = cells
-
     internal fun glyphStart(x: Int, y: Int): Int = if (cells[y][x].continuation) x - 1 else x
 
     internal fun glyphEndExclusive(x: Int, y: Int): Int {
@@ -151,7 +141,7 @@ internal class Buffer(
 
     private fun Cell.toStoredGlyph(): StoredCell {
         if (symbol.isEmpty()) return StoredCell(Cell(" ", style), width = 1, continuation = false)
-        // Every cell of every blit and every cluster of every setString reaches this method, and
+        // Every cell and every cluster of every setString reaches this method, and
         // full grapheme segmentation allocates a matcher, a sequence and a builder per call. A
         // lone printable ASCII character is unambiguously one cluster one cell wide, which is what
         // the vast majority of painted cells are.

@@ -208,15 +208,6 @@ internal class CanvasTest {
     }
 
     @Test
-    fun `reveal intersection does not retain hidden columns`() {
-        val canvas = Canvas.offscreen(10, 1)
-
-        canvas.markReveal(Rect(-2, 0, 5, 1))
-
-        assertEquals(Rect(0, 0, 3, 1), canvas.revealRect())
-    }
-
-    @Test
     fun `inset composes across nesting and clamps to zero rather than negative`() {
         val canvas = Canvas.offscreen(10, 10)
 
@@ -279,98 +270,6 @@ internal class CanvasTest {
     }
 
     @Test
-    fun `blit copies cell char fg and bg from source to destination`() {
-        val src = Canvas.offscreen(5, 5)
-        src.set(1, 2, Cell("X", Style(StandardRole.DANGER, StandardRole.INFO)))
-        val dest = Canvas.offscreen(10, 10)
-
-        dest.blit(src.region(Rect(1, 2, 1, 1)), 3, 4)
-
-        assertEquals(Cell("X", Style(StandardRole.DANGER, StandardRole.INFO)), dest.get(3, 4))
-    }
-
-    @Test
-    fun `blit clips at destination right and bottom edges`() {
-        val src = Canvas.offscreen(5, 5)
-        src.set(0, 0, Cell("A", Style(StandardRole.SUCCESS)))
-        src.set(1, 0, Cell("B", Style(StandardRole.SUCCESS)))
-        src.set(2, 0, Cell("C", Style(StandardRole.SUCCESS)))
-        val dest = Canvas.offscreen(4, 4)
-
-        dest.blit(src.region(Rect(0, 0, 3, 1)), 3, 0)
-
-        assertEquals(Cell("A", Style(StandardRole.SUCCESS)), dest.get(3, 0))
-        assertEquals(Cell(), dest.get(2, 0))
-    }
-
-    @Test
-    fun `blit of a source region larger than its canvas copies only the canvas`() {
-        val src = Canvas.offscreen(2, 2)
-        src.set(0, 0, Cell("Z", Style(StandardRole.ACCENT)))
-        val dest = Canvas.offscreen(10, 10)
-
-        dest.blit(src.region(Rect(0, 0, 5, 5)))
-
-        assertEquals(Cell("Z", Style(StandardRole.ACCENT)), dest.get(0, 0))
-        assertEquals(Cell(), dest.get(2, 0))
-        assertEquals(Cell(), dest.get(0, 2))
-    }
-
-    @Test
-    fun `blit into a sub-region never writes past that region's own edge`() {
-        val buffer = Buffer(10, 1)
-        val src = Canvas.offscreen(5, 1)
-        src.set(0, 0, Cell("A"))
-        src.set(1, 0, Cell("B"))
-        src.set(2, 0, Cell("C"))
-        val dest = Canvas.of(buffer).region(Rect(0, 0, 2, 1)) // narrower than the 3-cell blit
-
-        dest.blit(src.region(Rect(0, 0, 3, 1)))
-
-        assertEquals(Cell(), buffer.get(2, 0), "must not leak past the 2-wide dest canvas")
-    }
-
-    @Test
-    fun `blit never copies only half of a wide glyph`() {
-        val source = Canvas.offscreen(3, 1)
-        source.setString(0, 0, "中")
-        val destination = Canvas.offscreen(3, 1)
-
-        destination.blit(source.region(Rect(0, 0, 1, 1)))
-
-        assertEquals(Cell(), destination.get(0, 0))
-        assertEquals(Cell(), destination.get(1, 0))
-    }
-
-    @Test
-    fun `overlapping horizontal and vertical blits use their original source`() {
-        val horizontal = Canvas.offscreen(4, 1)
-        horizontal.setString(0, 0, "ABCD")
-        horizontal.blit(horizontal.region(Rect(0, 0, 3, 1)), 1, 0)
-
-        val vertical = Canvas.offscreen(3, 3)
-        vertical.setString(0, 0, "ABC")
-        vertical.setString(0, 1, "DEF")
-        vertical.blit(vertical.region(Rect(0, 0, 3, 2)), 0, 1)
-
-        assertEquals("AABC", (0 until 4).joinToString("") { horizontal.get(it, 0).symbol })
-        assertEquals("ABC", (0 until 3).joinToString("") { vertical.get(it, 1).symbol })
-        assertEquals("DEF", (0 until 3).joinToString("") { vertical.get(it, 2).symbol })
-    }
-
-    @Test
-    fun `two regions over one buffer overlap, so their blit still reads original source`() {
-        // Distinct Canvas objects, one backing buffer: the shifted copy would read cells this same
-        // blit has already overwritten unless overlap is detected by buffer, not by canvas identity.
-        val canvas = Canvas.offscreen(6, 1)
-        canvas.setString(0, 0, "ABCDEF")
-
-        canvas.region(Rect(1, 0, 5, 1)).blit(canvas.region(Rect(0, 0, 5, 1)))
-
-        assertEquals("AABCDE", (0 until 6).joinToString("") { canvas.get(it, 0).symbol })
-    }
-
-    @Test
     fun `a window keeps a negative origin and writes only where it overlaps its parent`() {
         val buffer = Buffer(6, 2)
         val parent = Canvas.of(buffer).region(Rect(1, 0, 4, 2))
@@ -392,16 +291,5 @@ internal class CanvasTest {
 
         assertEquals(Cell(" ", Style(fg = StandardRole.ACCENT)), canvas.get(0, 0))
         assertEquals("x", canvas.get(1, 0).symbol)
-    }
-
-    @Test
-    fun `blit into a window copies only its visible part`() {
-        val source = Canvas.offscreen(3, 3)
-        (0 until 3).forEach { row -> source.setString(0, row, "$row$row$row") }
-        val canvas = Canvas.offscreen(3, 1)
-
-        canvas.window(Rect(0, -1, 3, 3)).blit(source)
-
-        assertEquals("111", (0 until 3).joinToString("") { canvas.get(it, 0).symbol })
     }
 }

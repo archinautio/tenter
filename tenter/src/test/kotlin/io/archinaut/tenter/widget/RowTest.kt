@@ -49,7 +49,7 @@ internal class RowTest {
     }
 
     @Test
-    fun `a child wider than its width is clipped to it`() {
+    fun `a child wider than its width widens its segment and pushes the next ones right`() {
         val wide = object : Widget {
             override fun render(canvas: Canvas) {
                 canvas.setString(0, 0, "XXXXXX")
@@ -57,7 +57,8 @@ internal class RowTest {
         }.fixedSize(6, 1)
         val row = Row(listOf(Length(2) to wide, Fill(1) to filled("B")))
 
-        assertEquals("XXBBB", render(row, 5, 1).line(0))
+        assertEquals(Size(9, 1), row.measure(5))
+        assertEquals("XXXXXXBBB", render(row, 9, 1).line(0))
     }
 
     @Test
@@ -67,11 +68,8 @@ internal class RowTest {
             writer.draw(Paragraph("R").revealed())
         }
         val row = Row(listOf(Length(3) to filled("A"), Fill(1) to revealing))
-        val canvas = Canvas.offscreen(8, 2)
 
-        row.render(canvas)
-
-        assertEquals(Rect(3, 1, 5, 1), canvas.revealRect())
+        assertEquals(Rect(3, 1, 5, 1), row.prepare(8).request()?.area)
     }
 
     @Test

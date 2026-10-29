@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.screen.Point
+import io.archinaut.tenter.screen.Rect
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -36,7 +36,7 @@ internal class ViewportTest {
 
     @Test
     fun `explicit offset shifts visible window`() {
-        val state = ViewportState(Point(0, 3))
+        val state = ViewportState().apply { scrollBy(0, 3) }
         val buffer = Buffer(viewportWidth, viewportHeight)
         val viewport = Viewport(content(20))
         viewport.render(Canvas.of(buffer), state)
@@ -47,7 +47,7 @@ internal class ViewportTest {
 
     @Test
     fun `prepared layout reaches rows beyond the old measurement ceiling`() {
-        val state = ViewportState(Point(0, 999))
+        val state = ViewportState().apply { scrollBy(0, 999) }
         val viewport = Viewport(content(600))
         viewport.render(Canvas.offscreen(viewportWidth, viewportHeight), state)
 
@@ -122,37 +122,8 @@ internal class ViewportTest {
     }
 
     @Test
-    fun `a block stays fixed around the scrolling content`() {
-        val state = ViewportState(Point(0, 5))
-
-        val buffer = render(Viewport(content(20), block = Block.bordered(title = "LOG")), 12, 5, state)
-
-        assertEquals("╭── LOG ───╮", buffer.line(0))
-        assertEquals("│line5", buffer.line(1, width = 6))
-        assertEquals(5, state.frame().offset.y)
-    }
-
-    @Test
-    fun `thumbs are painted only on sides that have a border`() {
-        val state = ViewportState()
-        val openRight = Block(borders = Borders.LEFT + Borders.TOP + Borders.BOTTOM)
-
-        val buffer = render(Viewport(content(20), block = openRight), 10, 5, state)
-
-        assertEquals(0, (0 until 5).count { buffer.get(9, it).symbol == "▐" })
-        assertEquals(19 - 2, state.frame().maxOffset.y)
-    }
-
-    @Test
-    fun `a bordered block paints the vertical thumb on its right border`() {
-        val buffer = render(Viewport(content(20), block = Block.bordered()), 10, 5, ViewportState())
-
-        assertTrue((1 until 4).any { buffer.get(9, it).symbol == "▐" })
-    }
-
-    @Test
     fun `a block on the content scrolls away with it`() {
-        val state = ViewportState(Point(0, 1))
+        val state = ViewportState().apply { scrollBy(0, 1) }
 
         val buffer = render(Viewport(content(5).block(Block.bordered())), 10, 3, state)
 
@@ -160,38 +131,64 @@ internal class ViewportTest {
     }
 
     @Test
-    fun `a state stuck to the bottom keeps the last row visible as content grows`() {
-        val state = ViewportState(stickToBottom = true)
+    fun `content following its end keeps the last row visible as it grows`() {
+        val state = ViewportState()
 
-        Viewport(content(20)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        Viewport(content(20).followingEnd()).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
         assertEquals(12, state.frame().offset.y)
-        Viewport(content(30)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        Viewport(content(30).followingEnd()).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
 
         assertEquals(22, state.frame().offset.y)
     }
 
     @Test
-    fun `scrolling up stops sticking to the bottom and scrolling back resumes it`() {
-        val state = ViewportState(stickToBottom = true)
-        Viewport(content(20)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+    fun `scrolling up stops following the end and scrolling back resumes it`() {
+        val state = ViewportState()
+        Viewport(content(20).followingEnd()).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
 
         state.scrollBy(0, -5)
-        Viewport(content(30)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        Viewport(content(30).followingEnd()).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
         assertEquals(7, state.frame().offset.y)
 
         state.scrollBy(0, 100)
-        Viewport(content(30)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
-        Viewport(content(40)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        Viewport(content(30).followingEnd()).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+        Viewport(content(40).followingEnd()).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
         assertEquals(32, state.frame().offset.y)
     }
 
     @Test
-    fun `without sticking to the bottom growing content keeps the offset`() {
+    fun `content not following its end keeps the offset as it grows`() {
         val state = ViewportState()
 
         Viewport(content(20)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
         Viewport(content(30)).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
 
         assertEquals(0, state.frame().offset.y)
+    }
+
+    @Test
+    fun `a plain widget reveals the area it is given`() {
+        val state = ViewportState()
+
+        Viewport(EmptyWidget.fixedSize(10, 40).revealed(Rect(0, 30, 2, 2))).render(Canvas.offscreen(viewportWidth, viewportHeight), state)
+
+        assertEquals(24, state.frame().offset.y)
+        assertEquals(Rect(0, 30, 2, 2), state.frame().revealed)
+    }
+
+    @Test
+    fun `a plain widget is painted once per frame, straight into the viewport`() {
+        val painted = mutableListOf<Int>()
+        val tall = object : Widget {
+            override fun render(canvas: Canvas) {
+                painted += canvas.height
+            }
+        }
+        val state = ViewportState().apply { scrollBy(0, 5) }
+
+        val buffer = render(Viewport(tall.fixedSize(4, 40)), 4, 3, state)
+
+        assertEquals(listOf(40), painted)
+        assertEquals(3, buffer.height)
     }
 }

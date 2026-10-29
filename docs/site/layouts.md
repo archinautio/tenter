@@ -2,7 +2,7 @@
 
 Tenter has two kinds of widget. A `Widget` paints into whatever area it is given, as in
 Ratatui. A `MeasurableWidget` can also measure its height for a width before painting,
-so it can be stacked, placed in columns, and scrolled.
+so it can be stacked, placed side by side, and scrolled.
 
 ## Show text
 
@@ -45,36 +45,30 @@ piece can follow it: `writer.write(label.x + 1, value)`. Place a child with
 your rows instead of its own. Paint a plain `Widget` across the full width with
 `writer.draw(widget, height)`. A child wider than `writer.width`, such as a large
 `fixedSize` drawing, makes your widget that wide too, so a viewport can scroll to it; text
-past the edge is clipped instead. `widget.measure(width)` returns the `Size` content takes.
+past the edge is clipped instead.
 
 ## Stack content vertically
 
-Use `Stack(listOf(first, second))` to place measurable widgets one below another. The example's
+Use `Stack(listOf(first, second))` to place measurable widgets one below another, with
+`spacing` blank rows between them. The example's
 [help panel](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt)
 combines a `KeyHelp` with text showing the selected row and checked count.
 A plain `Widget` cannot measure itself; to stack one, give it a size with
 `widget.fixedSize(width, height)`.
 
-## Arrange columns
+## Place content side by side
 
-Give each `Column` a width in terminal cells and a `MeasurableWidget`. This excerpt
-from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
+`Row` places measurable widgets side by side with the same `Constraint`s as `Layout`, and
+never wraps. This excerpt from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
 places selection markers beside rows. `markerColumn` and `rowColumn` are measurable
-widgets defined earlier in that file; the widths account for the available space.
+widgets defined earlier in that file; the rows take whatever width the markers leave.
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt:columns"
 ```
 
-`gutter` separates columns. Columns that wrap into another band have a blank row
-between bands. Combine the resulting columns with other content using `Stack`.
-Widths are display cells, so a wide character such as `中` occupies more than one.
-
-## Size columns with constraints
-
-`Row` places measurable widgets side by side with the same `Constraint`s as `Layout`, and
-never wraps. Use it when a column should take a share of the width rather than a fixed
-count of cells:
+`spacing` separates the children. Widths are display cells, so a wide character such as
+`中` occupies more than one. A detail pane beside a list is a row too:
 
 ```kotlin
 val split = Row(
@@ -88,7 +82,26 @@ val split = Row(
 
 The row is as tall as its tallest child, and each child gets that full height, so a block's
 border reaches the bottom of the row; a left border divides a child from its neighbour.
-A child wider than its share is clipped.
+Composites never clip: a child measured wider than its share, such as a `fixedSize` drawing,
+widens it and pushes the later children right, so a viewport can scroll to it. Only a
+viewport clips.
+
+## Flow content into bands
+
+`Flow` lays children out at declared widths and wraps to a new band when the next one does
+not fit, as text flows. Each band is a `Row`, and bands are stacked with a blank row between
+them; a child wider than the available space keeps its width alone in its band:
+
+```kotlin
+val sheet = Flow(
+    listOf(
+        Constraint.Length(30) to summary,
+        Constraint.Length(24) to equipment,
+        Constraint.Length(40) to diagram,
+    ),
+    spacing = 2,
+)
+```
 
 ## Add borders and padding
 
@@ -98,8 +111,8 @@ such as `Borders.TOP` for a titled divider, and their glyphs with `borderType`, 
 Mordant's `BorderType` sets. A block without borders adds padding alone.
 
 Surround measurable content with a block using `.block(...)`. The result is still
-measurable. This excerpt frames a label in a bordered block with one cell of padding,
-then measures it for an available width of eight cells:
+measurable: eight cells wide, it is five rows tall. This excerpt frames a label in a
+bordered block with one cell of padding:
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt:padding"
@@ -169,5 +182,6 @@ A viewport paints only the rows and children inside its window, so painting cost
 the visible area, not the content length. Preparation still records all logical
 content, so very long content uses proportionally more memory and preparation time;
 limit or page the application data you prepare when working with large datasets.
-A plain widget given a size with `fixedSize` is painted in full once per frame wherever it is
-placed, because its reveal request is only known after it paints.
+A plain widget given a size with `fixedSize` is painted once per frame, straight into the
+visible window. It makes no visibility request of its own; declare one where you give it
+its size, such as `board.fixedSize(w, h).revealed(cursorArea)`.

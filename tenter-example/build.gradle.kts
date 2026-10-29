@@ -95,7 +95,7 @@ val rejectRawComposition = tasks.register<Exec>("rejectRawComposition") {
     doLast {
         val diagnostics = standardOutput.toString()
         check(executionResult.get().exitValue != 0) { "Raw composition unexpectedly compiled" }
-        for (fixture in listOf("RawStack.kt", "RawColumns.kt")) {
+        for (fixture in listOf("RawStack.kt", "RawFlow.kt")) {
             check(diagnostics.lineSequence().any {
                 fixture in it && "Argument type mismatch" in it && "MeasurableWidget" in it
             }) { "Missing expected type rejection for $fixture:\n$diagnostics" }

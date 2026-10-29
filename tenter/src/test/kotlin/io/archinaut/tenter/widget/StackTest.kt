@@ -24,22 +24,22 @@ internal class StackTest {
     }
 
     @Test
-    fun `stacks two children top to bottom, gutter-separated`() {
-        val stack = Stack(listOf(block(4, 2, "A"), block(4, 2, "B")), gutter = 1)
+    fun `stacks two children top to bottom, spacing-separated`() {
+        val stack = Stack(listOf(block(4, 2, "A"), block(4, 2, "B")), spacing = 1)
 
         val buffer = render(stack, width = 4)
 
         assertEquals("AAAA", buffer.line(0, width = 4))
         assertEquals("AAAA", buffer.line(1, width = 4))
         assertEquals("", buffer.line(2, width = 4))
-        // Second child starts one row below the first child's measured height (2 + gutter 1 = 3).
+        // Second child starts one row below the first child's measured height (2 + spacing 1 = 3).
         assertEquals("BBBB", buffer.line(3, width = 4))
         assertEquals("BBBB", buffer.line(4, width = 4))
     }
 
     @Test
     fun `each child is placed by its own measured height, not a fixed slot`() {
-        val stack = Stack(listOf(block(4, 3, "A"), block(4, 1, "B")), gutter = 0)
+        val stack = Stack(listOf(block(4, 3, "A"), block(4, 1, "B")), spacing = 0)
 
         val buffer = render(stack, width = 4)
 
@@ -49,7 +49,7 @@ internal class StackTest {
 
     @Test
     fun `a child past the bottom of the canvas is skipped`() {
-        val stack = Stack(listOf(block(4, 5, "A"), block(4, 5, "B"), block(4, 5, "C")), gutter = 0)
+        val stack = Stack(listOf(block(4, 5, "A"), block(4, 5, "B"), block(4, 5, "C")), spacing = 0)
 
         val buffer = render(stack, width = 4, height = 10)
 
@@ -66,7 +66,7 @@ internal class StackTest {
 
     @Test
     fun `a child taller than what remains is clipped, not stretched`() {
-        val stack = Stack(listOf(block(4, 8, "A"), block(4, 8, "B")), gutter = 0)
+        val stack = Stack(listOf(block(4, 8, "A"), block(4, 8, "B")), spacing = 0)
 
         val buffer = render(stack, width = 4, height = 10)
 

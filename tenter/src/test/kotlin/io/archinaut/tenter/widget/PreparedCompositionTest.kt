@@ -3,11 +3,9 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.screen.Point
+import io.archinaut.tenter.screen.Constraint
 import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.screen.Rect
-
-
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -22,9 +20,7 @@ internal class PreparedCompositionTest {
     @Test
     fun `width-only resize follows a fixed reveal and unchanged dimensions retain manual scroll`() {
         val state = ViewportState()
-        val viewport = Viewport(object : Widget {
-            override fun render(canvas: Canvas) { canvas.markReveal(Rect(15, 0, 1, 1)) }
-        }.fixedSize(30, 1))
+        val viewport = Viewport(EmptyWidget.fixedSize(30, 1).revealed(Rect(15, 0, 1, 1)))
         viewport.render(Canvas.offscreen(20, 2), state)
 
         viewport.render(Canvas.offscreen(10, 2), state)
@@ -38,13 +34,13 @@ internal class PreparedCompositionTest {
     }
 
     @Test
-    fun `stack uses logical child heights and no trailing gutter`() {
+    fun `stack uses logical child heights and no trailing spacing`() {
         val stack = Stack(
             listOf(
                 MeasurableWidget { it.writeLine("A"); it.newLine() },
                 MeasurableWidget { it.writeLine("B") },
             ),
-            gutter = 2,
+            spacing = 2,
         )
 
         val layout = stack.prepare(4)
@@ -55,14 +51,14 @@ internal class PreparedCompositionTest {
     }
 
     @Test
-    fun `columns wraps by declared widths and logical heights`() {
-        val columns = Columns(
+    fun `flow wraps by declared widths and logical heights`() {
+        val columns = Flow(
             listOf(
-                Column(4, MeasurableWidget { it.writeLine("AAAA"); it.newLine() }),
-                Column(4, MeasurableWidget { it.writeLine("BBBB") }),
-                Column(4, MeasurableWidget { it.writeLine("CCCC") }),
+                Constraint.Length(4) to MeasurableWidget { it.writeLine("AAAA"); it.newLine() },
+                Constraint.Length(4) to MeasurableWidget { it.writeLine("BBBB") },
+                Constraint.Length(4) to MeasurableWidget { it.writeLine("CCCC") },
             ),
-            gutter = 1,
+            spacing = 1,
         )
 
         val layout = columns.prepare(9)
@@ -92,10 +88,8 @@ internal class PreparedCompositionTest {
 
     @Test
     fun `negative composition sizes are rejected`() {
-        assertThrows<IllegalArgumentException> { Stack(emptyList(), gutter = -1) }
-        assertThrows<IllegalArgumentException> {
-            Columns(listOf(Column(-1, MeasurableWidget { })))
-        }
+        assertThrows<IllegalArgumentException> { Stack(emptyList(), spacing = -1) }
+        assertThrows<IllegalArgumentException> { Flow(emptyList(), spacing = -1) }
         assertThrows<IllegalArgumentException> {
             io.archinaut.tenter.screen.Padding(left = -1)
         }
@@ -189,7 +183,7 @@ internal class PreparedCompositionTest {
                 canvas.set(12, 5, Cell("X"))
             }
         }.fixedSize(20, 10)
-        val state = ViewportState(Point(10, 4))
+        val state = ViewportState().apply { scrollBy(10, 4) }
         val viewport = Viewport(fixed)
         val buffer = Buffer(10, 4)
 
@@ -220,13 +214,9 @@ internal class PreparedCompositionTest {
     @Test
     fun `prepared and fixed reveal targets follow composition order`() {
         val prepared = contentLayout(10, 1) {
-            reveal(Rect(0, 0, 10, 1))
+            request(VisibilityRequest.Reveal(Rect(0, 0, 10, 1)))
         }
-        val fixed = object : Widget {
-            override fun render(canvas: Canvas) {
-                canvas.markReveal(Rect(0, 0, 10, 1))
-            }
-        }.fixedSize(10, 1).prepare(10)
+        val fixed = EmptyWidget.fixedSize(10, 1).revealed().prepare(10)
         val fixedLast = object : LayoutWidget {
             override fun layout(availableWidth: Int): ContentLayout = contentLayout(10, 20) {
                 place(0, 0, prepared)
@@ -253,7 +243,7 @@ internal class PreparedCompositionTest {
     fun `a reveal request survives block padding and is the target followed`() {
         val content = object : LayoutWidget {
             override fun layout(availableWidth: Int): ContentLayout = contentLayout(availableWidth, 20) {
-                reveal(Rect(0, 2, availableWidth, 1))
+                request(VisibilityRequest.Reveal(Rect(0, 2, availableWidth, 1)))
             }
         }
         val state = ViewportState()

@@ -3,8 +3,10 @@
 
 package tenterexample.negative
 
-import io.archinaut.tenter.widget.Column
+import io.archinaut.tenter.screen.Constraint
+import io.archinaut.tenter.widget.Flow
+import io.archinaut.tenter.widget.MeasurableWidget
 import io.archinaut.tenter.widget.Widget
 
 // Deliberate negative fixture: this directory is excluded from ordinary source sets.
-public fun rawColumn(raw: Widget): Column = Column(10, raw)
+public fun rawFlow(raw: Widget): MeasurableWidget = Flow(listOf(Constraint.Length(10) to raw))

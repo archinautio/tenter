@@ -13,7 +13,13 @@ internal fun Screen.renderBuffer(buffer: Buffer): CompletedFrame {
     return draw { frame ->
         frame.renderWidget(
             object : Widget {
-                override fun render(canvas: Canvas) = canvas.blit(Canvas.of(buffer))
+                override fun render(canvas: Canvas) {
+                    for (y in 0 until buffer.height) {
+                        for (x in 0 until buffer.width) {
+                            if (buffer.glyphStart(x, y) == x) canvas.set(x, y, buffer.get(x, y))
+                        }
+                    }
+                }
             },
             frame.area,
         )

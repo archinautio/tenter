@@ -49,9 +49,16 @@ corresponding implementation; do not maintain a second description here:
   application places each rendered panel in a rectangle every frame, typically split with
   `Layout` from its `PanelSet.modeOf`. Do not reintroduce panel widths, layout factories, or a
   library-chosen arrangement. Keep mode-specific options out of the common render operation.
-- Propagate reveal requests through composites such as `Stack`, `Columns`, and `.block()`,
-  and resolve them before the actual viewport paint. Commit managed viewport state and hit geometry together
-  only after all panels paint successfully. Expose no provisional or second settled-state read path.
+- Drawing flows one way: sizes and visibility requests (`revealed`, `followingEnd`) travel up only
+  as data in prepared layouts, through composites such as `Stack`, `Row`, `Flow`, and `.block()`;
+  offsets travel down. Never route a request through the canvas or its buffer, and never let a
+  plain widget's paint decide one. Composites never clip; only `Viewport` does.
+- Keep scrolling responsibilities apart: `ViewportState` chooses where a frame scrolls to,
+  `ScrollTarget` computes the offset, `Viewport` measures and paints, `Scrollbar` shows the
+  settled position, and `Block` draws chrome only. A panel composes them and records the
+  geometry it painted, so hit testing reads the completed frame instead of re-deriving insets.
+- Each viewport settles as it paints; `PanelSet` publishes hit geometry once every panel has
+  painted. Expose no provisional or second settled-state read path.
 - Share complete grapheme segmentation and display-width rules across text, wrapping,
   truncation, styled spans, and widgets. Cover combining marks, variation selectors,
   ZWJ sequences, flags, keycaps, decomposed accents, CJK, and supplementary characters.

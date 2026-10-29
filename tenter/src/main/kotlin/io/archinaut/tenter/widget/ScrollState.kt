@@ -10,7 +10,8 @@ import io.archinaut.tenter.screen.Size
 /**
  * An immutable observation of a completed viewport frame, in cells: the [offset] shown and the
  * largest one possible, the [viewport] it was shown in, the measured [content], and the reveal
- * request followed, in content coordinates.
+ * area the content asked to keep visible, in content coordinates, whether or not this frame
+ * followed it.
  */
 public data class ScrollState(
     public val offset: Point,

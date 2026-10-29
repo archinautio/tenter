@@ -6,28 +6,44 @@
 of the scrollable area and render the viewport with it on every frame:
 `frame.renderStatefulWidget(Viewport(content), area, state)`. To move down one row,
 call `state.scrollBy(dx = 0, dy = 1)` and draw again. Negative deltas move up or left.
-Give the viewport a `block` to frame it:
-`Viewport(content, block = Block.bordered(title = "LOG"))` keeps the border fixed while
-the content scrolls, and paints scrollbar thumbs on its right and bottom borders. To make
-a border scroll away with the content instead, put it on the content:
-`Viewport(content.block(Block.bordered()))`.
+
+A viewport draws no chrome. As in Ratatui, compose the frame yourself: render a `Block`, the
+viewport into `block.inner(area)`, and then a `Scrollbar` over the border beside it, from the
+settled state:
+
+```kotlin
+val block = Block.bordered(title = "LOG")
+frame.renderWidget(block, area)
+val inner = block.inner(area)
+frame.renderStatefulWidget(Viewport(content), inner, state)
+state.settled?.let { scroll ->
+    val track = Rect(area.x + area.width - 1, inner.y, 1, inner.height)
+    frame.renderStatefulWidget(Scrollbar.vertical(), track, scroll)
+}
+```
+
+The border stays fixed while the content scrolls. To make a border scroll away with the
+content instead, put it on the content: `Viewport(content.block(Block.bordered()))`.
 
 After rendering, `state.settled` describes the completed frame, including its scroll
 offset. It is initially null. Keep the state between frames; recreating it resets
-scrolling. A changed reveal target or either viewport dimension re-engages following;
-unchanged dimensions and targets preserve manual scrolling. Use `requestRecenter()` to center the content's current reveal target on
-the next drawable frame.
+scrolling.
 
-Mark the content to follow with `.revealed()`, such as the selected item:
-`writer.draw(if (selected) item.revealed() else item)`. When several requests are
-made, the last one wins. For a log, create the state with
-`ViewportState(stickToBottom = true)`, or pass `stickToBottom = true` to a `Panel`: the
-viewport keeps the last row visible as content grows, stops when the user scrolls up, and
-resumes once they scroll back to the bottom.
+The content says what it wants kept visible; the viewport decides when to follow it:
+
+- `.revealed()` asks to keep a widget visible, such as the selected item:
+  `writer.draw(if (selected) item.revealed() else item)`. `.revealed(area)` asks for part of
+  it, such as the cursor in a `fixedSize` map. A changed target or either viewport dimension
+  re-engages following; unchanged dimensions and targets preserve manual scrolling.
+- `.followingEnd()` keeps a log's last row visible as it grows. Scrolling up stops it, and
+  scrolling back to the end resumes it.
+
+When several requests are made, the last one wins. Use `requestRecenter()` to center the
+content's current request on the next drawable frame.
 
 ## Create a panel layout
 
-Panels combine content with a title, border, and scrolling. Keep one `PanelSet` for
+Panels combine content with a title, border, scrollbars, and scrolling. Keep one `PanelSet` for
 the screen's lifetime: it is the state of the `Panels` widget, which you render each
 frame with your current application state.
 
@@ -105,8 +121,9 @@ See [input and resizing](input.md) for collecting events and repainting.
 
 ## Recover from a failed render
 
-If a panel fails to paint, the set keeps its previous completed layout and scroll
-observations, along with queued scrolling and recenter requests for retry. When the
-failure escapes `terminal.draw`, the terminal sends nothing and keeps the previous
-frame as its diff base. Side effects in application callbacks are not rolled back.
-Published layout lists are immutable observations.
+If a panel fails to paint, the set keeps its previous completed layout, so hit tests and
+paging still read the last frame that finished. Panels painted before the failure keep the
+offsets they settled on; the failed panel and those after it keep their queued scrolling and
+recenter requests for retry. When the failure escapes `terminal.draw`, the terminal sends
+nothing and keeps the previous frame as its diff base. Side effects in application
+callbacks are not rolled back. Published layout lists are immutable observations.

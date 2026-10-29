@@ -4,7 +4,6 @@
 package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Point
-import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 
 /**
@@ -12,76 +11,48 @@ import io.archinaut.tenter.screen.Size
  * are queued until a drawable frame; they never rewrite [settled]. A state belongs to one
  * viewport and is confined to the application's rendering context.
  *
- * With [stickToBottom], the viewport keeps its last row visible as the content grows, as a log
- * does. Scrolling up stops that; scrolling back to the bottom resumes it. A changed reveal target
- * is still followed first.
+ * The state chooses where each frame scrolls to: the queued offset, unless the content's
+ * visibility request (see [revealed] and [followingEnd]) is to be followed this frame.
  */
-public class ViewportState(
-    initialOffset: Point = Point.ORIGIN,
-    private val stickToBottom: Boolean = false,
-) {
+public class ViewportState {
 
-    /**
-     * Every value a frame carries forward, in one immutable record. [fork] and [adopt] copy this
-     * single reference rather than field-by-field, so a value added here cannot be forgotten by
-     * one of them and go stale across a managed frame.
-     */
-    private data class Carried(
-        public val requestedOffset: Point,
-        public val pendingRecenter: Boolean = false,
-        public val settled: ScrollState? = null,
-    )
+    private var requestedOffset: Point = Point.ORIGIN
 
-    private var carried: Carried = Carried(initialOffset)
+    /** How the next frame places the content's request, overriding its own follow rule; `null` when nothing is queued. */
+    private var pendingPlacement: Placement? = null
 
     /** The last completed drawable frame, or `null` before the first such frame. */
-    public val settled: ScrollState? get() = carried.settled
-
-    /** Stages a managed frame without consuming the owner's queued intent. */
-    internal fun fork(): ViewportState = ViewportState(stickToBottom = stickToBottom).also { it.carried = carried }
-
-    internal fun adopt(candidate: ViewportState) {
-        carried = candidate.carried
-    }
+    public var settled: ScrollState? = null
+        private set
 
     /** Queues a relative scroll request for the next drawable frame. */
     public fun scrollBy(dx: Int, dy: Int) {
-        carried = carried.copy(
-            requestedOffset = Point(
-                saturatingAdd(carried.requestedOffset.x, dx),
-                saturatingAdd(carried.requestedOffset.y, dy),
-            ),
+        requestedOffset = Point(
+            saturatingAdd(requestedOffset.x, dx),
+            saturatingAdd(requestedOffset.y, dy),
         )
     }
 
-    /** Queues a one-shot request to center the current reveal target on the next frame. */
+    /** Queues a one-shot request to center the content's current visibility request on the next frame. */
     public fun requestRecenter() {
-        carried = carried.copy(pendingRecenter = true)
+        pendingPlacement = Placement.CENTER
     }
 
-    internal fun requestedOffset(): Point = carried.requestedOffset
-
-    internal fun shouldFollow(reveal: Rect?, viewport: Size): Boolean {
-        if (reveal == null) return false
-        val previous = carried.settled ?: return true
-        return reveal != previous.revealed || viewport != previous.viewport
+    /** Where this frame scrolls to for content making [request], shown in [viewport]. */
+    internal fun targets(request: VisibilityRequest?, viewport: Size): ScrollTargets {
+        val keep = ScrollTargets.keep(requestedOffset)
+        if (request == null) return keep
+        val placement = pendingPlacement
+            ?: Placement.FOLLOW.takeIf { request.isFollowed(settled, requestedOffset, viewport) }
+            ?: return keep
+        return request.targets(requestedOffset, placement)
     }
 
-    internal fun recenterRequested(): Boolean = carried.pendingRecenter
-
-    /** Whether this frame should show the content's last row: at the bottom before, and not scrolled up since. */
-    internal fun stuckToBottom(): Boolean {
-        if (!stickToBottom) return false
-        val previous = carried.settled ?: return true
-        return carried.requestedOffset.y >= previous.maxOffset.y
-    }
-
+    /** Records [snapshot] as the completed frame; the next frame starts from its offset. */
     internal fun settle(snapshot: ScrollState) {
-        carried = Carried(
-            requestedOffset = snapshot.offset,
-            pendingRecenter = false,
-            settled = snapshot,
-        )
+        requestedOffset = snapshot.offset
+        pendingPlacement = null
+        settled = snapshot
     }
 
     private fun saturatingAdd(left: Int, right: Int): Int =

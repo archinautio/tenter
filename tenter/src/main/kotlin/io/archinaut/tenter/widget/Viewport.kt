@@ -9,100 +9,37 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 
 /**
- * Scrolls a [MeasurableWidget], painting only the part inside the viewport. The caller owns the
+ * Scrolls a [MeasurableWidget] across the whole canvas, painting only the part inside it. It is
+ * the only widget that clips content: composites grow to fit what they hold. The caller owns the
  * [ViewportState] and passes it to every render; read the completed frame from
  * [ViewportState.settled].
  *
- * With a [block], the viewport draws it around the scrolling area, keeps it fixed while the
- * content scrolls, and paints scrollbar thumbs on its right and bottom borders. To make a border
- * scroll away with the content instead, put it on the content: `Viewport(content.block(b))`.
+ * A viewport draws no chrome. Frame it by rendering a [Block] and then the viewport into
+ * [Block.inner], and show its position with a [Scrollbar] rendered from the settled state.
  */
-public class Viewport(
-    private val content: MeasurableWidget,
-    private val block: Block? = null,
-) : StatefulWidget<ViewportState> {
+public class Viewport(private val content: MeasurableWidget) : StatefulWidget<ViewportState> {
 
     override fun render(canvas: Canvas, state: ViewportState) {
-        if (block == null) {
-            drawPrepared(canvas, state)
-            return
-        }
-        block.render(canvas)
-        drawPrepared(block.inner(canvas), state)
-        // Thumbs need the settled offset, so they are painted after the content.
-        state.settled?.let { block.drawThumbs(canvas, it) }
-    }
-
-    private fun drawPrepared(canvas: Canvas, viewportState: ViewportState) {
         if (canvas.width <= 0 || canvas.height <= 0) return
 
         val layout = content.prepare(canvas.width)
-        val maxOffsetX = (layout.width - canvas.width).coerceAtLeast(0)
-        val maxOffsetY = (layout.height - canvas.height).coerceAtLeast(0)
-        var offset = Point.ORIGIN
-        // The offset depends on the reveal request, so the layout resolves it first and paints
-        // only the rows and children inside the window, shifted by the resolved offset.
-        val revealed = layout.paintAt(canvas) { reveal ->
-            offset = resolveOffset(viewportState, reveal, canvas.width, canvas.height, maxOffsetX, maxOffsetY)
-            Point(-offset.x, -offset.y)
-        }
+        val viewport = Size(canvas.width, canvas.height)
+        val maxOffset = Point(
+            (layout.width - canvas.width).coerceAtLeast(0),
+            (layout.height - canvas.height).coerceAtLeast(0),
+        )
+        val request = layout.request()
+        val offset = state.targets(request, viewport).offset(viewport, maxOffset)
+        layout.paint(canvas.window(Rect(-offset.x, -offset.y, layout.width, layout.height)))
 
-        viewportState.settle(
+        state.settle(
             ScrollState(
                 offset = offset,
-                maxOffset = Point(maxOffsetX, maxOffsetY),
-                viewport = Size(canvas.width, canvas.height),
+                maxOffset = maxOffset,
+                viewport = viewport,
                 content = Size(layout.width, layout.height),
-                revealed = revealed,
+                revealed = request?.area,
             ),
         )
-    }
-
-    private fun resolveOffset(
-        viewportState: ViewportState,
-        reveal: Rect?,
-        viewportWidth: Int,
-        viewportHeight: Int,
-        maxOffsetX: Int,
-        maxOffsetY: Int,
-    ): Point {
-        val follow = viewportState.shouldFollow(reveal, Size(viewportWidth, viewportHeight))
-        val base = viewportState.requestedOffset()
-        val recenter = viewportState.recenterRequested()
-        val stuck = viewportState.stuckToBottom()
-        val offsetX = resolveAxis(
-            base = base.x,
-            revealRange = reveal?.let { it.x to it.x + it.width },
-            viewportSize = viewportWidth,
-            maxOffset = maxOffsetX,
-            shouldFollow = follow,
-            recenter = recenter,
-            stuckToEnd = false,
-        )
-        val offsetY = resolveAxis(
-            base = base.y,
-            revealRange = reveal?.let { it.y to it.y + it.height },
-            viewportSize = viewportHeight,
-            maxOffset = maxOffsetY,
-            shouldFollow = follow,
-            recenter = recenter,
-            stuckToEnd = stuck,
-        )
-        return Point(offsetX, offsetY)
-    }
-
-    private fun resolveAxis(
-        base: Int,
-        revealRange: Pair<Int, Int>?,
-        viewportSize: Int,
-        maxOffset: Int,
-        shouldFollow: Boolean,
-        recenter: Boolean,
-        stuckToEnd: Boolean,
-    ): Int = when {
-        revealRange != null && recenter -> ScrollGeometry.center(revealRange.first, revealRange.second, viewportSize, maxOffset)
-        revealRange != null && shouldFollow -> ScrollGeometry.follow(base, revealRange.first, revealRange.second, viewportSize, maxOffset)
-        stuckToEnd -> maxOffset
-        else -> base.coerceIn(0, maxOffset)
     }
 }
