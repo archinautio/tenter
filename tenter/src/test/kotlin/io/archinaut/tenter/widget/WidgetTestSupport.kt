@@ -5,6 +5,7 @@ package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Buffer
+import io.archinaut.tenter.screen.Size
 
 /** Renders [widget] into a fresh [width]x[height] buffer and returns it for assertions. */
 internal fun render(widget: Widget, width: Int, height: Int): Buffer {
@@ -18,6 +19,12 @@ internal fun <S> render(widget: StatefulWidget<S>, width: Int, height: Int, stat
     val buffer = Buffer(width, height)
     widget.render(Canvas.of(buffer), state)
     return buffer
+}
+
+/** This widget's size at [width]. */
+internal fun MeasurableWidget.measure(width: Int): Size {
+    val layout = prepare(width)
+    return Size(layout.width, layout.height)
 }
 
 /** Row [y], columns [x] until [x] + [width], right-trimmed. */

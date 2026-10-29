@@ -9,15 +9,10 @@ import kotlin.time.Duration.Companion.ZERO
 import io.archinaut.tenter.widget.Widget
 
 /**
- * Samples a finite collection of animations against elapsed monotonic time.
- *
- * Playback owns the timeline only. It does not own a clock, a terminal, or the application data
- * carried by each [Clip]. Sampling is pure: a caller may sample the same elapsed time repeatedly,
- * or sample times out of order. The input list and each animation's metadata are copied at
- * construction, so later mutation cannot change the timeline or its original ordering. A clip is
- * visible exactly while `startAfter <= elapsed < startAfter + frameDuration * frameCount`; its
- * frame zero is visible at the exact start and it is absent at the exact end. Construction and
- * sampling reject invalid or non-finite timeline values with [IllegalArgumentException].
+ * The timeline of a finite set of animations, sampled at elapsed time; it owns no clock. Sampling
+ * is pure, so any time may be sampled in any order. A clip is visible exactly while
+ * `startAfter <= elapsed < startAfter + frameDuration * frameCount`. The clips are copied when it
+ * is built, and invalid or non-finite times throw [IllegalArgumentException].
  */
 public class AnimationPlayback<T>(clips: List<Clip<T>>) {
     private val timelines: List<Timeline<T>> = clips.map(::Timeline)
@@ -37,22 +32,15 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
     )
 
     /**
-     * The visible frames at a sampled time and the next positive timeline transition.
-     *
-     * A non-null [nextChangeIn] is the shortest positive delay until a pending clip starts, a
-     * visible clip changes frame, or a visible clip ends. It is null only when every clip has
-     * finished, including an empty playback. Therefore an empty [frames] list with a non-null
-     * delay represents a gap before a future clip starts.
+     * The visible frames at a sampled time, and [nextChangeIn], the delay until a clip starts,
+     * changes frame, or ends, or null once every clip has finished.
      */
     public data class Sample<T>(
         public val frames: List<VisibleFrame<T>>,
         public val nextChangeIn: Duration?,
     )
 
-    /**
-     * Samples all clips at [elapsed], omitting clips that have not started or have finished.
-     * At an exact start this returns frame zero; at an exact end the clip is omitted.
-     */
+    /** The clips visible at [elapsed]. */
     public fun sample(elapsed: Duration): Sample<T> {
         require(elapsed.isFinite() && elapsed >= ZERO) {
             "elapsed must be finite and non-negative, was $elapsed"

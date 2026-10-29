@@ -6,13 +6,8 @@ package io.archinaut.tenter.screen
 import io.archinaut.tenter.text.textClusters
 
 /**
- * A rectangular, clipped, origin-translated region of a [Buffer]. All coordinates
- * passed to its methods are LOCAL: `(0, 0)` is this region's own top-left corner. Writes
- * outside `0 until width` / `0 until height` are silently dropped, so a widget rendering into a
- * [Canvas] cannot touch a sibling's cells — even by mistake.
- *
- * [inner] and [region] derive smaller canvases by [Rect.clipTo], so nesting can only
- * ever narrow: a child can't widen its way back out to a wider rect than it started with.
+ * A clipped region of a [Buffer] in local coordinates, `(0, 0)` being its top-left corner. Writes
+ * outside it are dropped, and the canvases derived from it can only be narrower.
  */
 public class Canvas private constructor(
     private val buffer: Buffer,
@@ -29,7 +24,7 @@ public class Canvas private constructor(
 
     public val height: Int get() = bounds.height
 
-    /** This canvas in its own local coordinates: always `Rect(0, 0, width, height)`. Split it with [Layout]. */
+    /** This canvas in its own coordinates: `Rect(0, 0, width, height)`. */
     public val area: Rect = Rect(0, 0, bounds.width, bounds.height)
 
     /** This canvas's top-left corner in its buffer's absolute (frame) coordinates. */
@@ -38,20 +33,15 @@ public class Canvas private constructor(
     /** The part of [area] this canvas can actually write, in local coordinates. */
     internal val visibleArea: Rect get() = clip.offset(-bounds.x, -bounds.y)
 
-    /**
-     * The intersection of [rect] with this canvas — e.g. a [Layout] split of [area], or a rectangle a
-     * completed frame publishes (see [io.archinaut.tenter.widget.panel.PanelLayout]).
-     */
+    /** The part of this canvas inside [rect]. */
     public fun region(rect: Rect): Canvas = narrowed(rect.clipTo(area))
 
-    /** The region left after removing [padding] from each edge, clamped to never go negative. */
+    /** This canvas without [padding] on each edge. */
     public fun inner(padding: Padding): Canvas = narrowed(area.inner(padding))
 
     /**
-     * A canvas whose local `(0, 0)` is this canvas's local ([rect].x, [rect].y) — either of which
-     * may be negative — with [rect]'s logical size, writing only where [rect] overlaps this canvas.
-     * Unlike [region], the origin is never moved to stay inside this canvas, so content can be
-     * painted shifted by a scroll offset or placed partly outside its parent.
+     * A canvas of [rect]'s size whose origin is at [rect], even partly outside this canvas, writing
+     * only where the two overlap; unlike [region], it can paint content shifted by a scroll offset.
      */
     internal fun window(rect: Rect): Canvas {
         val absolute = rect.toAbsolute()
@@ -78,11 +68,7 @@ public class Canvas private constructor(
         buffer.writeCell(bounds.x + x, bounds.y + y, cell, clip)
     }
 
-    /**
-     * Writes [text] from ([x], [y]), one cell per column a glyph occupies; cells outside this canvas
-     * are skipped. Returns where the text ended: the column after it, on row [y], so the next piece
-     * can follow it.
-     */
+    /** Writes [text] from ([x], [y]), skipping cells outside this canvas, and returns the point after it. */
     public fun setString(
         x: Int,
         y: Int,
@@ -114,7 +100,7 @@ public class Canvas private constructor(
         /** A canvas over the whole of [buffer]. */
         internal fun of(buffer: Buffer): Canvas = Canvas(buffer, Rect(0, 0, buffer.width, buffer.height))
 
-        /** A detached canvas over its own backing buffer — for measuring or scrolling content off-screen. */
+        /** A detached canvas over its own buffer, for rendering a widget off-screen. */
         public fun offscreen(width: Int, height: Int): Canvas = of(Buffer(width, height))
     }
 }

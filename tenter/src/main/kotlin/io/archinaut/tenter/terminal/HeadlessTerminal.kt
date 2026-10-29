@@ -13,12 +13,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 /**
- * A [Terminal] that never touches a real one, for tests and headless rendering; create it with
- * [Terminal.headless].
- *
- * It follows a real terminal's rules: only a [Screen] draws, and nested scopes throw. It reports
- * no [colorSpace] and ignores the color scheme, since frames hold color roles, not colors. Its screen's
- * events come from the script it was created with; see [HeadlessInput].
+ * A [Terminal] that never touches a real one, created with [Terminal.headless]. It follows a real
+ * terminal's rules, reports no [colorSpace], and ignores the color scheme, since frames hold roles.
  */
 public class HeadlessTerminal internal constructor(
     width: Int,
@@ -28,11 +24,7 @@ public class HeadlessTerminal internal constructor(
 
     private val input: ScriptedInput = ScriptedInput { HeadlessInput(this).script() }
 
-    /**
-     * What this terminal shows: the latest frame a [Screen] drew, or blank cells before the first
-     * one. Entering [withScreen] blanks it, as a real terminal clears; it keeps the last frame after
-     * the scope returns, so a test reads it once the application has finished.
-     */
+    /** What this terminal shows: the latest frame drawn, blank before the first and on entering [withScreen]. */
     public var frame: CompletedFrame = CompletedFrame.blank(area.width, area.height)
         private set
 

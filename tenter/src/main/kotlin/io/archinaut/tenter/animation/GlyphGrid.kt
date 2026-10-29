@@ -11,14 +11,10 @@ import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.widget.Widget
 
 /**
- * A mutable grid of single-cell terminal glyphs with priority compositing and per-glyph styles.
- * Characters supplied to [put] and [set] must occupy exactly one terminal cell; surrogate
- * characters and zero- or two-cell characters are rejected for in-bounds writes. Out-of-bounds
- * writes are silently dropped.
- *
- * [priority] and [style] are captured for this grid's lifetime, and callers must supply functions
- * whose results remain stable for that lifetime. Build a frame by mutating the grid, then leave the
- * returned grid unchanged so that its rendering remains stable.
+ * A mutable grid of one-cell glyphs with priority compositing and per-glyph styles, for building
+ * animation frames. In-bounds writes reject characters that are not exactly one cell wide;
+ * out-of-bounds writes are dropped. [priority] and [style] must give stable results, and a
+ * finished frame must not be mutated again.
  */
 public class GlyphGrid(
     public val size: Size,
@@ -40,10 +36,7 @@ public class GlyphGrid(
     /** The style supplied for the glyph at ([x], [y]). */
     public fun styleAt(x: Int, y: Int): Style = style(get(x, y))
 
-    /**
-     * Writes [char] unless a strictly higher-priority glyph already occupies the cell. Equal
-     * priority writes replace the old glyph.
-     */
+    /** Writes [char] unless a higher-priority glyph occupies the cell. */
     public fun put(x: Int, y: Int, char: Char) {
         if (!inBounds(x, y)) return
         validate(char)
@@ -57,7 +50,7 @@ public class GlyphGrid(
         cells[y][x] = char
     }
 
-    /** Paints every cell, including styled spaces, into the clipped destination canvas. */
+    /** Paints every cell, including styled spaces. */
     public override fun render(canvas: Canvas) {
         for (y in 0 until height) {
             for (x in 0 until width) {

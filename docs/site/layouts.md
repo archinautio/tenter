@@ -36,23 +36,30 @@ class Summary(private val items: List<String>) : MeasurableWidget {
 }
 ```
 
-`writeLine` writes a `String` or a `Line` and advances; `newLine` leaves a blank row;
-`write(column, text, row = …)` places text at a column, on the current row unless you
-name an earlier one; `writer.width` is the available width. `write` and `writeLine`
-return the `Point` where the text ended, as Ratatui's `Buffer::set_line` does, so the next
-piece can follow it: `writer.write(label.x + 1, value)`. Place a child with
-`writer.draw(child)`; never call a child's `write` yourself, since it would write into
-your rows instead of its own. Paint a plain `Widget` across the full width with
-`writer.draw(widget, height)`. A child wider than `writer.width`, such as a large
-`fixedSize` drawing, makes your widget that wide too, so a viewport can scroll to it; text
-past the edge is clipped instead.
+A `RowWriter` offers:
+
+- `writer.width`: the available width.
+- `writeLine(text)`: writes a `String` or a `Line`, shortened to fit, and advances.
+- `writeRow(left, right)`: writes text flush left and flush right on one row, and advances.
+- `write(column, text, row = …)`: places text at a column without advancing, on the current
+  row unless you name an earlier one.
+- `newLine()`: leaves a blank row.
+- `draw(child)`: places a measurable child and advances past it. Never call a child's `write`
+  yourself, since it would write into your rows instead of its own.
+- `draw(widget, height)`: paints a plain `Widget` across the full width.
+
+`write` and `writeLine` return the `Point` where the text ended, as Ratatui's
+`Buffer::set_line` does, so the next piece can follow it: `writer.write(label.x + 1, value)`.
+
+A child wider than `writer.width`, such as a large `fixedSize` drawing, makes your widget that
+wide too, so a viewport can scroll to it. Text past the edge is clipped instead.
 
 ## Stack content vertically
 
 Use `Stack(listOf(first, second))` to place measurable widgets one below another, with
 `spacing` blank rows between them. The example's
-[help panel](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt)
-combines a `KeyHelp` with text showing the selected row and checked count.
+[details panel](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt)
+stacks the selected row's label above whether it is checked.
 A plain `Widget` cannot measure itself; to stack one, give it a size with
 `widget.fixedSize(width, height)`.
 
@@ -105,10 +112,12 @@ val sheet = Flow(
 
 ## Add borders and padding
 
-A `Block` holds borders, a title, and padding, as Ratatui's `Block` does. `Block()` has
-no border and `Block.bordered(...)` draws all four sides; choose sides with `borders`,
-such as `Borders.TOP` for a titled divider, and their glyphs with `borderType`, one of
-Mordant's `BorderType` sets. A block without borders adds padding alone.
+A `Block` holds borders, a title, and padding, as Ratatui's `Block` does:
+
+- `Block.bordered(...)` draws all four sides, and `Block()` none.
+- `borders` chooses the sides, such as `Borders.TOP` for a titled divider.
+- `borderType` chooses their glyphs, one of Mordant's `BorderType` sets.
+- A block without borders adds padding alone.
 
 Surround measurable content with a block using `.block(...)`. The result is still
 measurable: eight cells wide, it is five rows tall. This excerpt frames a label in a
@@ -178,10 +187,15 @@ color-role objects are retained rather than deep-copied. Capture stable frame da
 those widgets when you need repeatable output. `fixedSize` uses the dimensions you
 supply without painting to measure; it calls the original widget each time it paints.
 
-A viewport paints only the rows and children inside its window, so painting costs
-the visible area, not the content length. Preparation still records all logical
-content, so very long content uses proportionally more memory and preparation time;
-limit or page the application data you prepare when working with large datasets.
-A plain widget given a size with `fixedSize` is painted once per frame, straight into the
-visible window. It makes no visibility request of its own; declare one where you give it
+What costs what:
+
+- **Painting** costs the visible area, not the content length: a viewport paints only the
+  rows and children inside its window.
+- **Preparation** records all logical content, so very long content uses proportionally more
+  memory and time. Limit or page the application data you prepare for large datasets.
+- **A `fixedSize` widget** is painted once per frame, straight into the viewport's buffer. It
+  receives a canvas of its full size and writes outside the visible window are dropped, so a
+  large drawing that is costly to paint should skip what it cannot show.
+
+A `fixedSize` widget makes no visibility request of its own. Declare one where you give it
 its size, such as `board.fixedSize(w, h).revealed(cursorArea)`.

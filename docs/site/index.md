@@ -87,6 +87,7 @@ Ratatui, the names map directly:
 | `Cell`, `Style` | `Cell`, `Style` | A styled terminal cell, and its colors. |
 | `Layout`, `Constraint` | `Layout`, `Constraint` | Split a `Rect` into smaller rectangles. |
 | `Block`, `Borders`, `Padding` | `Block`, `Borders`, `Padding` | Borders with a title, and the space inside them. |
+| `Scrollbar` | `Scrollbar` | A thumb showing a viewport's position, drawn over the border beside it. |
 | `Paragraph`, `Line`, `Span` | `Paragraph`, `Line`, `Span` | Text: lines made of styled spans, shown by a paragraph widget. |
 
 Tenter adds measurable widgets (`MeasurableWidget`) for content that measures its own
@@ -94,7 +95,7 @@ height, scrolling viewports, and managed panels on top of these concepts.
 
 ## Continue with:
 
-- [Content and layouts](layouts.md): compose text, columns, padding, and borders.
+- [Content and layouts](layouts.md): compose text, side-by-side content, padding, and borders.
 - [Scrolling and panels](panels.md): show more content than fits on screen.
 - [Input and resizing](input.md): update your application in response to events.
 - [Testing](testing.md): check the frames your application draws.

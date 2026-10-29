@@ -13,13 +13,7 @@ public enum class Direction {
 }
 
 /**
- * Splits a [Rect] into adjacent segments along one axis:
- *
- * ```kotlin
- * val (header, body, footer) = Layout.vertical(Length(1), Fill(1), Length(1)).split(frame.area)
- * ```
- *
- * Resolution is integer-only and deterministic. After removing [margin] and the [spacing]
+ * Splits a [Rect] into adjacent segments along one axis, one per [Constraint]. Resolution is integer-only and deterministic. After removing [margin] and the [spacing]
  * between segments, each segment first takes its requested size: [Constraint.Length] and
  * [Constraint.Min] their value, [Constraint.Max] its maximum, [Constraint.Percentage] and
  * [Constraint.Ratio] their share of the available cells rounded down, and [Constraint.Fill]

@@ -54,20 +54,35 @@ the `Clear` widget into the popup's area first: it resets every cell there to a 
 no channel. Then render the popup into the same area:
 `frame.renderWidget(Clear, area)` followed by `frame.renderWidget(popup, area)`.
 
-For custom colors, construct `MapColorScheme` with a name, a `ColorSpace`, a
+Applications add their own roles as an enum implementing `ColorRole`, such as the colors of a
+map's terrain. A color scheme written in Kotlin can resolve both sets with an exhaustive `when`,
+so adding a role to either enum is a compile error until every color scheme handles it:
+
+```kotlin
+override fun foreground(role: ColorRole): TerminalColor = when (role) {
+    is StandardRole -> when (role) { /* every standard role */ }
+    is TerrainRole -> when (role) { /* every terrain role */ }
+    else -> error("unknown color role: $role")
+}
+```
+
+For custom colors loaded from data, construct `MapColorScheme` with a name, a `ColorSpace`, a
 `defaultBackground`, and a map from roles to `TerminalColor` values. Include every
 `StandardRole`, plus any application-specific roles. All colors must be in the
 chosen space: `Ansi16`, `Ansi256`, or `TrueColor`. To read colors from text, such as a
 theme file, use `ColorSpace.parse`.
 
-A simple customization is to start with
-`StandardRole.entries.associateWith { ColorScheme.Default.foreground(it) }`, replace
-an entry such as `StandardRole.ACCENT`, and supply that map with `ColorSpace.ANSI16`
-and `ColorScheme.Default.defaultBackground`. Pass the new color scheme as
-`terminal.withScreen(colorScheme) { ... }`. To choose a color scheme from the terminal's
-color support, read `terminal.colorSpace` before entering the scope; it is `null` when the terminal
-shows no color. A scope keeps its color scheme; to switch themes, leave the scope and
-enter it again.
+To adjust the default color scheme:
+
+1. Start from `StandardRole.entries.associateWith { ColorScheme.Default.foreground(it) }`.
+2. Replace an entry, such as `StandardRole.ACCENT`.
+3. Build a `MapColorScheme` from a name, that map, `ColorSpace.ANSI16`, and
+   `ColorScheme.Default.defaultBackground`.
+4. Pass it as `terminal.withScreen(colorScheme) { ... }`.
+
+To choose a color scheme from the terminal's color support, read `terminal.colorSpace` before
+entering the scope; it is `null` when the terminal shows no color. A scope keeps its color
+scheme, so to switch themes, leave the scope and enter it again.
 
 For a color that must not change with the theme, use a `TerminalColor` directly as
 the role, as Ratatui uses `Color::Rgb`: `Style(fg = TerminalColor.TrueColor(255, 128, 0))`.

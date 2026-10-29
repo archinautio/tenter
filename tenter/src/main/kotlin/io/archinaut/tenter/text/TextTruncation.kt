@@ -16,11 +16,7 @@ internal object TextTruncation {
         return text.substring(0, keep) + ELLIPSIS
     }
 
-    /**
-     * The exclusive code-unit index of the longest prefix of [text] fitting in [maxWidth]
-     * display cells — never inside a grapheme cluster. Shared internally with
-     * `io.archinaut.tenter.screen.Line` so it does not re-derive the rule.
-     */
+    /** The end of the longest prefix of [text] that fits in [maxWidth] cells, never inside a grapheme cluster. */
     internal fun prefixLengthWithin(text: String, maxWidth: Int): Int {
         var displayWidth = 0
         var index = 0

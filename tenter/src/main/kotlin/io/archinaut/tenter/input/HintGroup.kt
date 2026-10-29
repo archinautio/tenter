@@ -4,14 +4,9 @@
 package io.archinaut.tenter.input
 
 /**
- * One row of a help panel: a hand-written [label] for the keys (`"←→↑↓/wasd"`) and what they do.
- * Which rows exist, and that every binding is credited to one, are derived and test-enforced; only
- * the compact glyph [label] stays prose, because auto-joining eight chords reads far worse than
- * `"←→↑↓/wasd"` in the panel a user actually looks at.
- *
- * [bindingless] marks a row that documents something implemented outside the keymap — the mouse
- * wheel, which is deliberately not a binding. It is the only exemption from "every declared group
- * has at least one binding".
+ * One row of a help panel: a hand-written [label] for its keys, such as `"←→↑↓/wasd"`, and what they
+ * do. [bindingless] marks a row for something outside the key map, such as the mouse wheel, which
+ * is exempt from needing a binding.
  */
 public data class HintGroup(
     val id: String,

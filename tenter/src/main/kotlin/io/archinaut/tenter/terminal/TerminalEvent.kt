@@ -34,24 +34,15 @@ public sealed interface TerminalEvent {
 internal fun MordantTerminal.events(mouseTracking: MouseTracking): Flow<TerminalEvent> =
     merge(inputEvents(mouseTracking), resizeEvents())
 
-/**
- * Input events read in raw mode on [Dispatchers.IO].
- *
- * Mordant has no raw-mode shutdown hook for cancellation. A naive infinite-blocking `readEvent()`
- * only observes cancellation at its next `emit`, which may never come if the user stops typing —
- * leaving the terminal stuck in raw mode and the JVM unable to exit. [rawModePollingFlow] polls with
- * a short timeout and checks [isActive] between polls, so any cancellation, from any cause —
- * including the application simply stopping collection — is noticed within the poll timeout.
- */
+/** Input events read in raw mode on [Dispatchers.IO]. */
 internal fun MordantTerminal.inputEvents(mouseTracking: MouseTracking): Flow<TerminalEvent> =
     rawModePollingFlow(mouseTracking)
         .map<InputEvent, TerminalEvent> { TerminalEvent.Input(it) }
         .flowOn(Dispatchers.IO)
 
 /**
- * Enters raw mode and emits input events, polling with [pollTimeout] instead of blocking
- * indefinitely so that coroutine cancellation is observed promptly even while idle. See
- * [inputEvents] for why this matters.
+ * Enters raw mode and emits input events, polling with [pollTimeout]. A blocking read would notice
+ * cancellation only at its next event, which may never come, leaving the terminal in raw mode.
  */
 private fun MordantTerminal.rawModePollingFlow(
     mouseTracking: MouseTracking,
@@ -66,20 +57,9 @@ private fun MordantTerminal.rawModePollingFlow(
 }
 
 /**
- * A cold [TerminalEvent.Resized] flow polling [MordantTerminal.updateSize] every [period], which
- * must be finite and strictly positive. The first emission fires once at startup; later ones only
- * when the size actually changes.
- *
- * ### Mordant 3.0.2: `Size` has no `equals`
- * [com.github.ajalt.mordant.rendering.Size] is a plain class, not a data class, so it inherits
- * identity equality — and [MordantTerminal.updateSize] hands back a **fresh instance every call**.
- * Deduplicating on it would therefore never suppress anything: every poll would emit, and a
- * collector would re-render several times a second forever, indistinguishable from a real resize.
- * Each poll is therefore converted to Tenter's [Size], which compares by value, before
- * deduplicating.
- *
- * This flow intentionally has **no** [flowOn] — it runs in the collector's context so that size
- * reads can be co-located with rendering without cross-thread synchronisation.
+ * [TerminalEvent.Resized] once at startup and then on each size change, polled every positive
+ * [period]. Polls are compared as Tenter [Size]s because Mordant's `Size` compares by identity and
+ * `updateSize` returns a fresh one each time. It runs in the collector's context, beside rendering.
  */
 internal fun MordantTerminal.resizeEvents(period: Duration = 200.milliseconds): Flow<TerminalEvent> {
     require(period.isFinite() && period > Duration.ZERO) {

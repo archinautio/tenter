@@ -6,12 +6,8 @@ package io.archinaut.tenter.widget
 import io.archinaut.tenter.screen.Canvas
 
 /**
- * Resets its whole area to blank cells that set no style channel, as if nothing had been painted
- * there. Writes patch what is already painted (see [io.archinaut.tenter.screen.Style.patch]), so
- * render this first to keep a popup — a dialog, a banner — from showing what lies beneath it:
- * `frame.renderWidget(Clear, area)` then the popup into the same area.
- *
- * Like every write, it leaves whole a wide glyph that straddles the edge of its area.
+ * Resets its area to blank cells that set no style channel, so a popup rendered after it does not
+ * show what lies beneath. A wide glyph straddling its edge is left whole.
  */
 public object Clear : Widget {
     override fun render(canvas: Canvas) {

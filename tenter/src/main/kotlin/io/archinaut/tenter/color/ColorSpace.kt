@@ -3,11 +3,7 @@
 
 package io.archinaut.tenter.color
 
-/**
- * The space a [TerminalColor] is authored in, one per [TerminalColor] subtype. A [ColorScheme] picks one
- * for every role it defines, and a terminal reports the one it can show as
- * [io.archinaut.tenter.terminal.Terminal.colorSpace]. Colors are never converted between spaces.
- */
+/** The space a [TerminalColor] is authored in, one per subtype; a [ColorScheme] uses one for all its roles. */
 public enum class ColorSpace {
     /** [TerminalColor.TrueColor], written `#RRGGBB`. */
     TRUECOLOR {
@@ -29,9 +25,6 @@ public enum class ColorSpace {
     },
     ;
 
-    /**
-     * Parses [raw] as a color of this space. Throws [IllegalArgumentException] — same as the subtype
-     * constructors' own `require`s — on a malformed or out-of-range value.
-     */
+    /** Parses [raw] as a color of this space, throwing [IllegalArgumentException] when it is malformed or out of range. */
     public abstract fun parse(raw: String): TerminalColor
 }

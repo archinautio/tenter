@@ -17,15 +17,9 @@ import io.archinaut.tenter.widget.ViewportState
 import io.archinaut.tenter.widget.block
 
 /**
- * One stateful panel declaration. A panel owns its current mode, restore mode, attachment, and
- * viewport state; [PanelSet] is the only public module that may mutate those values. Each mode's
- * builder returns the panel's content for one frame.
- *
- * A panel has no size: where it goes and how big it is in each mode is the host application's
- * decision, made every frame by the areas it passes to [Panels]. [borderType] picks the frame's
- * glyphs, as for [Block]. The content scrolls inside the frame, which shows scrollbar thumbs on its
- * right and bottom borders; to follow a selection or a log's end, the content asks for it, with
- * [io.archinaut.tenter.widget.revealed] or [io.archinaut.tenter.widget.followingEnd].
+ * One panel declaration: a bordered, scrolling frame around the content its mode's builder returns
+ * each frame. It keeps its mode and scroll position, which only its [PanelSet] changes. It has no
+ * size; the application gives it an area every frame through [Panels].
  */
 public class Panel<K : PanelId, I>(
     internal val id: K,
@@ -43,14 +37,14 @@ public class Panel<K : PanelId, I>(
     internal var mode: PanelMode = PanelMode.NORMAL
         private set
 
-    /** The declared states, smallest first — what the owning set cycles. */
+    /** The declared modes, smallest first. */
     internal val modes: List<PanelMode> = listOfNotNull(
         minimized?.let { PanelMode.MINIMIZED },
         PanelMode.NORMAL,
         maximized?.let { PanelMode.MAXIMIZED },
     )
 
-    /** Steps [delta] through declared states, wrapping while preserving the restore state. */
+    /** Steps [delta] through the declared modes, wrapping, and remembers the mode a maximize left. */
     internal fun cycleMode(delta: Int) {
         val index = modes.indexOf(mode)
         val next = modes[(index + delta).mod(modes.size)]
@@ -58,7 +52,7 @@ public class Panel<K : PanelId, I>(
         mode = next
     }
 
-    /** Returns to the state this panel was maximized from. */
+    /** Returns to the mode this panel was maximized from. */
     internal fun demoteFromMaximized() {
         if (mode == PanelMode.MAXIMIZED) mode = restoreMode
     }
@@ -86,11 +80,7 @@ public class Panel<K : PanelId, I>(
         require(!attached) { "Panel $id is already attached to a PanelSet" }
     }
 
-    /**
-     * Renders the already-built [content] into [canvas] and returns what it painted, in [canvas]'s
-     * coordinates. Building happens in [PanelSet] so the application builder runs exactly once per
-     * rendered frame.
-     */
+    /** Renders [content] into [canvas] and returns what it painted, in [canvas]'s coordinates. */
     internal fun render(
         canvas: Canvas,
         content: MeasurableWidget,

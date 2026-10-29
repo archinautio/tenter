@@ -7,16 +7,7 @@ import com.lemonappdev.konsist.api.Konsist
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-/**
- * Enforces the internal layering `docs/architecture.md` describes for this module —
- * `text/input -> color -> screen -> widget -> animation/terminal`, with terminal
- * consuming input, color, screen, and widget for frame drawing and scoped lifecycle, never
- * the reverse — as an allowed-dependency matrix
- * between `tenter`'s direct child packages. [ArchitectureTest] enforces the module's *external*
- * seam (no `battletech.*` import, nothing outside an approved third-party allowlist); this
- * enforces the seams *between* its own packages, which nothing previously checked — a
- * a `io.archinaut.tenter.screen` file importing `io.archinaut.tenter.widget` passed every existing test.
- */
+/** Enforces the package layering `docs/architecture.md` describes, as an allowed-dependency matrix. */
 class LayeringTest {
 
     private val mainFiles = Konsist.scopeFromProject()

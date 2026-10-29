@@ -3,7 +3,6 @@
 
 package io.archinaut.tenter.terminal
 
-import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.color.ColorScheme
 import io.archinaut.tenter.color.ColorSpace
 import io.archinaut.tenter.screen.Buffer
@@ -17,19 +16,10 @@ import kotlinx.coroutines.flow.Flow
 import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
 /**
- * A [Terminal] that draws frames as ANSI escape sequences to a Mordant [backend], and reads its
- * input and size from it.
- *
- * Each session sends only the cells that changed since its previous frame, keeping the last
- * presented buffer as the diff base and recycling the one before it for the next draw. A full
- * repaint on every keystroke (a cursor nudge, a panel toggle) is otherwise tens of KB on a large
- * terminal. A session's first frame, and any frame after a resize, has no previous frame of its
- * size to diff against and falls back to a full repaint.
- *
- * The drawing area follows [backend]'s size: whenever Mordant reports a new size (for example after
- * [events] polls it), the next draw resizes. When the backend reports [AnsiLevel.NONE] there is no
- * [colorSpace] and every SGR tag is suppressed regardless of the color scheme, since the terminal
- * cannot render color at all.
+ * A [Terminal] that draws ANSI escape sequences to a Mordant [backend] and reads input and size
+ * from it. Each session sends only the cells that changed since its previous frame, which would
+ * otherwise be tens of KB per keystroke on a large terminal; the first frame and any frame after a
+ * resize repaint fully.
  */
 internal class AnsiTerminal(
     private val backend: MordantTerminal,
@@ -103,11 +93,7 @@ internal class AnsiTerminal(
             lifecycle.close()
         }
 
-        /**
-         * Clears the screen so the next frame repaints fully. The default style's SGR tag is emitted
-         * before `clearScreen()` (which erases using whatever SGR is currently active) so the cleared
-         * screen uses the color scheme's background immediately.
-         */
+        /** Clears the screen with the color scheme's background, since `clearScreen()` erases with the active SGR. */
         fun clear() {
             val defaultStyle = styles.tagsFor(Style.DEFAULT).open
             backend.rawPrint(defaultStyle + backend.cursor.getMoves { clearScreen(); setPosition(0, 0) })
@@ -136,11 +122,7 @@ internal class AnsiTerminal(
             backend.rawPrint(sb)
         }
 
-        /**
-         * Emits only the cells where [buffer] differs from [prev] (which must be the same size),
-         * as one or more `setPosition` + styled-span writes. Emits nothing at all if the two buffers
-         * are identical.
-         */
+        /** Emits only the cells where [buffer] differs from the same-sized [prev]. */
         private fun renderDiff(buffer: Buffer, prev: Buffer) {
             val sb = StringBuilder()
             for (y in 0 until buffer.height) {
@@ -166,17 +148,9 @@ internal class AnsiTerminal(
         }
 
         /**
-         * Appends styled text for `buffer[xStart, xEnd)` on row [y] to [sb], grouping consecutive
-         * same-style cells into runs and emitting only the ANSI tags needed at each run boundary.
-         *
-         * Closing the previous run before opening the next is skippable when both runs render the same
-         * attributes: every opening tag establishes BOTH foreground and background explicitly (even
-         * for [StandardRole.DEFAULT], which resolves to the color scheme's default surface rather than leaving
-         * a channel unset), so the next run's open tag always fully overwrites whatever the previous
-         * run set — nothing can bleed through. Only an attribute change (bold, dim, italic, underline,
-         * inverse, strikethrough) still needs the close, since attributes have no "close" bundled into
-         * every open tag the way color does. On a terminal without color every tag is [Tags.NONE], so
-         * the same logic emits no escapes at all.
+         * Appends `buffer[xStart, xEnd)` on row [y] to [sb] as same-style runs. A run is closed
+         * before the next only when attributes change: every opening tag sets both colors
+         * explicitly, so colors cannot bleed from one run into the next.
          */
         private fun renderSpan(sb: StringBuilder, buffer: Buffer, y: Int, xStart: Int, xEnd: Int) {
             var x = xStart

@@ -7,11 +7,7 @@ import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.textClusters
 
-/**
- * [text], one grapheme per row, centered horizontally in whatever width it is given — content
- * only, no border. Suits a minimized panel's stub, which [io.archinaut.tenter.widget.panel.Panels]
- * wraps in its own chrome like every other panel content.
- */
+/** [text], one grapheme per row, centered horizontally, as a minimized panel's content. */
 public class VerticalText(
     private val text: String,
     private val style: Style = Style(StandardRole.TEXT_PRIMARY),

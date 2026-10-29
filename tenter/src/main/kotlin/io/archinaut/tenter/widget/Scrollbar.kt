@@ -10,9 +10,8 @@ import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Style
 
 /**
- * A scrollbar thumb showing where a [Viewport]'s settled frame sits along one axis. The canvas is
- * the track: a vertical bar paints down its first column, a horizontal one along its first row,
- * typically over the border beside the viewport. It paints nothing while the content fits.
+ * A thumb showing where a [Viewport]'s settled frame sits along one axis, painted along the
+ * canvas's first column or row; nothing while the content fits.
  */
 public class Scrollbar private constructor(
     private val axis: Axis,
@@ -25,7 +24,6 @@ public class Scrollbar private constructor(
             ?.forEach { axis.paint(canvas, it, Cell(axis.glyph, style)) }
     }
 
-    /** One scrolling direction: how long its track is, which component of the frame it reads, and where a thumb cell goes. */
     private sealed class Axis(val glyph: String) {
         abstract fun track(canvas: Canvas): Int
 
@@ -57,16 +55,13 @@ public class Scrollbar private constructor(
     }
 
     public companion object {
-        /** A bar down the canvas's first column, for vertical scrolling. */
+        /** A bar for vertical scrolling. */
         public fun vertical(style: Style = Style(StandardRole.PANEL_BORDER)): Scrollbar = Scrollbar(Axis.Vertical, style)
 
-        /** A bar along the canvas's first row, for horizontal scrolling. */
+        /** A bar for horizontal scrolling. */
         public fun horizontal(style: Style = Style(StandardRole.PANEL_BORDER)): Scrollbar = Scrollbar(Axis.Horizontal, style)
 
-        /**
-         * The thumb's cells within a [track]-cell-long bar, or `null` when the content fits the
-         * viewport and there is no thumb. Every length is in cells along the scrolled axis.
-         */
+        /** The thumb's cells within a [track]-cell-long bar, or `null` when the content fits. */
         internal fun thumb(track: Int, contentLength: Int, viewportLength: Int, offset: Int): IntRange? {
             if (track <= 0) return null
             if (contentLength <= viewportLength) return null

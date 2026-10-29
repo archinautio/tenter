@@ -3,5 +3,5 @@
 
 package io.archinaut.tenter.widget.panel
 
-/** Stable identity for a [Panel] — a bare marker interface for the [Panel]'s [K] type parameter. */
+/** Identifies a [Panel] within its [PanelSet]. */
 public interface PanelId

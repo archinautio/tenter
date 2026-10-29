@@ -11,12 +11,9 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 
 /**
- * Runs a [script] of input once, handing each event it [send]s to whichever collection is reading
- * at the time, in step with it: [send] returns only when that collection asks for its next event.
- *
- * The script runs on [Dispatchers.Unconfined], so it starts in the first collection's thread and
- * each step resumes in the thread that asks for the next event — the application's own — and never
- * races it.
+ * Runs a [script] of input once, in step with whichever collection is reading: [send] returns only
+ * when it asks for the next event. The script runs on [Dispatchers.Unconfined], so each step
+ * resumes in the application's own thread and never races it.
  */
 internal class ScriptedInput(
     private val script: suspend () -> Unit,

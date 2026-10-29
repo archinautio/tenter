@@ -15,18 +15,8 @@ public data class Span(
 )
 
 /**
- * One line of text whose styling varies along its length: a sequence of [Span]s that measures,
- * wraps, truncates, and paints as one unit, so a caller wanting two colors on one line never
- * computes a column.
- *
- * ```
- * Line("plain")
- * Line("warning", Style(StandardRole.WARNING))
- * Line(Span("key ", Style(StandardRole.INFO)), Span("description"))
- * ```
- *
- * Spans are canonical: empty spans are dropped and adjacent same-styled spans merged, so two lines
- * that paint identically are equal — which is what makes them usable in assertions.
+ * One line of text made of styled [Span]s, measured, wrapped, truncated, and painted as a unit.
+ * Empty spans are dropped and same-styled neighbours merged, so lines that paint alike are equal.
  */
 public class Line(spans: List<Span>) {
 

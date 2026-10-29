@@ -7,25 +7,22 @@ import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Size
 
 /**
- * Mutable scrolling intent and the last immutable frame observation for one viewport. Commands
- * are queued until a drawable frame; they never rewrite [settled]. A state belongs to one
- * viewport and is confined to the application's rendering context.
- *
- * The state chooses where each frame scrolls to: the queued offset, unless the content's
- * visibility request (see [revealed] and [followingEnd]) is to be followed this frame.
+ * One viewport's queued scrolling and its last completed frame. It chooses where each frame
+ * scrolls to: the queued offset, unless the content's visibility request is followed this frame.
+ * Commands wait for a drawable frame and never change [settled].
  */
 public class ViewportState {
 
     private var requestedOffset: Point = Point.ORIGIN
 
-    /** How the next frame places the content's request, overriding its own follow rule; `null` when nothing is queued. */
+    /** A queued placement for the next frame, overriding the request's own follow rule. */
     private var pendingPlacement: Placement? = null
 
     /** The last completed drawable frame, or `null` before the first such frame. */
     public var settled: ScrollState? = null
         private set
 
-    /** Queues a relative scroll request for the next drawable frame. */
+    /** Queues scrolling by ([dx], [dy]) cells. */
     public fun scrollBy(dx: Int, dy: Int) {
         requestedOffset = Point(
             saturatingAdd(requestedOffset.x, dx),
@@ -33,7 +30,7 @@ public class ViewportState {
         )
     }
 
-    /** Queues a one-shot request to center the content's current visibility request on the next frame. */
+    /** Queues centering the content's visibility request on the next drawable frame. */
     public fun requestRecenter() {
         pendingPlacement = Placement.CENTER
     }
@@ -48,7 +45,7 @@ public class ViewportState {
         return request.targets(requestedOffset, placement)
     }
 
-    /** Records [snapshot] as the completed frame; the next frame starts from its offset. */
+    /** Records [snapshot] as the completed frame. */
     internal fun settle(snapshot: ScrollState) {
         requestedOffset = snapshot.offset
         pendingPlacement = null

@@ -9,18 +9,12 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.widget.StatefulWidget
 import io.archinaut.tenter.widget.Widget
 
-/**
- * One frame being drawn by [Screen.draw]. It is only valid inside the draw callback that
- * received it.
- *
- * Widgets render into a [Rect] of [area]; each one receives a [Canvas] clipped to the
- * intersection of that rectangle with the frame, so it cannot paint outside its own area.
- */
+/** One frame being drawn by [Screen.draw], valid only inside its callback. */
 public class Frame internal constructor(
     private val buffer: Buffer
 ) {
 
-    /** The full drawable area of this frame. Split it with [io.archinaut.tenter.screen.Layout]. */
+    /** The full drawable area of this frame. */
     public val area: Rect get() = Rect(0, 0, buffer.width, buffer.height)
 
     /** A canvas clipped to [area] within this frame. */

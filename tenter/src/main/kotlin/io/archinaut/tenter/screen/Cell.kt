@@ -9,8 +9,7 @@ public data class Cell(
     val style: Style = Style.DEFAULT,
 ) {
     public companion object {
-        /** The default, unstyled space cell — reused wherever a blank cell is needed so a fresh
-         * screen doesn't allocate a distinct identical instance per cell. */
+        /** The unstyled blank cell. */
         internal val EMPTY: Cell = Cell()
     }
 }

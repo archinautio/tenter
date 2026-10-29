@@ -8,11 +8,9 @@ import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.screen.Style
 
 /**
- * One cursor-highlightable row: a selection marker, a checkbox, [label], and optionally a
- * right-aligned [right] value. A [selected] row is highlighted and requests visibility, so an
- * enclosing [Viewport] follows it.
- * [checkboxColor] overrides the intrinsic checkbox color when the row is not selected.
- * [glyphs] selects the immutable checkbox glyph set without changing row colors.
+ * One row with a selection marker, a checkbox, [label], and an optional right-aligned [right]
+ * value. A [selected] row is highlighted and revealed. [checkboxColor] overrides the checkbox's own
+ * color while the row is not selected.
  */
 public class SelectableRow(
     private val label: String,

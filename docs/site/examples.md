@@ -10,15 +10,15 @@ tenter-example/build/install/tenter-example/bin/tenter-example
 ```
 
 On Windows use `gradlew.bat` and the launcher's `.bat` file.
-The catalog demonstrates scrolling through 600 rows, selection, checkboxes, a help
-panel, mouse handling, and resizing.
+The catalog demonstrates scrolling through 600 rows, selection, checkboxes, details,
+checked-row, and help panels, mouse handling, and resizing.
 
 | Input | Action |
 | --- | --- |
-| Up / Down | Move the selected row |
+| Up / Down | Move the selected row; with a side panel focused, scroll it a row |
 | Space | Toggle the selected row |
-| h | Focus the help panel |
-| m | Cycle the help panel's size |
+| 1 / 2 / 3 / h | Focus the catalog, details, checked, or help panel |
+| + / - | Grow or shrink the focused panel through its modes |
 | Page Up / Page Down | Scroll the focused panel |
 | Mouse wheel | Scroll the panel under the pointer |
 | Left click | Select and toggle a catalog row |
@@ -61,9 +61,12 @@ Check the [glyph choices](styling.md#choose-glyphs) and
 ## Content does not follow selection or resizing
 
 Review [viewport state and reveal following](panels.md#scroll-a-single-widget) and
-[resize handling](input.md#collect-events-and-repaint). `SelectableRow` marks its
-selected row for reveal; custom selectable content must mark its own target with
-`.revealed()`, and a log should stick to the bottom instead.
+[resize handling](input.md#collect-events-and-repaint). The content must say what to follow:
+
+- `SelectableRow` reveals its selected row by itself.
+- Custom selectable content marks its target with `.revealed()`.
+- A fixed-size drawing marks part of itself with `.revealed(area)`.
+- A log follows its end with `.followingEnd()`.
 
 ## Leaving the terminal cleanly
 

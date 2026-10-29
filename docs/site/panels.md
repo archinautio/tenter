@@ -32,9 +32,10 @@ scrolling.
 The content says what it wants kept visible; the viewport decides when to follow it:
 
 - `.revealed()` asks to keep a widget visible, such as the selected item:
-  `writer.draw(if (selected) item.revealed() else item)`. `.revealed(area)` asks for part of
-  it, such as the cursor in a `fixedSize` map. A changed target or either viewport dimension
-  re-engages following; unchanged dimensions and targets preserve manual scrolling.
+  `writer.draw(if (selected) item.revealed() else item)`.
+- `.revealed(area)` asks for part of it, such as the cursor in a `fixedSize` map.
+- A revealed target is followed again when it moves or the viewport resizes. Otherwise manual
+  scrolling stays where the user left it.
 - `.followingEnd()` keeps a log's last row visible as it grows. Scrolling up stops it, and
   scrolling back to the end resumes it.
 
@@ -57,10 +58,12 @@ items. The example's `ExampleListView` and content functions produce the display
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt:panels"
 ```
 
-Each mode's builder returns the panel's content. A panel has no size: where it goes and
-how big it is, in each mode, is your application's decision. Create the set with
-`PanelSet(listOf(rows, details, checked, help))`; focus starts on the first panel. Create fresh panels for
-independent sets: a panel instance belongs to one set.
+- Each mode's builder returns the panel's content, and runs once per rendered frame.
+- A panel has no size: where it goes and how big it is, in each mode, is your application's
+  decision.
+- Create the set with `PanelSet(listOf(rows, details, checked, help))`. Focus starts on the
+  first panel.
+- A panel instance belongs to one set, so create fresh panels for independent sets.
 
 ## Render and control panels
 
@@ -73,35 +76,51 @@ rectangle for each panel to draw, with the set as its state:
 ```
 
 Choose the rectangles every frame, usually by splitting the frame with `Layout` and picking
-each panel's `Constraint` from `panels.modeOf(id)`. Only panels you give a rectangle are drawn,
-so leaving an id out hides that panel. `MAXIMIZED` is a mode like the others: tenter tracks it
-and keeps at most one panel maximized, but you decide what it looks like, typically by giving
-that panel the whole area and leaving the others out. Rectangles are frame coordinates and are
-clipped to the area the widget renders into; where two overlap, the one later in the map paints
-over the earlier and receives hits. This example lets the catalog fill the width the
-right-hand panels leave, each at its mode's width, and gives a maximized panel the whole area:
+each panel's `Constraint` from `panels.modeOf(id)`:
+
+- Only panels you give a rectangle are drawn, so leaving an id out hides that panel.
+- `MAXIMIZED` is a mode like the others. Tenter keeps at most one panel maximized, but you
+  decide what it looks like, typically by giving that panel the whole area and leaving the
+  others out.
+- Rectangles are frame coordinates, clipped to the area the widget renders into.
+- Where two rectangles overlap, the one later in the map paints over the earlier and receives
+  hits.
+
+This example lets the catalog fill the width the right-hand panels leave, each at its mode's
+width, and gives a maximized panel the whole area:
 
 ```kotlin
 --8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt:panel-layout"
 ```
 
-Focus a declared id with `panels.focus(id)`.
-Use `scroll(panels.focused, 0, 1)` to scroll the focused panel a row and
-`page(panels.focused, 1)` to scroll it a page; pass another id, such as the panel under
-the mouse, to scroll that one. `cycleFocusedMode(1)` cycles the focused panel through its
-declared modes.
-Repaint after changing state or issuing a command. Use ids declared by the set;
-unknown ids throw `IllegalArgumentException`.
+Control the panels through the set, then repaint:
 
-After rendering, read rectangles and scroll offsets from `panels.layout`, a
-`PanelLayout` in terminal (frame) coordinates. It is null before the first frame;
-`slotOf(id)` finds one drawn panel's slot. A slot with
-no drawable frame can have a null scroll observation. Hidden panels retain their
-state and can be shown again without recreating the set. When the focused panel is not
-drawn, focus moves to the first drawn panel in declaration order; a frame that draws no
-panel keeps the focus, so focused commands still target the hidden panel. Without a displayed viewport, a page
-command queues one row per direction. Recenter requests wait until the panel has
-a drawable frame, including across hidden or zero-sized frames.
+- `focus(id)` focuses a panel.
+- `scroll(id, 0, 1)` scrolls a panel a row, and `page(id, 1)` a page. Pass `panels.focused`
+  for the focused panel, or another id, such as the panel under the mouse.
+- `cycleFocusedMode(1)` cycles the focused panel through its declared modes.
+- `requestRecenter(id)` centers a panel's visibility request on its next drawable frame.
+
+Use ids declared by the set; unknown ids throw `IllegalArgumentException`.
+
+After rendering, `panels.layout` is a `PanelLayout` in terminal (frame) coordinates, null
+before the first frame. `slotOf(id)` finds one drawn panel's slot:
+
+| Field | What it holds |
+| --- | --- |
+| `outer` | The whole panel rectangle, border included |
+| `content` | The part the scrolling viewport showed |
+| `scroll` | The viewport's settled `ScrollState` |
+| `contentBounds` | Where the content lay, extending past `content` where scrolled out of view |
+
+A slot with no drawable frame has no `scroll` and no `contentBounds`.
+
+Hidden panels keep their state, and come back as they were:
+
+- When the focused panel is not drawn, focus moves to the first drawn panel in declaration
+  order. A frame that draws no panel keeps the focus, so focused commands still target it.
+- Without a displayed viewport, a page command queues one row per direction.
+- Recenter requests wait until the panel has a drawable frame.
 
 ## Handle clicks and the mouse wheel
 
@@ -121,9 +140,13 @@ See [input and resizing](input.md) for collecting events and repainting.
 
 ## Recover from a failed render
 
-If a panel fails to paint, the set keeps its previous completed layout, so hit tests and
-paging still read the last frame that finished. Panels painted before the failure keep the
-offsets they settled on; the failed panel and those after it keep their queued scrolling and
-recenter requests for retry. When the failure escapes `terminal.draw`, the terminal sends
-nothing and keeps the previous frame as its diff base. Side effects in application
-callbacks are not rolled back. Published layout lists are immutable observations.
+If a panel fails to paint:
+
+- The set keeps its previous completed layout, so hit tests and paging still read the last
+  frame that finished.
+- Panels painted before the failure keep the offsets they settled on.
+- The failed panel and those after it keep their queued scrolling and recenter requests for
+  the next frame.
+- When the failure escapes `terminal.draw`, the terminal sends nothing and keeps the previous
+  frame as its diff base.
+- Side effects in your own callbacks are not rolled back.

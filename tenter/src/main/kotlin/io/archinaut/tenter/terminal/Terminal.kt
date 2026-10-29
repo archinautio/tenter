@@ -3,7 +3,6 @@
 
 package io.archinaut.tenter.terminal
 
-import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.color.ColorScheme
 import io.archinaut.tenter.color.ColorSpace
 import io.archinaut.tenter.screen.Rect
@@ -14,24 +13,15 @@ import com.github.ajalt.mordant.terminal.Terminal as MordantTerminal
 
 /**
  * A terminal an application draws to and reads input from, through the [Screen] that [withScreen]
- * opens.
- *
- * There are two kinds. [Terminal] (the factory function) is a real one over Mordant;
- * [Terminal.headless] is a [HeadlessTerminal] that never touches one, for tests and headless
- * rendering. Both follow the same rules: creating one writes nothing, and only a [Screen] draws.
- *
- * Picking *which* color scheme to pass to [withScreen] (a light/dark choice, [colorSpace], letting the
- * user override it) is the host application's job. A terminal is not thread-safe.
+ * opens: a real one from the [Terminal] function, or a [HeadlessTerminal] from [headless]. Creating
+ * one writes nothing. A terminal is not thread-safe.
  */
 public sealed class Terminal(
     width: Int,
     height: Int,
 ) {
 
-    /**
-     * The color space this terminal shows, for choosing the color scheme to pass to [withScreen], or
-     * `null` if it shows no color at all, in which case every color scheme draws without color.
-     */
+    /** The color space this terminal shows, or `null` if it shows no color, so every color scheme draws without color. */
     public abstract val colorSpace: ColorSpace?
 
     private var width: Int = width.coerceAtLeast(0)
@@ -62,22 +52,11 @@ public sealed class Terminal(
     internal abstract fun events(mouseTracking: MouseTracking): Flow<TerminalEvent>
 
     /**
-     * Runs [block] with this terminal's [Screen], drawing with [colorScheme], whose [ColorRole]s resolve
-     * every color the application draws with.
+     * Runs [block] with this terminal's [Screen], drawing with [colorScheme]. Entry clears the
+     * screen; the screen closes and the terminal is restored when [block] returns or throws, and a
+     * cleanup failure is suppressed onto an earlier one. [block] is inlined, so it may suspend.
      *
-     * Entry clears the screen, so the first [Screen.draw] repaints fully. Entering again after an
-     * earlier scope has returned is fine, also with another color scheme; a nested scope on the same
-     * terminal throws [IllegalStateException]. The [Screen] closes when [block] returns.
-     *
-     * This operation does not collect input, run an event loop, or make the terminal safe to use from
-     * multiple threads. [block] is inlined, so inside a coroutine it may suspend — for example to run
-     * the application's event loop over [Screen.events] — and a synchronous caller may put a
-     * `runBlocking` application inside it instead. Either way, keep every use of the screen confined
-     * to one execution context.
-     *
-     * Entry and cleanup are exception-safe, including a failure after entry has already written to
-     * the terminal. If the block or entry fails and cleanup fails as well, the original failure is
-     * rethrown and the cleanup failure is suppressed on it.
+     * @throws IllegalStateException when a scope is already active on this terminal.
      */
     public inline fun <T> withScreen(colorScheme: ColorScheme = ColorScheme.Default, block: (Screen) -> T): T {
         // Kept minimal: this body is copied into callers, so the logic lives in the two calls.
@@ -102,10 +81,7 @@ public sealed class Terminal(
         return Screen(this, session)
     }
 
-    /**
-     * Closes a [screen] that [openScreen] returned, even if closing its session fails. A cleanup
-     * failure is suppressed on [failure], the block's or entry's own, when there is one.
-     */
+    /** Closes [screen]; a cleanup failure is suppressed onto [failure] when there is one. */
     @PublishedApi
     internal fun closeScreen(screen: Screen, failure: Throwable?) {
         try {
@@ -119,11 +95,7 @@ public sealed class Terminal(
     }
 
     public companion object {
-        /**
-         * A [width] x [height] terminal that never touches a real one, for tests and headless
-         * rendering. Its screen's events come from [script], which runs once, in step with the
-         * application reading them; see [HeadlessInput].
-         */
+        /** A [width] x [height] terminal that never touches a real one; its screen's events come from [script]. */
         public fun headless(
             width: Int,
             height: Int,
@@ -132,8 +104,5 @@ public sealed class Terminal(
     }
 }
 
-/**
- * The process's real terminal, drawing through [mordant]. Pass a configured Mordant terminal to
- * choose its color level or size yourself.
- */
+/** The process's real terminal, drawing through [mordant]. */
 public fun Terminal(mordant: MordantTerminal = MordantTerminal()): Terminal = AnsiTerminal(mordant)

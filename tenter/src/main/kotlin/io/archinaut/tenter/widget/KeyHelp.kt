@@ -9,11 +9,7 @@ import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.text.TextWrap
 
-/**
- * Content for a HELP panel: a single `KEYS` section (a [Block] with a titled top border)
- * holding one sub-section per entry in [sections] — each rendered
- * lazygit-style as an indented label followed by its `key  description` rows.
- */
+/** Content for a help panel: a titled `KEYS` section with an indented sub-section of `key  description` rows per entry in [sections]. */
 public class KeyHelp(private val sections: List<KeySection>) : MeasurableWidget {
 
     override fun write(writer: RowWriter) {
@@ -21,11 +17,8 @@ public class KeyHelp(private val sections: List<KeySection>) : MeasurableWidget 
     }
 
     private fun writeSections(writer: RowWriter) {
-        // One key column shared across every section (not per-hint) so descriptions line up in a
-        // single straight edge down the panel instead of jagging with each key's own length.
-        // The description is wrapped on its own — not as part of one combined "key + description"
-        // string — because TextWrap collapses any run of whitespace to a single space, which would
-        // destroy alignment padding embedded in the text.
+        // One key column across every section, so descriptions line up. Descriptions wrap on their
+        // own because wrapping collapses runs of spaces, which would undo the alignment.
         val keyColumnWidth = sections.flatMap { it.hints }.maxOfOrNull { CellWidth.of(it.keys) } ?: 0
         val prefixWidth = keyColumnWidth + 2
         val descWidth = (writer.width - prefixWidth).coerceAtLeast(1)

@@ -8,21 +8,11 @@ import java.util.Collections
 import java.util.LinkedHashMap
 
 /**
- * Every keyboard binding in the application, as data, addressed by a context key [C] and resolving
- * to the application's own action type [A] — typically an enum, so handling is exhaustive.
- *
- * Resolution is a first-match-wins walk over the contexts the caller says are active *right now*.
- * The keymap deliberately has no notion of which contexts those are: "is a panel focused", "has the
- * match ended" are application state, not binding facts. [layers] is copied at construction, and
- * its captured action values and chords must remain stable in equality.
- *
- * Construction validates the structural contract for every layer: exact chords are unique within a
- * layer, references resolve to the layer's own help groups or to exactly one titled owner for a
- * sectionless layer, and every non-[HintGroup.bindingless] group is credited by a binding. This
- * makes a consumer's configuration safe to use without copying those validation loops.
- *
- * A sectionless layer does not produce a help section. Its bindings can credit a group on exactly
- * one titled layer; this is useful for precedence-only layers such as panel scrolling.
+ * Every keyboard binding of an application, by context [C], resolving to its own action type [A].
+ * The caller says which contexts are active, in precedence order. [layers] is copied and validated
+ * when the map is built: chords are unique within a layer, every group reference resolves (a
+ * sectionless layer's to exactly one titled layer), and every group not [HintGroup.bindingless] is
+ * bound. Actions and chords must keep stable equality.
  */
 public class KeyMap<C : Any, A : Any>(layers: Map<C, KeyLayer<A>>) {
 
@@ -59,7 +49,7 @@ public class KeyMap<C : Any, A : Any>(layers: Map<C, KeyLayer<A>>) {
         return KeySection(title, layer.hintGroups.map { KeyHint(it.label, it.description) })
     }
 
-    /** Every chord bound to [action], across every layer. Used to derive labels such as a panel badge. */
+    /** Every chord bound to [action], across every layer. */
     public fun chordsFor(action: A): List<KeyboardEvent> =
         layers.values.flatMap { layer -> layer.bindings.filter { it.action == action }.map { it.chord } }
 

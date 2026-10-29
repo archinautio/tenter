@@ -9,13 +9,8 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 
 /**
- * Scrolls a [MeasurableWidget] across the whole canvas, painting only the part inside it. It is
- * the only widget that clips content: composites grow to fit what they hold. The caller owns the
- * [ViewportState] and passes it to every render; read the completed frame from
- * [ViewportState.settled].
- *
- * A viewport draws no chrome. Frame it by rendering a [Block] and then the viewport into
- * [Block.inner], and show its position with a [Scrollbar] rendered from the settled state.
+ * Scrolls a [MeasurableWidget] across the whole canvas, painting only what it shows, and records
+ * the completed frame in [ViewportState.settled]. It draws no chrome; see [Block] and [Scrollbar].
  */
 public class Viewport(private val content: MeasurableWidget) : StatefulWidget<ViewportState> {
 

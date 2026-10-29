@@ -6,11 +6,9 @@ package io.archinaut.tenter.widget
 import io.archinaut.tenter.screen.Constraint
 
 /**
- * Lays [children] out left to right at their declared widths, wrapping to a new band when the
- * next one does not fit the available width, as text flows. Each band is a [Row] with [spacing]
- * blank cells between its children, and bands are stacked with one blank row between them. A
- * child wider than the available space keeps its declared width, alone in its band, and an
- * enclosing [Viewport] scrolls to it. Give a plain widget a size with [fixedSize] to flow it.
+ * Lays [children] out at their declared widths, wrapping to a new band when the next does not fit,
+ * as text flows. Each band is a [Row] with [spacing] between children, and bands are stacked with
+ * one blank row between them; a child wider than the space keeps its width, alone in its band.
  */
 @Suppress("FunctionName") // A factory named like the widget it builds, as Kotlin's List() is.
 public fun Flow(children: List<Pair<Constraint.Length, MeasurableWidget>>, spacing: Int = 2): MeasurableWidget {
@@ -30,7 +28,7 @@ private class FlowLayout(
         return Stack(rows).prepare(availableWidth)
     }
 
-    /** [children] grouped greedily into bands that fit [availableWidth]; each band holds at least one child. */
+    /** [children] grouped greedily into bands that fit [availableWidth], at least one child each. */
     private fun bands(availableWidth: Int): List<List<Pair<Constraint.Length, MeasurableWidget>>> {
         val bands = mutableListOf<MutableList<Pair<Constraint.Length, MeasurableWidget>>>()
         for (child in children) {
@@ -48,7 +46,7 @@ private class FlowLayout(
         band.fold(-spacing) { total, (length, _) -> checkedAdd(checkedAdd(total, spacing, FLOW_WIDTH), length.length, FLOW_WIDTH) }
 }
 
-/** [content] laid out at no less than [width], so a band keeps every declared width even when the space is narrower. */
+/** [content] laid out at no less than [width], so a band keeps its declared widths in a narrower space. */
 private class AtLeast(private val width: Int, private val content: MeasurableWidget) : LayoutWidget {
     override fun layout(availableWidth: Int): ContentLayout = content.prepare(maxOf(availableWidth, width))
 }

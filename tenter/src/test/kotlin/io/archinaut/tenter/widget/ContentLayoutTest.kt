@@ -13,7 +13,7 @@ import io.archinaut.tenter.screen.Buffer
 internal class ContentLayoutTest {
 
     @Test
-    fun `raw layouts retain the widget while captured frame data stays repeatable`() {
+    fun `fixed-size layouts retain the widget while captured frame data stays repeatable`() {
         var label = "before"
         val captured = label
         val snapshot = object : Widget {
@@ -104,15 +104,15 @@ internal class ContentLayoutTest {
     }
 
     @Test
-    fun `fixed content does not render its raw widget while preparing`() {
+    fun `fixed content does not render its widget while preparing`() {
         var drawCount = 0
-        val raw = object : Widget {
+        val plain = object : Widget {
             override fun render(canvas: Canvas) {
                 drawCount++
                 canvas.setString(0, 0, "raw")
             }
         }
-        val content = raw.fixedSize(8, 3)
+        val content = plain.fixedSize(8, 3)
 
         val layout = content.prepare(2)
 
@@ -243,7 +243,7 @@ internal class ContentLayoutTest {
     @Test
     fun `a viewport invokes a plain widget once per frame and follows the area declared for it`() {
         var paints = 0
-        val raw = object : Widget {
+        val plain = object : Widget {
             override fun render(canvas: Canvas) {
                 paints++
                 canvas.setString(0, 15, "here")
@@ -251,7 +251,7 @@ internal class ContentLayoutTest {
         }.fixedSize(5, 20).revealed(Rect(0, 15, 5, 1))
         val state = ViewportState()
 
-        val buffer = render(Viewport(raw), 5, 4, state)
+        val buffer = render(Viewport(plain), 5, 4, state)
 
         assertEquals(1, paints)
         assertEquals(12, checkNotNull(state.settled).offset.y)

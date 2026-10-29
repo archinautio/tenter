@@ -15,30 +15,17 @@ import io.archinaut.tenter.color.ColorScheme
 import io.archinaut.tenter.screen.Style
 
 /**
- * The [StyleTags] of a terminal that shows color: renders [Style]s to cached open/close ANSI escape
- * strings.
- *
- * Mordant styles text through [TextStyle.invoke], which runs a regex scan over the styled text —
- * fine for occasional one-off printing, but too costly to repeat for every run of every row of
- * every frame. Each distinct [Style] is styled through Mordant exactly once, at first use,
- * and the result is split into an open/close pair ([Tags]) that the terminal can then paste
- * around plain text with no further Mordant involvement.
- *
- * [colorScheme] resolves every [ColorRole] to a [TerminalColor] already authored in the color scheme's
- * color space — there is no downsampling here or anywhere else in this class. Choosing colors for
- * the terminal is the job of which [ColorScheme] the caller chose.
+ * The [StyleTags] of a terminal that shows color. Mordant's [TextStyle.invoke] scans text with a
+ * regex, too costly for every run of every frame, so each distinct [Style] goes through it once
+ * and is cached as an open/close pair. Colors are used as [colorScheme] authored them, never
+ * downsampled.
  */
 internal class StyleTagCache(private val colorScheme: ColorScheme) : StyleTags {
 
-    // Per-role fg/bg color caches, lazily populated since a host application's ColorRole is an
-    // open set (unlike the old closed Color enum, there is no fixed "every role" list to seed
-    // these with eagerly). Separate maps because StandardRole.DEFAULT resolves to different foreground
-    // and background values — a single cache keyed by role could not represent that.
+    // Filled lazily, since roles are an open set; separate because DEFAULT differs between channels.
     private val foregroundCache: HashMap<ColorRole, ColorValue> = HashMap()
     private val backgroundCache: HashMap<ColorRole, ColorValue> = HashMap()
 
-    // Tags cache, keyed by the full Style. Lazily populated on first use for each distinct
-    // Style — each entry pays Mordant's one-off styling cost exactly once.
     private val tagsCache: HashMap<Style, Tags> = HashMap()
 
     override fun tagsFor(style: Style): Tags {

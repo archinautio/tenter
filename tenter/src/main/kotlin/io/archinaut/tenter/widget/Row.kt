@@ -8,15 +8,9 @@ import io.archinaut.tenter.screen.Layout
 import io.archinaut.tenter.screen.Rect
 
 /**
- * Places [children] side by side across the available width, each at the width its [Constraint]
- * resolves to as [Layout.horizontal] splits a rectangle, with [spacing] blank cells between them.
- * Unlike [Flow], it never wraps.
- *
- * The row is as tall as its tallest child, and every child gets that full height, so a [block]
- * around a child draws its borders to the bottom of the row: `detail.block(Block(borders = Borders.LEFT))`
- * divides it from its neighbour. Like every composite, a row never clips: a child measured wider
- * than its width, such as fixed-size content, widens its segment and pushes the later ones right,
- * so an enclosing [Viewport] can scroll to it.
+ * Places [children] side by side at the widths [Layout.horizontal] resolves from their
+ * constraints, with [spacing] blank cells between them, never wrapping. Every child gets the
+ * tallest child's height. A child wider than its segment widens it and pushes later ones right.
  */
 @Suppress("FunctionName") // A factory named like the widget it builds, as Kotlin's List() is.
 public fun Row(children: List<Pair<Constraint, MeasurableWidget>>, spacing: Int = 0): MeasurableWidget {

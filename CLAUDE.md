@@ -1,19 +1,8 @@
 # Tenter agent instructions
 
-## Project Overview
+Tenter is a JVM terminal-UI toolkit built on Mordant: the `tenter` library and `tenter-example`, an external-consumer demonstration that depends on it.
 
-Tenter is a JVM terminal-UI toolkit built on Mordant.
-
-Callers describe prepared content, dispatch input intent, and inspect completed-frame observations;
-Tenter owns glyph integrity, layout size, scroll following, panel geometry, and terminal-scope cleanup.
-
-## Technology Stack
-
-- Kotlin 2.4
-- JVM 25
-- Gradle 9.7.x (Kotlin DSL, convention plugins in `buildSrc/`)
-- JUnit Jupiter + MockK + AssertJ for tests
-- `explicitApi()` is on repo-wide — declare `public`/`internal` explicitly.
+Kotlin 2.4, JVM 25, Gradle 9.7 (Kotlin DSL, convention plugins in `buildSrc/`), JUnit Jupiter + MockK + AssertJ. `explicitApi()` is on repo-wide, so declare `public`/`internal` explicitly.
 
 ## Commands
 
@@ -34,25 +23,20 @@ Tenter owns glyph integrity, layout size, scroll following, panel geometry, and 
 ./gradlew :tenter:updateKotlinAbi
 ```
 
-## Architecture
+## Where things are documented
 
-### Module Structure
+- [docs/architecture.md](docs/architecture.md): dependency boundaries, package layering, and implementation invariants. Read it before changing library structure.
+- [docs/site/](docs/site/index.md): every caller-facing contract. Update the guide that owns a behavior when changing it.
+- [docs/documentation.md](docs/documentation.md): where each kind of documentation belongs, and how to validate the site.
 
-Dependencies flow: `tenter-example` → `tenter`
+## Design principles
 
-- `tenter` - the library 
-- `tenter-example` - external-consumer demonstration
-
-### Tests
-
-- Use focused tests for behavior changes; keep rendering helpers in Tenter's test sources, not its published artifact.
-
-### Invariants
-
-- The library is independent. Its main sources may depend only on Kotlin, kotlinx coroutines, and Mordant. Keep application policies in consumers.
-- Preserve the package layering and external dependency checks in `tenter`'s architecture tests; see `docs/architecture.md`.
-- Mordant types deliberately appear in the public API. Keep `mordant` and `kotlinx-coroutines-core` as `api` dependencies.
-- Keep the example buildable as an ordinary module and as an isolated packaged-jar consumer.
+- Single Responsibility: each module resolves one behavior.
+- Prefer polymorphism (sealed types, strategy objects) over a boolean parameter that an `if` switches on.
+- Lay content out with `Layout` and `Constraint` wherever possible.
+- Drawing flows top-down; anything that travels up is returned data, never a side channel.
+- Comment only what the code cannot say for itself.
+- The API is pre-1.0 and exploratory: break it freely, with no compatibility layer.
 
 ## Tool Preferences
 

@@ -8,10 +8,8 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 
 /**
- * An immutable observation of a completed viewport frame, in cells: the [offset] shown and the
- * largest one possible, the [viewport] it was shown in, the measured [content], and the reveal
- * area the content asked to keep visible, in content coordinates, whether or not this frame
- * followed it.
+ * A completed viewport frame, in cells: the [offset] shown and the largest possible, the [viewport]
+ * and [content] sizes, and the area the content asked to keep visible, followed or not.
  */
 public data class ScrollState(
     public val offset: Point,

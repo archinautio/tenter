@@ -14,18 +14,9 @@ import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
 
 /**
- * Borders, an optional title/badge on the top row, and padding. `Block()` has no border;
- * [bordered] draws all four sides. A block without borders is how content gets padding alone.
- *
- * A block paints only its own chrome. In an allocated area, render it and then render the content
- * into [inner]; around measurable content, use [MeasurableWidget.block]. The title sits on the top
- * border, or on its own top row when there is no top border. [padding] is space between the
- * borders and the content. [borderType] picks the glyphs from one of Mordant's border sets, such as
- * [BorderType.SQUARE] or [BorderType.ASCII]; a box uses its head section's corners on the top row,
- * its body's vertical on the sides, and its foot's corners on the bottom row.
- *
- * The single place every framed widget gets its box from — no widget should draw its own border.
- * A [Scrollbar] can paint over a border beside a [Viewport] rendered into [inner].
+ * Borders, a title and badge on the top row, and padding; it paints only this chrome, around the
+ * content rendered into [inner]. The title sits on the top border, or on its own row without one.
+ * [borderType]'s head section gives the top row, its body the sides, and its foot the bottom row.
  */
 public class Block(
     private val title: String = "",
@@ -45,10 +36,10 @@ public class Block(
         bottom = if (borders.bottom) 1 else 0,
     ) + padding
 
-    /** The content area of a block rendered into [area]: [area] minus the borders and [padding]. */
+    /** [area] without the borders and [padding]. */
     public fun inner(area: Rect): Rect = area.inner(insets)
 
-    /** The content canvas of a block rendered into [canvas]: minus the borders and [padding]. */
+    /** [canvas] without the borders and [padding]. */
     public fun inner(canvas: Canvas): Canvas = canvas.inner(insets)
 
     public override fun render(canvas: Canvas) {
@@ -91,12 +82,10 @@ public class Block(
                 canvas.setString(4, 0, title, Style(titleColor))
                 canvas.set(4 + titleWidth, 0, Cell(style = Style(borderColor)))
             } else if (badge != null && width > 2 + badgeRunWidth) {
-                // The full "[badge] title" run doesn't fit — e.g. a minimized stub too narrow for
-                // its full title. The badge alone is still worth showing.
+                // Too narrow for "[badge] title", as a minimized stub is: the badge alone still helps.
                 canvas.setString(2, 0, "[$badge]", Style(titleColor))
             }
         } else if (badge != null && width > 2 + badgeRunWidth) {
-            // No title to anchor a "[badge] title" run to. The badge alone is still worth showing.
             canvas.setString(2, 0, "[$badge]", Style(titleColor))
         }
     }
@@ -114,11 +103,7 @@ public class Block(
     }
 }
 
-/**
- * This content surrounded by [block]'s borders, title, and padding. The result is measurable: its
- * width is the content's plus the block's sides, its height the content's plus the block's top and
- * bottom.
- */
+/** This content surrounded by [block]'s borders, title, and padding, still measurable. */
 public fun MeasurableWidget.block(block: Block): MeasurableWidget {
     val content = this
     return object : LayoutWidget {

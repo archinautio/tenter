@@ -8,20 +8,9 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.widget.StatefulWidget
 
 /**
- * Draws panels of a [PanelSet], each into its rectangle of [areas], building each panel's content
- * from [inputs], with the set as its state. Read the completed frame's geometry from
- * [PanelSet.layout] afterwards.
- *
- * The application owns the layout: split the frame with [io.archinaut.tenter.screen.Layout] each
- * frame, choosing every panel's size from its [PanelSet.modeOf] — for example, giving a maximized
- * panel the whole area and leaving the others out. Only the panels in [areas] are drawn, in its
- * iteration order, so a later one paints over an earlier one where they overlap. Areas are frame
- * coordinates, like the rectangles [io.archinaut.tenter.screen.Layout] splits from the frame's
- * area, and are clipped to the canvas this widget renders into.
- *
- * Each panel's viewport settles as it paints; [PanelSet.layout] is published once every panel has
- * painted. A failed frame keeps the previous layout and rolls nothing back, so discard its canvas;
- * the next frame resolves every panel again.
+ * Draws the panels of a [PanelSet] named in [areas], in its iteration order, each into its
+ * rectangle in frame coordinates, building their content from [inputs]. A failed frame keeps the
+ * set's previous [PanelSet.layout] and rolls nothing back.
  */
 public class Panels<K : PanelId, I>(
     private val inputs: I,

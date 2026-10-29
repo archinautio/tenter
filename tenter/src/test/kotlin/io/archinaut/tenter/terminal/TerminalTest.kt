@@ -22,12 +22,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.color.TerminalColor.TrueColor
 
-/**
- * A minimal, fully-authored [ColorScheme] for exercising [Terminal]'s own mechanics —
- * diffing, run coalescing, alt-screen switching — independent of any host application's actual
- * theme. Every [StandardRole] is resolved so [Terminal] can be exercised with an arbitrary
- * [Style], not just the handful of roles individual tests reference.
- */
+/** A color scheme resolving every [StandardRole], so tests can draw with any [Style]. */
 private fun rgb(r: Int, g: Int, b: Int) = TerminalColor.TrueColor(r, g, b)
 
 private object FixtureColorScheme : ColorScheme {
@@ -102,8 +97,7 @@ internal class TerminalTest {
 
         screen.renderBuffer(buffer)
 
-        // setPosition(0, 0) emits ESC[1;1H (1-indexed row;col) — the literal ESC byte is part of
-        // the prefix, not just the bracket text that follows it.
+        // Positions are 1-indexed: (0, 0) is ESC[1;1H.
         assertTrue(
             recorder.output().startsWith("[1;1H"),
             "Expected output to start with ESC[1;1H but was: ${recorder.output().take(20).repr()}"
@@ -112,8 +106,7 @@ internal class TerminalTest {
 
     @Test
     fun `default cell emits the color scheme's explicit foreground and background truecolor sequences`() {
-        // StandardRole.DEFAULT resolves to a real color — there is no "unstyled" cell on an
-        // ANSI-capable terminal.
+        // StandardRole.DEFAULT resolves to a real color, so even a default cell is styled.
         val buffer = Buffer(5, 1)
         Canvas.of(buffer).setString(0, 0, "hello")
 
@@ -154,22 +147,15 @@ internal class TerminalTest {
 
     @Test
     fun `colored run emits one style per run not one per cell`() {
-        // 4 cells all with fg=DANGER — they should be wrapped in a single SGR open+close pair
         val buffer = Buffer(4, 1)
         Canvas.of(buffer).setString(0, 0, "ABCD", Style(fg = StandardRole.DANGER))
 
         screen.renderBuffer(buffer)
 
         val out = recorder.output()
-        // The characters must appear contiguous — no SGR codes between them
         assertTrue(out.contains("ABCD"), "Expected 'ABCD' to appear contiguously in output: ${out.repr()}")
 
-        // Count closing/reset sequences for fg: ESC[39m is always the fg-reset code, regardless
-        // of the foreground's own color space (truecolor/256/16) — see AnsiCodes.fgColorReset.
-        // StandardRole.DEFAULT now sets a real background too, so every style sets both channels and
-        // the close tag is always the combined "39;49m" (fg+bg reset in one SGR), never a bare
-        // "39m" — see Terminal.renderSpan's KDoc. Each run emits exactly one close tag;
-        // with one run we expect exactly one.
+        // Every style sets both channels, so each run closes with one combined "39;49m".
         val resetSeq = "39;49m"
         val resetCount = out.countOccurrences(resetSeq)
         assertEquals(1, resetCount, "Expected exactly 1 fg+bg-reset sequence for a single run, got $resetCount in: ${out.repr()}")
@@ -177,7 +163,6 @@ internal class TerminalTest {
 
     @Test
     fun `per-cell styling would produce four resets but run-length produces one`() {
-        // Contrast: 4 consecutive DANGER cells → 1 reset (run-length) vs 4 resets (per-cell, old).
         val buffer = Buffer(4, 1)
         for (x in 0 until 4) {
             buffer.set(x, 0, Cell("X", Style(fg = StandardRole.DANGER)))
@@ -193,8 +178,7 @@ internal class TerminalTest {
 
     @Test
     fun `strikethrough style emits strikethrough SGR once per run`() {
-        // 3 consecutive cells with fg=DANGER + strikethrough — Mordant folds both attributes into
-        // one compound SGR open, and one run should emit exactly one.
+        // Mordant folds color and strikethrough into one compound SGR open.
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "XYZ", Style(fg = StandardRole.DANGER, strikethrough = true))
 
@@ -203,8 +187,7 @@ internal class TerminalTest {
         val out = recorder.output()
         assertTrue(out.contains("XYZ"), "Expected 'XYZ' to appear contiguously in output: ${out.repr()}")
 
-        // ";9m" is the strikethrough-on code compounded onto the fg-open sequence;
-        // ";29m" is strikethrough-off compounded onto the fg-reset sequence.
+        // ";9m" turns strikethrough on with the color; ";29m" turns it off with the reset.
         val strikeOnCount = out.countOccurrences(";9m")
         val strikeOffCount = out.countOccurrences(";29m")
         assertEquals(
@@ -239,8 +222,7 @@ internal class TerminalTest {
 
     @Test
     fun `an attribute does not bleed into a following run that only changes color`() {
-        // The run-length skip-close optimization only holds for colors; a bold run followed by a
-        // plain run of another color must still close bold.
+        // Only colors can skip a run's close; a change of attribute must still close bold.
         val buffer = Buffer(2, 1)
         buffer.set(0, 0, Cell("◆", Style(fg = StandardRole.DANGER, bold = true)))
         buffer.set(1, 0, Cell("◇", Style(fg = StandardRole.INFO)))
@@ -254,11 +236,7 @@ internal class TerminalTest {
 
     @Test
     fun `transitions between default and semantic roles do not leak either color channel`() {
-        // Every open tag now sets BOTH channels explicitly (StandardRole.DEFAULT resolves to real
-        // colors too), so the run-length skip-close optimization never needs to special-case
-        // DEFAULT — see Terminal.renderSpan's KDoc. Regression guard: a cell that follows a
-        // differently-colored one must still get its own explicit fg AND bg, not inherit either
-        // channel from the previous run.
+        // A run that skips the previous close must still set both of its own colors.
         val buffer = Buffer(2, 1)
         buffer.set(0, 0, Cell("A", Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS)))
         buffer.set(1, 0, Cell("B", Style.DEFAULT))
@@ -279,10 +257,7 @@ internal class TerminalTest {
 
     @Test
     fun `wide character written via setString appears in output`() {
-        // U+4E2D is a CJK wide character (width=2). setString stores it in cell 0 and a
-        // follow-up Cell("") in cell 1.  The terminal should include the character char and
-        // the empty follow-up char (which contributes nothing), resulting in "中" appearing
-        // once in the output.
+        // A wide glyph's continuation cell contributes nothing to the output.
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "中") // 中, width=2
 
@@ -290,7 +265,6 @@ internal class TerminalTest {
 
         val out = recorder.output()
         assertTrue(out.contains("中"), "Expected wide char '中' in output: ${out.repr()}")
-        // Should appear exactly once
         assertEquals(1, out.countOccurrences("中"), "Wide char should appear exactly once")
     }
 
@@ -304,10 +278,7 @@ internal class TerminalTest {
         screen.renderBuffer(buffer)
 
         val out = recorder.output()
-        // Rows joined with \r\n, last row has no trailing \r\n. Each row is its own styled run
-        // now (StandardRole.DEFAULT sets real colors), so "AB" and "CD" are no longer literally
-        // adjacent to the \r\n — a close tag sits between the text and the separator — so this
-        // checks ordering and separator count rather than one contiguous substring.
+        // Rows are joined with \r\n and each closes its own run, so a close tag sits before each separator.
         val firstBreak = out.indexOf("\r\n")
         val secondBreak = out.indexOf("\r\n", firstBreak + 1)
         assertTrue(firstBreak >= 0 && secondBreak >= 0, "Expected two \\r\\n row separators in: ${out.repr()}")
@@ -325,8 +296,7 @@ internal class TerminalTest {
         Canvas.of(first).setString(0, 0, "hello")
         screen.renderBuffer(first)
 
-        // A fresh, separately-allocated buffer with the same content — draw() diffs by value,
-        // not by instance identity.
+        // A separate buffer with the same content: draw() diffs by value, not identity.
         val second = Buffer(5, 2)
         Canvas.of(second).setString(0, 0, "hello")
         recorder.clearOutput()
@@ -357,8 +327,6 @@ internal class TerminalTest {
 
     @Test
     fun `a changed wide character re-emits its lead glyph, not a lone continuation cell`() {
-        // "a中b": a(width 1) + 中(width 2, CJK) + b(width 1) — setString stores 中's lead
-        // glyph at column 1 and an empty Cell("") continuation at column 2.
         val first = Buffer(4, 1)
         Canvas.of(first).setString(0, 0, "a中b")
         screen.renderBuffer(first)
@@ -470,9 +438,7 @@ internal class TerminalTest {
 
     @Test
     fun `entering a screen paints the color scheme's default background before erasing, not the terminal's own`() {
-        // Regression guard for a cross-fade flash: the default-style SGR tag must be emitted before
-        // the erase-display sequence, so ED erases using the color scheme's background rather than
-        // whatever the terminal itself defaults to.
+        // Erasing before setting the default style would flash the terminal's own background.
         val altRecorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
         val altBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = altRecorder)
 

@@ -9,20 +9,10 @@ import com.github.ajalt.mordant.input.InputEvent
 import com.github.ajalt.mordant.input.KeyboardEvent
 
 /**
- * What a [HeadlessTerminal]'s script does: the input a user would type, and the resizes they would
- * make, while it checks the [frame] the application drew in response.
- *
- * The script runs once per terminal, the first time the application collects [Screen.events], and
- * carries on across later collections, as a real user's input does. Each call hands its event to the
- * application and returns once the application asks for its next event — so by then it has handled
- * the event and drawn whatever it draws in response. That holds when the application collects the
- * flow directly (through operators such as `map`, `onEach` or `takeWhile`); an operator that buffers
- * in between, such as `merge` or `buffer`, lets a call return as soon as the event is queued.
- *
- * When the script returns, the events flow completes. If the application stops collecting for good
- * (on its quit key, say), the rest of the script never runs, so check the final frame after the
- * application returns. A script that throws fails the application's collection with the same
- * exception.
+ * What a [HeadlessTerminal]'s script can do: send input and resizes, and read the [frame] drawn in
+ * response. It runs once, from the application's first collection of [Screen.events]. Each call
+ * returns once the application asks for its next event; when the script returns, the flow
+ * completes, and a script that throws fails the collection with its exception.
  */
 public class HeadlessInput internal constructor(
     private val terminal: HeadlessTerminal,

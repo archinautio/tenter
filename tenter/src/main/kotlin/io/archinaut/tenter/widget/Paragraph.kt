@@ -10,8 +10,6 @@ import io.archinaut.tenter.screen.Style
  * Lines of text. Without [wrap], each line takes one row and is ellipsized to the available width;
  * with it, lines wrap at word boundaries and a word wider than a row is split. An empty line is a
  * blank row.
- *
- * Use it to show text; implement [MeasurableWidget] with a [RowWriter] for custom content.
  */
 public class Paragraph(
     private val lines: List<Line>,

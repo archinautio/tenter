@@ -6,13 +6,9 @@ package io.archinaut.tenter.screen
 import io.archinaut.tenter.color.ColorRole
 
 /**
- * Foreground and background roles plus text attributes for a [Cell]. A null channel is unset: a
- * write leaves that channel of the painted cell as it is (see [patch]), so a glyph drawn with only
- * a foreground keeps the background already under it. A channel no write ever set renders as
+ * Foreground and background roles plus text attributes for a [Cell]. A null channel is unset, so
+ * a write keeps what is painted under it (see [patch]); a channel never set renders as
  * [io.archinaut.tenter.color.StandardRole.DEFAULT], or with the attribute off.
- *
- * Attributes render through Mordant's `TextStyle`, so each one looks however the terminal draws
- * that SGR attribute; some terminals ignore [italic] or render [dim] like normal intensity.
  */
 public data class Style(
     val fg: ColorRole? = null,
@@ -55,7 +51,7 @@ public data class Style(
             underline != null && inverse != null && strikethrough != null
 
     public companion object {
-        /** The style that sets no channel; reused everywhere an unstyled cell is needed. */
+        /** The style that sets no channel. */
         public val DEFAULT: Style = Style()
     }
 }

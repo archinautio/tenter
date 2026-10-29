@@ -4,14 +4,8 @@
 package io.archinaut.tenter.color
 
 /**
- * A concrete color, in whatever space it was authored in. It is also a [ColorRole] that resolves to
- * itself: use one directly in a [io.archinaut.tenter.screen.Style] for content whose color must not
- * change with the theme; use a semantic role for themeable content.
- *
- * Colors are never converted between spaces: a color scheme picks one [ColorSpace] for every role it
- * defines, matching the terminal capability it targets, and the terminal renders each subtype with
- * the matching ANSI encoding directly. There is no nearest-color downsampling anywhere in this
- * package. [ColorSpace.parse] reads a color from text.
+ * A concrete color in the space it was authored in, never converted to another. As a [ColorRole]
+ * it resolves to itself, for content whose color must not change with the theme.
  */
 public sealed interface TerminalColor : ColorRole {
     /** The space this color is authored in. */
@@ -28,11 +22,7 @@ public sealed interface TerminalColor : ColorRole {
         override val space: ColorSpace get() = ColorSpace.TRUECOLOR
     }
 
-    /**
-     * xterm-256 palette index, restricted to `16..255`. Indices `0..15` are remapped by the
-     * user's terminal theme, so their contrast is unknowable at build time — `16..255` are fixed
-     * by the xterm specification and therefore both reproducible and testable.
-     */
+    /** xterm-256 palette index in `16..255`; `0..15` are excluded because terminal themes remap them. */
     public data class Ansi256(val index: Int) : TerminalColor {
         init {
             require(index in 16..255) { "index must be in 16..255, got: $index" }

@@ -1,8 +1,21 @@
 # Maintaining the documentation
 
+## Where each explanation belongs
+
+Keep each explanation in one place and link to it elsewhere instead of copying prose:
+
+- How to use the library belongs in the relevant public guide under `docs/site/`.
+- What a maintainer must preserve belongs in [architecture](architecture.md).
+- `CLAUDE.md` holds only what every working session needs (commands and working
+  conventions) and links to these pages for the rest. Do not repeat it here.
+- Source comments state a declaration's contract briefly, or explain what the code cannot
+  say for itself. Leave tutorials and examples to the guides.
+
+Write every page in `docs/` for people to read: prefer a list or a table over a long paragraph
+of clauses joined by semicolons.
+
 The public site follows `main` and is built from `docs/site/` using Zensical.
-Architecture and contributor documentation stay outside that directory. Only the
-contents of generated `build/site/` are uploaded to Pages.
+Only the contents of generated `build/site/` are uploaded to Pages.
 
 ## Preview locally
 
@@ -24,24 +37,30 @@ in PowerShell. Open the local URL printed by Zensical. Stop the preview with Ctr
 zensical build --clean --strict
 ```
 
-Strict validation checks internal links and anchors. The snippets extension fails
-on missing source paths or named regions. Prefer named regions in compiled example
-sources over duplicated Kotlin. The greeting includes everything after its package
-line; preserve its complete imports. Run the [project checks](../CLAUDE.md#commands)
-and the [packaged example check](site/examples.md#noninteractive-check) when changing example sources.
+- Strict validation checks internal links and anchors, and the snippets extension fails on
+  missing source paths or named regions.
+- Prefer named regions in compiled example sources over duplicated Kotlin.
+- The greeting includes everything after its package line, so preserve its complete imports.
+- When changing example sources, run the [project checks](../CLAUDE.md#commands) and the
+  [packaged example check](site/examples.md#noninteractive-check).
 
 When changing installation requirements, update the getting-started page from the
 version catalog and Gradle wrapper. Verify Maven Local installation in a separate
-consumer project. Keep each explanation in one place: caller-facing behavior belongs
-in the relevant public guide; implementation invariants belong in [architecture](architecture.md).
-Use links elsewhere, including the README and agent instructions, instead of copying prose.
+consumer project.
 
-Before publishing, inspect desktop and narrow layouts, keyboard navigation, search,
-copy buttons, and a directly opened nested page. Verify the `/tenter/` project prefix
-for assets and links. Do not commit `build/site/`, `.cache/`, or the virtual environment.
+Do not commit `build/site/`, `.cache/`, or the virtual environment.
 
-Pull requests validate without deploying. Manual runs deploy only from `main`.
-Failed builds leave the previously deployed site in place. To recover from a bad
-content update, revert that update through the normal review process; the next
-successful `main` build republishes the corrected site. No custom domain, deployment
-token, generated branch, or Sites hosting configuration is required.
+## Publishing
+
+Before publishing, check:
+
+- Desktop and narrow layouts, keyboard navigation, search, copy buttons, and a directly opened
+  nested page.
+- The `/tenter/` project prefix for assets and links.
+
+- Pull requests validate without deploying, and manual runs deploy only from `main`.
+- A failed build leaves the previously deployed site in place.
+- To recover from a bad content update, revert it through the normal review process; the next
+  successful `main` build republishes the corrected site.
+- No custom domain, deployment token, generated branch, or Sites hosting configuration is
+  required.

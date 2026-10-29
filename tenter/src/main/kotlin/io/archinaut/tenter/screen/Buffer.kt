@@ -141,10 +141,8 @@ internal class Buffer(
 
     private fun Cell.toStoredGlyph(): StoredCell {
         if (symbol.isEmpty()) return StoredCell(Cell(" ", style), width = 1, continuation = false)
-        // Every cell and every cluster of every setString reaches this method, and
-        // full grapheme segmentation allocates a matcher, a sequence and a builder per call. A
-        // lone printable ASCII character is unambiguously one cluster one cell wide, which is what
-        // the vast majority of painted cells are.
+        // Every painted cell reaches here, and most are one printable ASCII character: one cluster,
+        // one cell wide, so they skip grapheme segmentation and its allocations.
         if (symbol.length == 1 && symbol[0].code in 0x20..0x7E) {
             return StoredCell(this, width = 1, continuation = false)
         }

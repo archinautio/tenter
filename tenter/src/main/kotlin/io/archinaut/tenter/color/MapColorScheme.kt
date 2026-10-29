@@ -4,16 +4,9 @@
 package io.archinaut.tenter.color
 
 /**
- * A [ColorScheme] backed by a plain `Map<ColorRole, TerminalColor>` — the shape [ColorScheme]'s own
- * KDoc anticipates for "a host application's own file-backed color scheme": the role set isn't known
- * until a loader has parsed its source, so completeness is a load-time check on [colors] rather
- * than the compile-time exhaustiveness a hand-authored `when`-based color scheme gets. [space] is the
- * [ColorSpace] [colors] were authored in; every value in [colors] and [defaultBackground] must be in
- * it (never converted between spaces — see [TerminalColor]'s KDoc).
- *
- * Every [StandardRole] is required at construction. Domain-role completeness remains with the
- * application's loader, which knows the application's role set. The source map is copied, so
- * later mutation by a loader or caller cannot change a color scheme after a terminal has cached it.
+ * A [ColorScheme] backed by a copied map, for colors loaded from data. Every [StandardRole] is
+ * required, and every color must be in [space]; checking the application's own roles is its
+ * loader's job.
  */
 public class MapColorScheme(
     private val name: String,
@@ -40,6 +33,6 @@ public class MapColorScheme(
     override fun foreground(role: ColorRole): TerminalColor =
         colors[role] ?: error("Unknown color role: $role")
 
-    /** [name] — the color scheme's source name (a built-in stem, or a custom file path), for readable test/log output. */
+    /** [name], for readable output. */
     override fun toString(): String = name
 }

@@ -7,28 +7,25 @@ import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 
-/**
- * Content asking an enclosing [Viewport] to keep [area], in the content's own coordinates,
- * visible. Each kind decides when the viewport follows it and how.
- */
+/** Content asking an enclosing [Viewport] to keep [area] visible; each kind decides when and how it is followed. */
 internal sealed class VisibilityRequest {
     abstract val area: Rect
 
     protected abstract fun at(area: Rect): VisibilityRequest
 
-    /** Whether the viewport scrolls to this request this frame, given the [previous] frame and the [requested] offset. */
+    /** Whether this frame scrolls to this request. */
     abstract fun isFollowed(previous: ScrollState?, requested: Point, viewport: Size): Boolean
 
-    /** Where to scroll, from the [requested] offset, to show this request as [placement] places it. */
+    /** Where to scroll from [requested] to show this request as [placement] places it. */
     abstract fun targets(requested: Point, placement: Placement): ScrollTargets
 
     fun movedBy(dx: Int, dy: Int): VisibilityRequest = at(area.offset(dx, dy))
 
-    /** This request clipped to a [width] by [height] area, or `null` when nothing of it is left. */
+    /** This request clipped to a [width] by [height] area, or `null` when nothing is left. */
     fun clippedTo(width: Int, height: Int): VisibilityRequest? =
         area.clipTo(Rect(0, 0, width, height)).takeUnless { it.isEmpty }?.let(::at)
 
-    /** A selection: followed whenever it moves or the viewport changes size, as a cursor is. */
+    /** A selection: followed whenever it moves or the viewport changes size. */
     data class Reveal(override val area: Rect) : VisibilityRequest() {
         override fun at(area: Rect): VisibilityRequest = Reveal(area)
 
@@ -41,10 +38,7 @@ internal sealed class VisibilityRequest {
         )
     }
 
-    /**
-     * The content's last row, as a log's: followed vertically while the reader still sees where the
-     * previous frame's end was, so new rows stay in view, and left alone once they scroll away.
-     */
+    /** A log's last row: followed vertically while the reader still sees where the previous frame ended. */
     data class End(override val area: Rect) : VisibilityRequest() {
         override fun at(area: Rect): VisibilityRequest = End(area)
 
