@@ -177,3 +177,8 @@ internal class AnsiTerminal(
         }
     }
 }
+
+/** The [StyleTags] of a terminal that shows no color: no style emits an escape. */
+private object NoStyleTags : StyleTags {
+    override fun tagsFor(style: Style): Tags = Tags.NONE
+}

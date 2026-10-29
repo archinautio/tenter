@@ -8,12 +8,6 @@ import io.archinaut.tenter.text.TextTruncation
 import io.archinaut.tenter.text.TextWrap
 import io.archinaut.tenter.text.textClusters
 
-/** A run of text in one [style]. */
-public data class Span(
-    public val text: String,
-    public val style: Style = Style.DEFAULT,
-)
-
 /**
  * One line of text made of styled [Span]s, measured, wrapped, truncated, and painted as a unit.
  * Empty spans are dropped and same-styled neighbours merged, so lines that paint alike are equal.

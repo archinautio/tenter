@@ -3,9 +3,6 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.screen.Point
-import io.archinaut.tenter.screen.Size
-
 /** Where a [Viewport] scrolls along one axis this frame. */
 internal sealed interface ScrollTarget {
     /** The offset for a [viewportSize]-long window over content scrollable up to [maxOffset]. */
@@ -41,25 +38,5 @@ internal sealed interface ScrollTarget {
             val centered = start - (viewportSize - (end - start)) / 2
             return centered.coerceIn(0, maxOffset)
         }
-    }
-}
-
-/** How a followed request is brought into view along one axis. */
-internal fun interface Placement {
-    fun target(from: Int, start: Int, end: Int): ScrollTarget
-
-    companion object {
-        val FOLLOW: Placement = Placement(ScrollTarget::Follow)
-
-        val CENTER: Placement = Placement { _, start, end -> ScrollTarget.Center(start, end) }
-    }
-}
-
-internal data class ScrollTargets(val x: ScrollTarget, val y: ScrollTarget) {
-    fun offset(viewport: Size, maxOffset: Point): Point =
-        Point(x.offset(viewport.width, maxOffset.x), y.offset(viewport.height, maxOffset.y))
-
-    companion object {
-        fun keep(offset: Point): ScrollTargets = ScrollTargets(ScrollTarget.Keep(offset.x), ScrollTarget.Keep(offset.y))
     }
 }

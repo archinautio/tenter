@@ -736,7 +736,6 @@ public final class io/archinaut/tenter/widget/MeasurableWidget$DefaultImpls {
 }
 
 public final class io/archinaut/tenter/widget/MeasurableWidgetKt {
-	public static final fun fixedSize (Lio/archinaut/tenter/widget/Widget;II)Lio/archinaut/tenter/widget/MeasurableWidget;
 	public static final fun followingEnd (Lio/archinaut/tenter/widget/MeasurableWidget;)Lio/archinaut/tenter/widget/MeasurableWidget;
 	public static final fun revealed (Lio/archinaut/tenter/widget/MeasurableWidget;)Lio/archinaut/tenter/widget/MeasurableWidget;
 	public static final fun revealed (Lio/archinaut/tenter/widget/MeasurableWidget;Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/widget/MeasurableWidget;
@@ -842,6 +841,10 @@ public final class io/archinaut/tenter/widget/ViewportState {
 
 public abstract interface class io/archinaut/tenter/widget/Widget {
 	public abstract fun render (Lio/archinaut/tenter/screen/Canvas;)V
+}
+
+public final class io/archinaut/tenter/widget/WidgetKt {
+	public static final fun fixedSize (Lio/archinaut/tenter/widget/Widget;II)Lio/archinaut/tenter/widget/MeasurableWidget;
 }
 
 public final class io/archinaut/tenter/widget/panel/Panel {

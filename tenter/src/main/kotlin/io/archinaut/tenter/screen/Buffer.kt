@@ -155,14 +155,14 @@ internal class Buffer(
     }
 }
 
-internal data class StoredCell(
-    internal val cell: Cell,
-    internal val width: Int,
-    internal val continuation: Boolean,
+private data class StoredCell(
+    val cell: Cell,
+    val width: Int,
+    val continuation: Boolean,
 ) {
-    internal fun asPublicCell(): Cell = if (continuation) Cell("", cell.style) else cell
+    fun asPublicCell(): Cell = if (continuation) Cell("", cell.style) else cell
 
-    internal fun withStyle(style: Style): StoredCell =
+    fun withStyle(style: Style): StoredCell =
         if (style == cell.style) this else copy(cell = cell.copy(style = style))
 }
 

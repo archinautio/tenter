@@ -28,7 +28,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class TerminalEventTest {
+internal class MordantEventsTest {
 
     /** A recorder that also reports whether raw mode is active, which Mordant keeps private. */
     private class RawModeProbe(

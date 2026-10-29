@@ -3,15 +3,6 @@
 
 package io.archinaut.tenter.screen
 
-/** The axis a [Layout] splits along. */
-public enum class Direction {
-    /** Segments sit side by side, left to right. */
-    HORIZONTAL,
-
-    /** Segments are stacked, top to bottom. */
-    VERTICAL,
-}
-
 /**
  * Splits a [Rect] into adjacent segments along one axis, one per [Constraint]. Resolution is integer-only and deterministic. After removing [margin] and the [spacing]
  * between segments, each segment first takes its requested size: [Constraint.Length] and

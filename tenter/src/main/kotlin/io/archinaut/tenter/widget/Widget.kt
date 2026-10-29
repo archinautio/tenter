@@ -9,3 +9,13 @@ import io.archinaut.tenter.screen.Canvas
 public interface Widget {
     public fun render(canvas: Canvas)
 }
+
+/** This plain widget at a fixed [width] and [height], invoked on each paint; it makes no visibility request of its own. */
+public fun Widget.fixedSize(width: Int, height: Int): MeasurableWidget {
+    require(width >= 0) { "content width must not be negative: $width" }
+    require(height >= 0) { "content height must not be negative: $height" }
+    val widget = this
+    return object : LayoutWidget {
+        override fun layout(availableWidth: Int): ContentLayout = ContentLayout.fixed(width, height, widget)
+    }
+}

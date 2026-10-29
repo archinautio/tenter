@@ -7,6 +7,12 @@ import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 
+internal fun contentLayout(
+    width: Int,
+    height: Int,
+    block: ContentLayout.Builder.() -> Unit,
+): ContentLayout = ContentLayout.Builder().apply(block).build(width, height)
+
 /**
  * What one [MeasurableWidget] recorded at one width: its logical size, text, children, painted
  * widgets (invoked on each paint), and visibility requests, of which the last one wins.

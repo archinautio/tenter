@@ -21,16 +21,6 @@ public fun interface MeasurableWidget : Widget {
     }
 }
 
-/** This plain widget at a fixed [width] and [height], invoked on each paint; it makes no visibility request of its own. */
-public fun Widget.fixedSize(width: Int, height: Int): MeasurableWidget {
-    require(width >= 0) { "content width must not be negative: $width" }
-    require(height >= 0) { "content height must not be negative: $height" }
-    val widget = this
-    return object : LayoutWidget {
-        override fun layout(availableWidth: Int): ContentLayout = ContentLayout.fixed(width, height, widget)
-    }
-}
-
 /** This widget asking an enclosing [Viewport] to keep all of it visible, overriding requests made inside it. */
 public fun MeasurableWidget.revealed(): MeasurableWidget =
     Requesting(this) { VisibilityRequest.Reveal(Rect(0, 0, it.width, it.height)) }
@@ -55,25 +45,9 @@ private class Requesting(
     }
 }
 
-/** A measurable widget that places prepared children at explicit coordinates instead of writing rows. */
-internal interface LayoutWidget : MeasurableWidget {
-    /** Lays out this widget for [availableWidth], which [prepare] has checked is not negative. */
-    fun layout(availableWidth: Int): ContentLayout
-
-    override fun write(writer: RowWriter) {
-        writer.draw(this)
-    }
-}
-
 /** Records this widget's content for [availableWidth]. */
 internal fun MeasurableWidget.prepare(availableWidth: Int): ContentLayout {
     require(availableWidth >= 0) { "available width must not be negative: $availableWidth" }
     if (this is LayoutWidget) return layout(availableWidth)
     return RowWriter(availableWidth).also(::write).build()
 }
-
-internal fun contentLayout(
-    width: Int,
-    height: Int,
-    block: ContentLayout.Builder.() -> Unit,
-): ContentLayout = ContentLayout.Builder().apply(block).build(width, height)
