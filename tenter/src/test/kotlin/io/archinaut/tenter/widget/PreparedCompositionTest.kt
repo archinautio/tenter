@@ -181,7 +181,7 @@ internal class PreparedCompositionTest {
     fun `fixed prepared content scrolls in both axes`() {
         val fixed = object : Widget {
             override fun render(canvas: Canvas) {
-                canvas.set(12, 5, Cell("X"))
+                canvas.set(12, 5, "X")
             }
         }.fixedSize(20, 10)
         val state = ViewportState().apply { scrollBy(10, 4) }

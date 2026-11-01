@@ -122,8 +122,8 @@ internal class PanelFrameTest {
         val buffer = draw(stubContent(20))
 
         val thumbRow = 1 + Scrollbar.thumb(track = 8, contentLength = 21, viewportLength = 8, offset = 0)!!.first
-        assertEquals(StandardRole.PANEL_BORDER_FOCUSED, buffer.get(29, 0).style.fg)
-        assertEquals(StandardRole.PANEL_BORDER_FOCUSED, buffer.get(29, thumbRow).style.fg)
+        assertEquals(StandardRole.PANEL_BORDER_FOCUSED, buffer.get(29, 0).fg)
+        assertEquals(StandardRole.PANEL_BORDER_FOCUSED, buffer.get(29, thumbRow).fg)
     }
 
     @Test

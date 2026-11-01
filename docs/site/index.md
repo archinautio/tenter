@@ -85,7 +85,7 @@ Ratatui, the names map directly:
 | `Widget`, `StatefulWidget` | `Widget`, `StatefulWidget` | Something that renders into an area, optionally with caller-owned state. |
 | `Canvas` | `Rect` + `Buffer` | The area a widget renders into: clipped, with local coordinates. |
 | `CompletedFrame` | `CompletedFrame` + `Buffer` | What a draw presented: compare it, narrow it to a `region`, and read its text. See [Testing](testing.md). |
-| `Cell`, `Style` | `Cell`, `Style` | A styled terminal cell, and its colors. |
+| `Cell`, `Style` | `Cell`, `Style` | What a terminal cell shows, and the change a write applies to it. |
 | `Layout`, `Constraint` | `Layout`, `Constraint` | Split a `Rect` into smaller rectangles. |
 | `Block`, `Borders`, `Padding` | `Block`, `Borders`, `Padding` | Borders with a title, and the space inside them. |
 | `Scrollbar` | `Scrollbar` | A thumb showing a viewport's position, drawn over the border beside it. |

@@ -37,8 +37,8 @@ internal class GaugeTest {
     fun `the caller chooses the filled and unfilled styles`() {
         val buffer = render(Gauge(0.5, filledStyle = Style(StandardRole.DANGER), unfilledStyle = Style(StandardRole.INFO)), 4, 1)
 
-        assertEquals(StandardRole.DANGER, buffer.get(0, 0).style.fg)
-        assertEquals(StandardRole.INFO, buffer.get(3, 0).style.fg)
+        assertEquals(StandardRole.DANGER, buffer.get(0, 0).fg)
+        assertEquals(StandardRole.INFO, buffer.get(3, 0).fg)
     }
 
     @Test

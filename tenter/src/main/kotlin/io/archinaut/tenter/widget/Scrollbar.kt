@@ -5,7 +5,6 @@ package io.archinaut.tenter.widget
 
 import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Style
 
@@ -21,7 +20,7 @@ public class Scrollbar private constructor(
     override fun render(canvas: Canvas, state: ScrollState) {
         val track = axis.track(canvas)
         thumb(track, axis.length(state.content), axis.length(state.viewport), axis.offset(state))
-            ?.forEach { axis.paint(canvas, it, Cell(axis.glyph, style)) }
+            ?.forEach { axis.paint(canvas, it, style) }
     }
 
     private sealed class Axis(val glyph: String) {
@@ -31,7 +30,7 @@ public class Scrollbar private constructor(
 
         abstract fun offset(state: ScrollState): Int
 
-        abstract fun paint(canvas: Canvas, position: Int, cell: Cell)
+        abstract fun paint(canvas: Canvas, position: Int, style: Style)
 
         object Vertical : Axis("▐") {
             override fun track(canvas: Canvas): Int = canvas.height
@@ -40,7 +39,7 @@ public class Scrollbar private constructor(
 
             override fun offset(state: ScrollState): Int = state.offset.y
 
-            override fun paint(canvas: Canvas, position: Int, cell: Cell) = canvas.set(0, position, cell)
+            override fun paint(canvas: Canvas, position: Int, style: Style) = canvas.set(0, position, glyph, style)
         }
 
         object Horizontal : Axis("▬") {
@@ -50,7 +49,7 @@ public class Scrollbar private constructor(
 
             override fun offset(state: ScrollState): Int = state.offset.x
 
-            override fun paint(canvas: Canvas, position: Int, cell: Cell) = canvas.set(position, 0, cell)
+            override fun paint(canvas: Canvas, position: Int, style: Style) = canvas.set(position, 0, glyph, style)
         }
     }
 

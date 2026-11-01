@@ -70,8 +70,8 @@ internal class BlockTest {
         assertEquals("S", buffer.get(6, 0).symbol)
         assertEquals("T", buffer.get(7, 0).symbol)
         assertEquals(" ", buffer.get(8, 0).symbol)
-        assertEquals(StandardRole.ACCENT, buffer.get(4, 0).style.fg)
-        assertEquals(StandardRole.PANEL_BORDER, buffer.get(0, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(4, 0).fg)
+        assertEquals(StandardRole.PANEL_BORDER, buffer.get(0, 0).fg)
     }
 
     @Test
@@ -80,7 +80,7 @@ internal class BlockTest {
 
         val buffer = render(widget, 10, 3)
 
-        assertEquals(StandardRole.DANGER, buffer.get(0, 0).style.fg)
+        assertEquals(StandardRole.DANGER, buffer.get(0, 0).fg)
     }
 
     @Test
@@ -98,8 +98,8 @@ internal class BlockTest {
         assertEquals("S", buffer.get(8, 0).symbol)
         assertEquals("T", buffer.get(9, 0).symbol)
         assertEquals(" ", buffer.get(10, 0).symbol)
-        assertEquals(StandardRole.ACCENT, buffer.get(2, 0).style.fg)
-        assertEquals(StandardRole.ACCENT, buffer.get(6, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(2, 0).fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(6, 0).fg)
     }
 
     @Test
@@ -117,8 +117,8 @@ internal class BlockTest {
         assertEquals("L", buffer.get(8, 0).symbol)
         assertEquals("P", buffer.get(9, 0).symbol)
         assertEquals(" ", buffer.get(10, 0).symbol)
-        assertEquals(StandardRole.ACCENT, buffer.get(3, 0).style.fg)
-        assertEquals(StandardRole.ACCENT, buffer.get(6, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(3, 0).fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(6, 0).fg)
     }
 
     @Test
@@ -161,7 +161,7 @@ internal class BlockTest {
         assertEquals("[", buffer.get(2, 0).symbol)
         assertEquals("1", buffer.get(3, 0).symbol)
         assertEquals("]", buffer.get(4, 0).symbol)
-        assertEquals(StandardRole.ACCENT, buffer.get(3, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(3, 0).fg)
     }
 
     @Test

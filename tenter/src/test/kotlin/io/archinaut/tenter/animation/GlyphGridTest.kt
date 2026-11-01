@@ -80,9 +80,8 @@ internal class GlyphGridTest {
 
         glyphs.render(io.archinaut.tenter.screen.Canvas.of(destination))
 
-        assertEquals(Cell(" ", style(' ')), destination.get(0, 0))
-        assertEquals(Cell("X", style('X')), destination.get(1, 0))
-        assertFalse(destination.get(0, 0).style == Style.DEFAULT)
+        assertEquals(Cell(" ", fg = StandardRole.SUCCESS, bg = StandardRole.TEXT_MUTED), destination.get(0, 0))
+        assertEquals(Cell("X", fg = StandardRole.DANGER, bg = StandardRole.INFO), destination.get(1, 0))
     }
 
     @Test

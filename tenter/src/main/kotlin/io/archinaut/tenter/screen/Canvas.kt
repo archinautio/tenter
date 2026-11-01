@@ -62,13 +62,19 @@ public class Canvas private constructor(
         return buffer.get(bounds.x + x, bounds.y + y)
     }
 
-    /** No-op if ([x], [y]) is outside this canvas. */
-    public fun set(x: Int, y: Int, cell: Cell) {
+    /**
+     * Writes [symbol], one grapheme cluster, at ([x], [y]), applying [style] to the cell: channels
+     * it leaves unset keep what is painted there. No-op if ([x], [y]) is outside this canvas.
+     */
+    public fun set(x: Int, y: Int, symbol: String, style: Style = Style.DEFAULT) {
         if (!area.contains(x, y)) return
-        buffer.writeCell(bounds.x + x, bounds.y + y, cell, clip)
+        buffer.write(bounds.x + x, bounds.y + y, symbol, style, clip)
     }
 
-    /** Writes [text] from ([x], [y]), skipping cells outside this canvas, and returns the point after it. */
+    /**
+     * Writes [text] from ([x], [y]), applying [style] to each cell as [set] does, skipping cells
+     * outside this canvas, and returns the point after it.
+     */
     public fun setString(
         x: Int,
         y: Int,
@@ -78,18 +84,18 @@ public class Canvas private constructor(
         var column = x
         for (cluster in textClusters(text)) {
             if (cluster.width == 0) continue
-            buffer.writeCell(bounds.x + column, bounds.y + y, Cell(cluster.drawableText, style), clip)
+            buffer.write(bounds.x + column, bounds.y + y, cluster.drawableText, style, clip)
             column += cluster.width
         }
         return Point(column, y)
     }
 
-    /** Resets every cell this canvas can write to a blank that sets no style channel. */
+    /** Resets every cell this canvas can write to [Cell.EMPTY]. */
     internal fun clear() {
         val visible = visibleArea
         for (y in visible.y until visible.y + visible.height) {
             for (x in visible.x until visible.x + visible.width) {
-                buffer.writeCell(bounds.x + x, bounds.y + y, Cell.EMPTY, clip, replace = true)
+                buffer.reset(bounds.x + x, bounds.y + y, clip)
             }
         }
     }

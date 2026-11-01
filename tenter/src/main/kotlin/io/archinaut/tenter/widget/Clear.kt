@@ -6,8 +6,8 @@ package io.archinaut.tenter.widget
 import io.archinaut.tenter.screen.Canvas
 
 /**
- * Resets its area to blank cells that set no style channel, so a popup rendered after it does not
- * show what lies beneath. A wide glyph straddling its edge is left whole.
+ * Resets its area to blank cells in the default colors with no attribute, so a popup rendered
+ * after it does not show what lies beneath. A wide glyph straddling its edge is left whole.
  */
 public object Clear : Widget {
     override fun render(canvas: Canvas) {

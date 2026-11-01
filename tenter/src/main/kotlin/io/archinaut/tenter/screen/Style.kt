@@ -4,12 +4,11 @@
 package io.archinaut.tenter.screen
 
 import io.archinaut.tenter.color.ColorRole
-import io.archinaut.tenter.color.StandardRole
 
 /**
- * Foreground and background roles plus text attributes for a [Cell]. A null channel is unset, so
- * a write keeps what is painted under it (see [patch]); a channel never set renders as
- * [io.archinaut.tenter.color.StandardRole.DEFAULT], or with the attribute off.
+ * The change a write applies to a [Cell]: the foreground and background roles and text attributes
+ * it sets. A null channel is unset, so the write keeps what the cell showed; set a channel to
+ * replace it, including back to [io.archinaut.tenter.color.StandardRole.DEFAULT] or off.
  */
 public data class Style(
     val fg: ColorRole? = null,
@@ -23,7 +22,7 @@ public data class Style(
 ) {
     /** This style with every channel [other] sets replaced by [other]'s. */
     public fun patch(other: Style): Style = when {
-        // Every cell write patches, so the two common cases avoid allocating.
+        // The two common cases avoid allocating.
         other == DEFAULT -> this
         other.setsEveryChannel() -> other
         else -> Style(
@@ -37,27 +36,6 @@ public data class Style(
             strikethrough = other.strikethrough ?: strikethrough,
         )
     }
-
-    /** Whether this style and [other] render the same attributes, treating an unset attribute as off. */
-    internal fun rendersSameAttributes(other: Style): Boolean =
-        (bold ?: false) == (other.bold ?: false) &&
-            (dim ?: false) == (other.dim ?: false) &&
-            (italic ?: false) == (other.italic ?: false) &&
-            (underline ?: false) == (other.underline ?: false) &&
-            (inverse ?: false) == (other.inverse ?: false) &&
-            (strikethrough ?: false) == (other.strikethrough ?: false)
-
-    /** This style as the terminal shows it: an unset color is [StandardRole.DEFAULT], an unset attribute off. */
-    internal fun rendered(): Style = Style(
-        fg = fg ?: StandardRole.DEFAULT,
-        bg = bg ?: StandardRole.DEFAULT,
-        bold = bold ?: false,
-        dim = dim ?: false,
-        italic = italic ?: false,
-        underline = underline ?: false,
-        inverse = inverse ?: false,
-        strikethrough = strikethrough ?: false,
-    )
 
     private fun setsEveryChannel(): Boolean =
         fg != null && bg != null && bold != null && dim != null && italic != null &&

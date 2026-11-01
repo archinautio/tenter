@@ -24,7 +24,7 @@ internal class AnimationPlaybackTest {
 
     private class LetterWidget(private val letter: Char) : Widget {
         public override fun render(canvas: Canvas) {
-            canvas.set(0, 0, Cell(letter.toString()))
+            canvas.set(0, 0, letter.toString())
         }
     }
 

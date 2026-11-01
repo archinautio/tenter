@@ -7,7 +7,6 @@ import io.archinaut.tenter.color.ColorScheme
 import io.archinaut.tenter.color.ColorSpace
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Cell
-import io.archinaut.tenter.screen.Style
 
 import com.github.ajalt.mordant.input.MouseTracking
 import com.github.ajalt.mordant.rendering.AnsiLevel
@@ -95,7 +94,7 @@ internal class AnsiTerminal(
 
         /** Clears the screen with the color scheme's background, since `clearScreen()` erases with the active SGR. */
         fun clear() {
-            val defaultStyle = styles.tagsFor(Style.DEFAULT).open
+            val defaultStyle = styles.tagsFor(Cell.EMPTY).open
             backend.rawPrint(defaultStyle + backend.cursor.getMoves { clearScreen(); setPosition(0, 0) })
             previous = null
         }
@@ -154,22 +153,22 @@ internal class AnsiTerminal(
          */
         private fun renderSpan(sb: StringBuilder, buffer: Buffer, y: Int, xStart: Int, xEnd: Int) {
             var x = xStart
-            // No run is open yet: NONE closes nothing, so the starting style never affects the output.
-            var activeStyle: Style = Style.DEFAULT
+            // No run is open yet: NONE closes nothing, so the starting attributes never affect the output.
+            var activeAttributes = Cell.EMPTY.attributes
             var activeTags: Tags = Tags.NONE
             while (x < xEnd) {
-                val runStyle = buffer.get(x, y).style
+                val lead = buffer.get(x, y)
                 val runChars = StringBuilder()
                 while (x < xEnd) {
                     val cell: Cell = buffer.get(x, y)
-                    if (cell.style != runStyle) break
+                    if (!cell.looksLike(lead)) break
                     runChars.append(cell.symbol)
                     x++
                 }
-                val tags = styles.tagsFor(runStyle)
-                if (!activeStyle.rendersSameAttributes(runStyle)) sb.append(activeTags.close)
+                val tags = styles.tagsFor(lead)
+                if (activeAttributes != lead.attributes) sb.append(activeTags.close)
                 sb.append(tags.open)
-                activeStyle = runStyle
+                activeAttributes = lead.attributes
                 activeTags = tags
                 sb.append(runChars)
             }
@@ -180,5 +179,5 @@ internal class AnsiTerminal(
 
 /** The [StyleTags] of a terminal that shows no color: no style emits an escape. */
 private object NoStyleTags : StyleTags {
-    override fun tagsFor(style: Style): Tags = Tags.NONE
+    override fun tagsFor(cell: Cell): Tags = Tags.NONE
 }

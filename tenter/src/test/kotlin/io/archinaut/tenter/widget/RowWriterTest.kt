@@ -87,10 +87,10 @@ internal class RowWriterTest {
             writer.writeLine(Line(Span("foo", Style(StandardRole.DANGER)), Span("bar", Style(StandardRole.SUCCESS))))
         }
 
-        assertEquals(Style(StandardRole.DANGER), canvas.get(0, 0).style)
-        assertEquals(Style(StandardRole.DANGER), canvas.get(2, 0).style)
-        assertEquals(Style(StandardRole.SUCCESS), canvas.get(3, 0).style)
-        assertEquals(Style(StandardRole.SUCCESS), canvas.get(5, 0).style)
+        assertEquals(StandardRole.DANGER, canvas.get(0, 0).fg)
+        assertEquals(StandardRole.DANGER, canvas.get(2, 0).fg)
+        assertEquals(StandardRole.SUCCESS, canvas.get(3, 0).fg)
+        assertEquals(StandardRole.SUCCESS, canvas.get(5, 0).fg)
         assertEquals("f", canvas.get(0, 0).symbol)
         assertEquals("b", canvas.get(3, 0).symbol)
     }
@@ -104,7 +104,7 @@ internal class RowWriterTest {
         assertEquals("中", canvas.get(0, 0).symbol)
         assertEquals("", canvas.get(1, 0).symbol, "filler reserves the wide glyph's second cell")
         assertEquals("A", canvas.get(2, 0).symbol)
-        assertEquals(Style(StandardRole.SUCCESS), canvas.get(2, 0).style)
+        assertEquals(StandardRole.SUCCESS, canvas.get(2, 0).fg)
     }
 
     @Test

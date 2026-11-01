@@ -7,7 +7,6 @@ import com.github.ajalt.mordant.rendering.BorderType
 import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
@@ -53,17 +52,17 @@ public class Block(
         val body = borderType.body
         val foot = borderType.foot
         for (i in 0 until width) {
-            if (borders.top) canvas.set(i, 0, Cell(head.ew, style))
-            if (borders.bottom) canvas.set(i, height - 1, Cell(foot.ew, style))
+            if (borders.top) canvas.set(i, 0, head.ew, style)
+            if (borders.bottom) canvas.set(i, height - 1, foot.ew, style)
         }
         for (i in 0 until height) {
-            if (borders.left) canvas.set(0, i, Cell(body.ns, style))
-            if (borders.right) canvas.set(width - 1, i, Cell(body.ns, style))
+            if (borders.left) canvas.set(0, i, body.ns, style)
+            if (borders.right) canvas.set(width - 1, i, body.ns, style)
         }
-        if (borders.top && borders.left) canvas.set(0, 0, Cell(head.es, style))
-        if (borders.top && borders.right) canvas.set(width - 1, 0, Cell(head.sw, style))
-        if (borders.bottom && borders.left) canvas.set(0, height - 1, Cell(foot.ne, style))
-        if (borders.bottom && borders.right) canvas.set(width - 1, height - 1, Cell(foot.nw, style))
+        if (borders.top && borders.left) canvas.set(0, 0, head.es, style)
+        if (borders.top && borders.right) canvas.set(width - 1, 0, head.sw, style)
+        if (borders.bottom && borders.left) canvas.set(0, height - 1, foot.ne, style)
+        if (borders.bottom && borders.right) canvas.set(width - 1, height - 1, foot.nw, style)
 
         drawTitle(canvas)
     }
@@ -76,11 +75,11 @@ public class Block(
         if (title.isNotEmpty()) {
             if (badge != null && width > titleWidth + badgeWidth + 7) {
                 canvas.setString(2, 0, "[$badge] $title", Style(titleColor))
-                canvas.set(5 + badgeWidth + titleWidth, 0, Cell(style = Style(borderColor)))
+                canvas.set(5 + badgeWidth + titleWidth, 0, " ", Style(borderColor))
             } else if (badge == null && width > titleWidth + 6) {
-                canvas.set(3, 0, Cell(style = Style(borderColor)))
+                canvas.set(3, 0, " ", Style(borderColor))
                 canvas.setString(4, 0, title, Style(titleColor))
-                canvas.set(4 + titleWidth, 0, Cell(style = Style(borderColor)))
+                canvas.set(4 + titleWidth, 0, " ", Style(borderColor))
             } else if (badge != null && width > 2 + badgeRunWidth) {
                 // Too narrow for "[badge] title", as a minimized stub is: the badge alone still helps.
                 canvas.setString(2, 0, "[$badge]", Style(titleColor))

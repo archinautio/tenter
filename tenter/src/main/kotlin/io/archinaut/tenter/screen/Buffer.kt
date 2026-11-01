@@ -32,50 +32,73 @@ internal class Buffer(
         return cells[y][x].asPublicCell()
     }
 
-    fun set(x: Int, y: Int, cell: Cell) {
+    fun set(x: Int, y: Int, symbol: String, style: Style = Style.DEFAULT) {
         if (!area.contains(x, y)) return
-        writeCell(x, y, cell, area)
+        write(x, y, symbol, style, area)
     }
 
     /**
-     * Writes [cell] at ([x], [y]) within [clip]. Its style is patched over what was painted there
-     * unless [replace] is set, which stores [cell] exactly as given, as if nothing was painted before.
+     * Writes [symbol], one grapheme cluster, at ([x], [y]) within [clip], applying [style] to what
+     * its lead column showed, so channels the style leaves unset — typically the background — keep
+     * their painted value.
      */
-    internal fun writeCell(
+    internal fun write(
         x: Int,
         y: Int,
-        cell: Cell,
+        symbol: String,
+        style: Style,
         clip: Rect,
-        replace: Boolean = false,
     ) {
-        val glyph = cell.toStoredGlyph()
+        val glyphSymbol: String
+        val glyphWidth: Int
+        // Every painted cell reaches here, and most are one printable ASCII character: one cluster,
+        // one cell wide, so they skip grapheme segmentation and its allocations.
+        if (symbol.isEmpty()) {
+            glyphSymbol = " "
+            glyphWidth = 1
+        } else if (symbol.length == 1 && symbol[0].code in 0x20..0x7E) {
+            glyphSymbol = symbol
+            glyphWidth = 1
+        } else {
+            val clusters = textClusters(symbol).toList()
+            require(clusters.size == 1 && clusters.single().width > 0) {
+                "Cell must contain exactly one drawable grapheme cluster: ${symbol.toDebugString()}"
+            }
+            glyphSymbol = clusters.single().drawableText
+            glyphWidth = clusters.single().width
+        }
         val clipLeft = clip.x
         val clipRight = clip.x + clip.width
         if (y !in clip.y until clip.y + clip.height) return
-        if (glyph.width == 2 && x < clipLeft && x + 1 >= clipLeft) {
-            writeBlank(clipLeft, y, glyph.cell.style, clip)
+        if (glyphWidth == 2 && x < clipLeft && x + 1 >= clipLeft) {
+            writeBlank(clipLeft, y, style, clip)
             return
         }
         if (x !in clipLeft until clipRight) return
 
-        if (glyph.width == 2 && x + 1 >= clipRight) {
-            writeBlank(x, y, glyph.cell.style, clip)
+        if (glyphWidth == 2 && x + 1 >= clipRight) {
+            writeBlank(x, y, style, clip)
             return
         }
 
-        val targetEnd = x + glyph.width
+        val targetEnd = x + glyphWidth
         if (targetEnd > clipRight || targetEnd > width) return
         if (!canReplace(x, y, targetEnd, clip)) return
 
-        // The glyph's style is patched over what its lead column had painted, so channels it leaves
-        // unset — typically the background — keep their painted value.
-        val painted = if (replace) glyph else glyph.withStyle(cells[y][x].cell.style.patch(glyph.cell.style))
+        val painted = cells[y][x].cell.painted(glyphSymbol, style)
         clearGlyphAt(x, y)
-        if (glyph.width == 2) clearGlyphAt(x + 1, y)
-        cells[y][x] = painted
-        if (glyph.width == 2) {
-            cells[y][x + 1] = StoredCell(painted.cell, width = 2, continuation = true)
+        if (glyphWidth == 2) clearGlyphAt(x + 1, y)
+        cells[y][x] = StoredCell(painted, glyphWidth, continuation = false)
+        if (glyphWidth == 2) {
+            cells[y][x + 1] = StoredCell(painted, width = 2, continuation = true)
         }
+    }
+
+    /** Resets ([x], [y]) within [clip] to [Cell.EMPTY]; a wide glyph it would split is left whole. */
+    internal fun reset(x: Int, y: Int, clip: Rect) {
+        if (!canReplace(x, y, x + 1, clip)) return
+        clearGlyphAt(x, y)
+        cells[y][x] = EMPTY_STORED
     }
 
     internal fun snapshot(): Buffer {
@@ -121,9 +144,10 @@ internal class Buffer(
     private fun clearGlyphAt(x: Int, y: Int) {
         val lead = glyphStart(x, y)
         val stored = cells[y][lead]
-        cells[y][lead] = StoredCell(Cell(" ", stored.cell.style), width = 1, continuation = false)
+        val blank = StoredCell(stored.cell.copy(symbol = " "), width = 1, continuation = false)
+        cells[y][lead] = blank
         if (stored.width == 2 && lead + 1 < width) {
-            cells[y][lead + 1] = StoredCell(Cell(" ", stored.cell.style), width = 1, continuation = false)
+            cells[y][lead + 1] = blank
         }
     }
 
@@ -134,24 +158,9 @@ internal class Buffer(
         clip: Rect,
     ) {
         if (!canReplace(x, y, x + 1, clip)) return
-        val painted = cells[y][x].cell.style.patch(style)
+        val painted = cells[y][x].cell.painted(" ", style)
         clearGlyphAt(x, y)
-        cells[y][x] = StoredCell(Cell(" ", painted), width = 1, continuation = false)
-    }
-
-    private fun Cell.toStoredGlyph(): StoredCell {
-        if (symbol.isEmpty()) return StoredCell(Cell(" ", style), width = 1, continuation = false)
-        // Every painted cell reaches here, and most are one printable ASCII character: one cluster,
-        // one cell wide, so they skip grapheme segmentation and its allocations.
-        if (symbol.length == 1 && symbol[0].code in 0x20..0x7E) {
-            return StoredCell(this, width = 1, continuation = false)
-        }
-        val clusters = textClusters(symbol).toList()
-        require(clusters.size == 1 && clusters.single().width > 0) {
-            "Cell must contain exactly one drawable grapheme cluster: ${symbol.toDebugString()}"
-        }
-        val cluster = clusters.single()
-        return StoredCell(Cell(cluster.drawableText, style), cluster.width, continuation = false)
+        cells[y][x] = StoredCell(painted, width = 1, continuation = false)
     }
 }
 
@@ -160,10 +169,7 @@ private data class StoredCell(
     val width: Int,
     val continuation: Boolean,
 ) {
-    fun asPublicCell(): Cell = if (continuation) Cell("", cell.style) else cell
-
-    fun withStyle(style: Style): StoredCell =
-        if (style == cell.style) this else copy(cell = cell.copy(style = style))
+    fun asPublicCell(): Cell = if (continuation) cell.copy(symbol = "") else cell
 }
 
 private fun String.toDebugString(): String = replace("\u001B", "<ESC>")

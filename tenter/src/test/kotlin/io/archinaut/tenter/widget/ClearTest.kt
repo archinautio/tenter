@@ -24,21 +24,21 @@ internal class ClearTest {
 
         Clear.render(canvas.region(Rect(1, 0, 2, 2)))
 
-        assertEquals(Cell("A", painted), canvas.get(0, 0))
-        assertEquals(Cell(" ", Style.DEFAULT), canvas.get(1, 0))
-        assertEquals(Cell(" ", Style.DEFAULT), canvas.get(2, 1))
-        assertEquals(Cell("H", painted), canvas.get(3, 1))
+        assertEquals(Cell("A", fg = StandardRole.DANGER, bg = StandardRole.SUCCESS, strikethrough = true), canvas.get(0, 0))
+        assertEquals(Cell(" "), canvas.get(1, 0))
+        assertEquals(Cell(" "), canvas.get(2, 1))
+        assertEquals(Cell("H", fg = StandardRole.DANGER, bg = StandardRole.SUCCESS, strikethrough = true), canvas.get(3, 1))
     }
 
     @Test
     fun `content drawn after clear does not inherit what was painted beneath`() {
         val canvas = Canvas.of(Buffer(1, 1))
-        canvas.set(0, 0, Cell("X", painted))
+        canvas.set(0, 0, "X", painted)
 
         Clear.render(canvas)
-        canvas.set(0, 0, Cell("─", Style(fg = StandardRole.ACCENT)))
+        canvas.set(0, 0, "─", Style(fg = StandardRole.ACCENT))
 
-        assertEquals(Cell("─", Style(fg = StandardRole.ACCENT)), canvas.get(0, 0))
+        assertEquals(Cell("─", fg = StandardRole.ACCENT), canvas.get(0, 0))
     }
 
     @Test
@@ -48,7 +48,7 @@ internal class ClearTest {
 
         Clear.render(canvas.region(Rect(1, 0, 2, 1)))
 
-        assertEquals(Cell("中", painted), canvas.get(0, 0))
-        assertEquals(Cell(" ", Style.DEFAULT), canvas.get(2, 0))
+        assertEquals(Cell("中", fg = StandardRole.DANGER, bg = StandardRole.SUCCESS, strikethrough = true), canvas.get(0, 0))
+        assertEquals(Cell(" "), canvas.get(2, 0))
     }
 }

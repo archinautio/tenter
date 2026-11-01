@@ -21,7 +21,7 @@ internal class KeyHelpTest {
         val buffer = renderHelp(listOf(KeySection("MOVEMENT", listOf(KeyHint("Enter", "select unit")))))
 
         assertEquals("─── KEYS " + "─".repeat(19), buffer.region(Rect(0, 0, 28, 1)).line(0))
-        assertEquals(io.archinaut.tenter.color.StandardRole.INFO, buffer.get(4, 0).style.fg)
+        assertEquals(io.archinaut.tenter.color.StandardRole.INFO, buffer.get(4, 0).fg)
     }
 
     @Test

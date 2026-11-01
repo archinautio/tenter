@@ -5,7 +5,6 @@ package io.archinaut.tenter.animation
 
 import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Canvas
-import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.widget.Widget
@@ -54,7 +53,7 @@ public class GlyphGrid(
     public override fun render(canvas: Canvas) {
         for (y in 0 until height) {
             for (x in 0 until width) {
-                canvas.set(x, y, Cell(get(x, y).toString(), styleAt(x, y)))
+                canvas.set(x, y, get(x, y).toString(), styleAt(x, y))
             }
         }
     }

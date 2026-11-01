@@ -3,9 +3,9 @@
 
 package io.archinaut.tenter.terminal
 
-import io.archinaut.tenter.screen.Style
+import io.archinaut.tenter.screen.Cell
 
-/** Renders a [Style] to the [Tags] a terminal pastes around a run of plain text in that style. */
+/** The [Tags] a terminal pastes around a run of plain text shown as [Cell]s that look like [cell]. */
 internal fun interface StyleTags {
-    fun tagsFor(style: Style): Tags
+    fun tagsFor(cell: Cell): Tags
 }

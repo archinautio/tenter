@@ -17,6 +17,6 @@ internal class FlashMessageTest {
 
         assertEquals(1, message.measure(10).height)
         assertEquals("saved all…", buffer.line(0))
-        assertEquals(StandardRole.INFO, buffer.get(0, 0).style.fg)
+        assertEquals(StandardRole.INFO, buffer.get(0, 0).fg)
     }
 }

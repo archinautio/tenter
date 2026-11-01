@@ -15,7 +15,7 @@ internal class BufferTest {
     fun `new buffer has all cells blank with no style channel set`() {
         val buffer = Buffer(3, 2)
 
-        val defaultCell = Cell(" ", Style.DEFAULT)
+        val defaultCell = Cell(" ")
         for (x in 0 until 3) {
             for (y in 0 until 2) {
                 assertEquals(defaultCell, buffer.get(x, y))
@@ -26,21 +26,19 @@ internal class BufferTest {
     @Test
     fun `set and get cell`() {
         val buffer = Buffer(5, 5)
-        val cell = Cell("A", Style(StandardRole.DANGER, StandardRole.INFO))
+        buffer.set(2, 3, "A", Style(fg = StandardRole.DANGER, bg = StandardRole.INFO))
 
-        buffer.set(2, 3, cell)
-
-        assertEquals(cell, buffer.get(2, 3))
+        assertEquals(Cell("A", fg = StandardRole.DANGER, bg = StandardRole.INFO), buffer.get(2, 3))
     }
 
     @Test
     fun `set out of bounds is ignored`() {
         val buffer = Buffer(3, 3)
 
-        buffer.set(-1, 0, Cell("X"))
-        buffer.set(0, -1, Cell("X"))
-        buffer.set(3, 0, Cell("X"))
-        buffer.set(0, 3, Cell("X"))
+        buffer.set(-1, 0, "X")
+        buffer.set(0, -1, "X")
+        buffer.set(3, 0, "X")
+        buffer.set(0, 3, "X")
 
         assertEquals(Cell(), buffer.get(0, 0))
     }
@@ -77,8 +75,8 @@ internal class BufferTest {
     fun `set rejects a multi-grapheme or control cell`() {
         val buffer = Buffer(2, 1)
 
-        assertThrows<IllegalArgumentException> { buffer.set(0, 0, Cell("AB")) }
-        assertThrows<IllegalArgumentException> { buffer.set(0, 0, Cell("\u001B")) }
+        assertThrows<IllegalArgumentException> { buffer.set(0, 0, "AB") }
+        assertThrows<IllegalArgumentException> { buffer.set(0, 0, "\u001B") }
     }
 
     @Test
@@ -86,7 +84,7 @@ internal class BufferTest {
         val buffer = Buffer(3, 1)
         Canvas.of(buffer).setString(0, 0, "中")
 
-        buffer.set(1, 0, buffer.get(1, 0))
+        buffer.set(1, 0, buffer.get(1, 0).symbol)
 
         assertEquals(Cell(), buffer.get(0, 0))
         assertEquals(Cell(), buffer.get(1, 0))

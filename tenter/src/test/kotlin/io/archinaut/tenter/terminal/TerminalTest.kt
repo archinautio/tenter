@@ -82,7 +82,7 @@ internal class TerminalTest {
         val customBackend = MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = recorder)
         val fixed = TrueColor(255, 0, 0)
         val buffer = Buffer(1, 1)
-        buffer.set(0, 0, Cell("X", Style(fg = fixed, bg = fixed)))
+        buffer.set(0, 0, "X", Style(fg = fixed, bg = fixed))
 
         Terminal(customBackend).openScreen(customColorScheme).also { recorder.clearOutput() }.renderBuffer(buffer)
 
@@ -165,7 +165,7 @@ internal class TerminalTest {
     fun `per-cell styling would produce four resets but run-length produces one`() {
         val buffer = Buffer(4, 1)
         for (x in 0 until 4) {
-            buffer.set(x, 0, Cell("X", Style(fg = StandardRole.DANGER)))
+            buffer.set(x, 0, "X", Style(fg = StandardRole.DANGER))
         }
 
         screen.renderBuffer(buffer)
@@ -205,11 +205,11 @@ internal class TerminalTest {
     @Test
     fun `text attributes render through their SGR codes`() {
         val buffer = Buffer(5, 1)
-        buffer.set(0, 0, Cell("B", Style(bold = true)))
-        buffer.set(1, 0, Cell("D", Style(dim = true)))
-        buffer.set(2, 0, Cell("I", Style(italic = true)))
-        buffer.set(3, 0, Cell("U", Style(underline = true)))
-        buffer.set(4, 0, Cell("V", Style(inverse = true)))
+        buffer.set(0, 0, "B", Style(bold = true))
+        buffer.set(1, 0, "D", Style(dim = true))
+        buffer.set(2, 0, "I", Style(italic = true))
+        buffer.set(3, 0, "U", Style(underline = true))
+        buffer.set(4, 0, "V", Style(inverse = true))
 
         screen.renderBuffer(buffer)
 
@@ -224,8 +224,8 @@ internal class TerminalTest {
     fun `an attribute does not bleed into a following run that only changes color`() {
         // Only colors can skip a run's close; a change of attribute must still close bold.
         val buffer = Buffer(2, 1)
-        buffer.set(0, 0, Cell("◆", Style(fg = StandardRole.DANGER, bold = true)))
-        buffer.set(1, 0, Cell("◇", Style(fg = StandardRole.INFO)))
+        buffer.set(0, 0, "◆", Style(fg = StandardRole.DANGER, bold = true))
+        buffer.set(1, 0, "◇", Style(fg = StandardRole.INFO))
 
         screen.renderBuffer(buffer)
 
@@ -238,8 +238,8 @@ internal class TerminalTest {
     fun `transitions between default and semantic roles do not leak either color channel`() {
         // A run that skips the previous close must still set both of its own colors.
         val buffer = Buffer(2, 1)
-        buffer.set(0, 0, Cell("A", Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS)))
-        buffer.set(1, 0, Cell("B", Style.DEFAULT))
+        buffer.set(0, 0, "A", Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS))
+        buffer.set(1, 0, "B")
 
         screen.renderBuffer(buffer)
 
@@ -364,7 +364,7 @@ internal class TerminalTest {
         Canvas.of(buffer).setString(0, 0, "中A")
         screen.renderBuffer(buffer)
 
-        buffer.set(1, 0, Cell("X"))
+        buffer.set(1, 0, "X")
         recorder.clearOutput()
         screen.renderBuffer(buffer)
 
@@ -394,7 +394,7 @@ internal class TerminalTest {
         Canvas.of(buffer).setString(0, 0, "A")
         screen.renderBuffer(buffer)
 
-        buffer.set(0, 0, Cell("B"))
+        buffer.set(0, 0, "B")
         recorder.clearOutput()
         screen.renderBuffer(buffer)
 

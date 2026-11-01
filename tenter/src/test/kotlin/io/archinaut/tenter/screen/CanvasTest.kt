@@ -14,33 +14,31 @@ internal class CanvasTest {
     @Test
     fun `get and set within bounds`() {
         val canvas = Canvas.of(Buffer(5, 5))
-        val cell = Cell("A", Style(StandardRole.DANGER, StandardRole.INFO))
+        canvas.set(2, 3, "A", Style(fg = StandardRole.DANGER, bg = StandardRole.INFO))
 
-        canvas.set(2, 3, cell)
-
-        assertEquals(cell, canvas.get(2, 3))
+        assertEquals(Cell("A", fg = StandardRole.DANGER, bg = StandardRole.INFO), canvas.get(2, 3))
     }
 
     @Test
     fun `a write changes only the channels its style sets`() {
         val canvas = Canvas.of(Buffer(3, 1))
-        canvas.set(0, 0, Cell(" ", Style(bg = StandardRole.SUCCESS)))
-        canvas.set(1, 0, Cell(" ", Style(fg = StandardRole.INFO, strikethrough = true)))
+        canvas.set(0, 0, " ", Style(bg = StandardRole.SUCCESS))
+        canvas.set(1, 0, " ", Style(fg = StandardRole.INFO, strikethrough = true))
 
         canvas.setString(0, 0, "AB", Style(fg = StandardRole.DANGER))
 
-        assertEquals(Cell("A", Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS)), canvas.get(0, 0))
-        assertEquals(Cell("B", Style(fg = StandardRole.DANGER, strikethrough = true)), canvas.get(1, 0))
+        assertEquals(Cell("A", fg = StandardRole.DANGER, bg = StandardRole.SUCCESS), canvas.get(0, 0))
+        assertEquals(Cell("B", fg = StandardRole.DANGER, strikethrough = true), canvas.get(1, 0))
     }
 
     @Test
     fun `a write that sets a channel to the default replaces what was painted`() {
         val canvas = Canvas.of(Buffer(1, 1))
-        canvas.set(0, 0, Cell("A", Style(bg = StandardRole.SUCCESS, strikethrough = true)))
+        canvas.set(0, 0, "A", Style(bg = StandardRole.SUCCESS, strikethrough = true))
 
-        canvas.set(0, 0, Cell("B", Style(bg = StandardRole.DEFAULT, strikethrough = false)))
+        canvas.set(0, 0, "B", Style(bg = StandardRole.DEFAULT, strikethrough = false))
 
-        assertEquals(Cell("B", Style(bg = StandardRole.DEFAULT, strikethrough = false)), canvas.get(0, 0))
+        assertEquals(Cell("B", bg = StandardRole.DEFAULT, strikethrough = false), canvas.get(0, 0))
     }
 
     @Test
@@ -50,17 +48,17 @@ internal class CanvasTest {
 
         canvas.setString(0, 0, "中", Style(fg = StandardRole.DANGER))
 
-        assertEquals(Cell("中", Style(fg = StandardRole.DANGER, bg = StandardRole.SUCCESS)), canvas.get(0, 0))
+        assertEquals(Cell("中", fg = StandardRole.DANGER, bg = StandardRole.SUCCESS), canvas.get(0, 0))
     }
 
     @Test
     fun `set out of bounds is ignored`() {
         val canvas = Canvas.of(Buffer(3, 3))
 
-        canvas.set(-1, 0, Cell("X"))
-        canvas.set(0, -1, Cell("X"))
-        canvas.set(3, 0, Cell("X"))
-        canvas.set(0, 3, Cell("X"))
+        canvas.set(-1, 0, "X")
+        canvas.set(0, -1, "X")
+        canvas.set(3, 0, "X")
+        canvas.set(0, 3, "X")
 
         assertEquals(Cell(), canvas.get(0, 0))
     }
@@ -82,8 +80,8 @@ internal class CanvasTest {
         val ended = canvas.setString(2, 0, "Hi", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED))
 
         assertEquals(Point(4, 0), ended)
-        assertEquals(Cell("H", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED)), canvas.get(2, 0))
-        assertEquals(Cell("i", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED)), canvas.get(3, 0))
+        assertEquals(Cell("H", fg = StandardRole.SUCCESS, bg = StandardRole.TEXT_MUTED), canvas.get(2, 0))
+        assertEquals(Cell("i", fg = StandardRole.SUCCESS, bg = StandardRole.TEXT_MUTED), canvas.get(3, 0))
         assertEquals(Cell(), canvas.get(4, 0))
     }
 
@@ -116,7 +114,7 @@ internal class CanvasTest {
 
         canvas.setString(0, 0, "AB")
 
-        assertEquals(Cell("A", Style.DEFAULT), canvas.get(0, 0))
+        assertEquals(Cell("A"), canvas.get(0, 0))
     }
 
     @Test
@@ -180,7 +178,7 @@ internal class CanvasTest {
         val buffer = Buffer(15, 8)
         val canvas = Canvas.of(buffer).region(Rect(2, 1, 10, 5))
 
-        canvas.set(0, 0, Cell("X"))
+        canvas.set(0, 0, "X")
 
         assertEquals(Cell("X"), buffer.get(2, 1))
     }
@@ -201,7 +199,7 @@ internal class CanvasTest {
         val child = Canvas.of(buffer).region(Rect(-2, 0, 5, 1))
 
         assertEquals(3, child.width)
-        child.set(2, 0, Cell("X"))
+        child.set(2, 0, "X")
 
         assertEquals(Cell("X"), buffer.get(2, 0))
         assertEquals(Cell(), buffer.get(3, 0))
@@ -243,7 +241,7 @@ internal class CanvasTest {
 
         child.setString(0, 0, "中", Style(fg = StandardRole.ACCENT))
 
-        assertEquals(Cell(" ", Style(fg = StandardRole.ACCENT)), buffer.get(1, 0))
+        assertEquals(Cell(" ", fg = StandardRole.ACCENT), buffer.get(1, 0))
         assertEquals(Cell(), buffer.get(2, 0))
     }
 
@@ -253,7 +251,7 @@ internal class CanvasTest {
 
         canvas.setString(-1, 0, "中", Style(fg = StandardRole.ACCENT))
 
-        assertEquals(Cell(" ", Style(fg = StandardRole.ACCENT)), canvas.get(0, 0))
+        assertEquals(Cell(" ", fg = StandardRole.ACCENT), canvas.get(0, 0))
         assertEquals(Cell(), canvas.get(1, 0))
     }
 
@@ -262,7 +260,7 @@ internal class CanvasTest {
         val canvas = Canvas.of(Buffer(4, 1))
         canvas.setString(0, 0, "中A")
 
-        canvas.set(1, 0, Cell("X"))
+        canvas.set(1, 0, "X")
 
         assertEquals(Cell(), canvas.get(0, 0))
         assertEquals(Cell("X"), canvas.get(1, 0))
@@ -289,7 +287,7 @@ internal class CanvasTest {
 
         window.setString(0, 0, "中x", Style(fg = StandardRole.ACCENT))
 
-        assertEquals(Cell(" ", Style(fg = StandardRole.ACCENT)), canvas.get(0, 0))
+        assertEquals(Cell(" ", fg = StandardRole.ACCENT), canvas.get(0, 0))
         assertEquals("x", canvas.get(1, 0).symbol)
     }
 }

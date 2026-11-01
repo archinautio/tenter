@@ -43,8 +43,8 @@ Pick the check that says what the test is about:
   )
   ```
 
-- **One property:** `frame.get(x, y)` gives a cell with its symbol and style. Styles hold color
-  roles, so a test does not depend on the color scheme.
+- **One property:** `frame.get(x, y)` gives the cell there: its `symbol`, its `fg` and `bg`, and
+  each attribute, such as `bold`. Colors are roles, so a test does not depend on the color scheme.
 - **Content and style together:** build the expected frame with `CompletedFrame.of(...)` from
   strings or styled `Line`s, and compare it with `assertEquals`. It is as wide as its widest line,
   so write out trailing spaces, or compare a `region` that holds only what matters:
@@ -56,10 +56,8 @@ Pick the check that says what the test is about:
   )
   ```
 
-  Two frames are equal when they have the same size and every cell shows the same symbol in the
-  same style as the terminal renders it: an unset color equals `StandardRole.DEFAULT` and an unset
-  attribute equals off. Where a frame sits does not count, so a region equals a frame built with
-  `of`. When they differ, the failure prints both frames as quoted rows followed by each change
+  Two frames are equal when they have the same size and equal cells. Where a frame sits does not
+  count, so a region equals a frame built with `of`. When they differ, the failure prints both frames as quoted rows followed by each change
   of style.
 - **A large screen:** `frame.find(text)` gives the cell where the text starts, counting columns as
   the terminal does, so a wide character before it counts twice. Use it to locate content, then

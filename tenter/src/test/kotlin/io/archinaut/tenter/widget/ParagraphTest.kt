@@ -21,7 +21,7 @@ internal class ParagraphTest {
 
         assertEquals(Size(10, 3), paragraph.measure(10))
         assertEquals(listOf("first", "", "third"), (0 until 3).map { buffer.line(it) })
-        assertEquals(StandardRole.INFO, buffer.get(0, 2).style.fg)
+        assertEquals(StandardRole.INFO, buffer.get(0, 2).fg)
     }
 
     @Test
@@ -52,8 +52,8 @@ internal class ParagraphTest {
         val buffer = render(paragraph, 20, 3)
 
         assertEquals(2, paragraph.measure(20).height)
-        assertEquals(StandardRole.INFO, buffer.get(0, 0).style.fg)
-        assertEquals(Style.DEFAULT, buffer.get(4, 0).style)
+        assertEquals(StandardRole.INFO, buffer.get(0, 0).fg)
+        assertEquals(StandardRole.DEFAULT, buffer.get(4, 0).fg)
     }
 
     @Test

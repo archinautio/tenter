@@ -16,10 +16,8 @@ import io.archinaut.tenter.screen.Style
  * terminal's reads its own buffer, so everything it answers, [equals] included, is only valid until
  * the next draw; a [HeadlessTerminal]'s stays valid for good.
  *
- * Two frames are equal when they have the same size and every cell shows the same symbol in the
- * same style as the terminal renders it: an unset color equals [io.archinaut.tenter.color.StandardRole.DEFAULT],
- * an unset attribute equals off. Where a frame sits on screen does not count, so a [region] can
- * equal a frame built with [of].
+ * Two frames are equal when they have the same size and equal [Cell]s. Where a frame sits on screen
+ * does not count, so a [region] can equal a frame built with [of].
  */
 public class CompletedFrame private constructor(
     private val buffer: Buffer,
@@ -80,25 +78,22 @@ public class CompletedFrame private constructor(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is CompletedFrame || width != other.width || height != other.height) return false
-        return positions().all { (x, y) -> sameLook(get(x, y), other.get(x, y)) }
+        return positions().all { (x, y) -> get(x, y) == other.get(x, y) }
     }
 
-    override fun hashCode(): Int = positions().fold(31 * width + height) { hash, (x, y) ->
-        val cell = get(x, y)
-        (hash * 31 + cell.symbol.hashCode()) * 31 + cell.style.rendered().hashCode()
-    }
+    override fun hashCode(): Int = positions().fold(31 * width + height) { hash, (x, y) -> hash * 31 + get(x, y).hashCode() }
 
-    /** Each row quoted, then the rendered style wherever it changes, scanning rows top to bottom. */
+    /** Each row quoted, then the colors and attributes wherever they change, scanning rows top to bottom. */
     override fun toString(): String = buildString {
         append("CompletedFrame ${width}x$height\n")
         for (y in 0 until height) append("  \"").append(rowText(y)).append("\"\n")
         append("styles:\n")
-        var last: Style? = null
+        var last: Cell? = null
         for ((x, y) in positions()) {
-            val style = get(x, y).style.rendered()
-            if (style != last) {
-                append("  ($x,$y) ").append(describe(style)).append('\n')
-                last = style
+            val cell = get(x, y)
+            if (last == null || !cell.looksLike(last)) {
+                append("  ($x,$y) ").append(describe(cell)).append('\n')
+                last = cell
             }
         }
     }
@@ -120,16 +115,14 @@ public class CompletedFrame private constructor(
         /** A [width] x [height] frame of blank cells, as a freshly cleared screen shows. */
         internal fun blank(width: Int, height: Int): CompletedFrame = CompletedFrame(Buffer(width, height))
 
-        private fun sameLook(a: Cell, b: Cell): Boolean = a.symbol == b.symbol && a.style.rendered() == b.style.rendered()
-
-        private fun describe(style: Style): String = buildString {
-            append("fg=").append(style.fg).append(" bg=").append(style.bg)
-            if (style.bold == true) append(" bold")
-            if (style.dim == true) append(" dim")
-            if (style.italic == true) append(" italic")
-            if (style.underline == true) append(" underline")
-            if (style.inverse == true) append(" inverse")
-            if (style.strikethrough == true) append(" strikethrough")
+        private fun describe(cell: Cell): String = buildString {
+            append("fg=").append(cell.fg).append(" bg=").append(cell.bg)
+            if (cell.bold) append(" bold")
+            if (cell.dim) append(" dim")
+            if (cell.italic) append(" italic")
+            if (cell.underline) append(" underline")
+            if (cell.inverse) append(" inverse")
+            if (cell.strikethrough) append(" strikethrough")
         }
     }
 }

@@ -36,12 +36,14 @@ Use `Style(StandardRole.ACCENT)` when writing highlighted text, for example as
 the second argument to `writer.writeLine`. The default color scheme supplies the
 toolkit's `StandardRole` colors using the terminal's ANSI-16 palette.
 
-A style sets only the channels you give it. Writing `Style(fg = StandardRole.DANGER)` over
-an already painted cell changes its glyph and foreground and keeps its background, so a
-marker drawn over a colored area keeps the color under it. Set a channel explicitly to
-replace it, including back to the default: `Style(bg = StandardRole.DEFAULT)` or
-`Style(strikethrough = false)`. A channel no write sets renders as `StandardRole.DEFAULT`,
-or with the attribute off.
+A style is the change a write makes, and it sets only the channels you give it. Writing
+`Style(fg = StandardRole.DANGER)` over an already painted cell changes its glyph and foreground
+and keeps its background, so a marker drawn over a colored area keeps the color under it. Set a
+channel explicitly to replace it, including back to the default: `Style(bg = StandardRole.DEFAULT)`
+or `Style(strikethrough = false)`.
+
+A `Cell` is what a cell shows after every write: its symbol, `fg`, `bg`, and each attribute,
+never unset. A cell no write touched shows `StandardRole.DEFAULT` with every attribute off.
 
 Besides the two colors, a style carries the text attributes `bold`, `dim`, `italic`,
 `underline`, `inverse`, and `strikethrough`, each a channel of its own:
@@ -50,8 +52,8 @@ each looks however the terminal draws that attribute; some terminals ignore ital
 render dim at normal intensity.
 
 To draw a popup, such as a dialog or a banner, over content without it showing through, render
-the `Clear` widget into the popup's area first: it resets every cell there to a blank that sets
-no channel. Then render the popup into the same area:
+the `Clear` widget into the popup's area first: it resets every cell there to a blank in the
+default colors with no attribute. Then render the popup into the same area:
 `frame.renderWidget(Clear, area)` followed by `frame.renderWidget(popup, area)`.
 
 Applications add their own roles as an enum implementing `ColorRole`, such as the colors of a

@@ -27,7 +27,7 @@ internal class DefaultColorSchemeTest {
         val buffer = Buffer(40, 4)
         SelectableRow(label = "default", checkState = CheckState.CHECKED, selected = true).render(Canvas.of(buffer))
         for ((index, role) in StandardRole.entries.withIndex()) {
-            buffer.set(index, 2, Cell("X", Style(fg = role, bg = role)))
+            buffer.set(index, 2, "X", Style(fg = role, bg = role))
         }
 
         io.archinaut.tenter.terminal.Terminal(terminal).openScreen(ColorScheme.Default).also { recorder.clearOutput() }.renderBuffer(buffer)

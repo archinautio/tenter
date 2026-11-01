@@ -17,8 +17,8 @@ internal class SelectableRowTest {
 
         assertEquals("▶", buffer.get(0, 0).symbol)
         assertEquals("host", rowText(buffer, 4, 4))
-        assertEquals(StandardRole.ACCENT, buffer.get(4, 0).style.fg)
-        assertEquals(StandardRole.ACCENT, buffer.get(2, 0).style.fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(4, 0).fg)
+        assertEquals(StandardRole.ACCENT, buffer.get(2, 0).fg)
         assertEquals(1, rows)
     }
 
@@ -37,8 +37,8 @@ internal class SelectableRowTest {
 
         assertEquals(" ", buffer.get(0, 0).symbol)
         assertEquals("AC/20", rowText(buffer, 4, 5))
-        assertEquals(StandardRole.DISABLED, buffer.get(4, 0).style.fg)
-        assertEquals(StandardRole.DISABLED, buffer.get(2, 0).style.fg)
+        assertEquals(StandardRole.DISABLED, buffer.get(4, 0).fg)
+        assertEquals(StandardRole.DISABLED, buffer.get(2, 0).fg)
         assertEquals("58%", rowText(buffer, 29, 3))
         assertEquals(1, rows)
     }
