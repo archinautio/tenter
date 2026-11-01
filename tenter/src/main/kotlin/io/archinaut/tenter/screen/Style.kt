@@ -4,6 +4,7 @@
 package io.archinaut.tenter.screen
 
 import io.archinaut.tenter.color.ColorRole
+import io.archinaut.tenter.color.StandardRole
 
 /**
  * Foreground and background roles plus text attributes for a [Cell]. A null channel is unset, so
@@ -45,6 +46,18 @@ public data class Style(
             (underline ?: false) == (other.underline ?: false) &&
             (inverse ?: false) == (other.inverse ?: false) &&
             (strikethrough ?: false) == (other.strikethrough ?: false)
+
+    /** This style as the terminal shows it: an unset color is [StandardRole.DEFAULT], an unset attribute off. */
+    internal fun rendered(): Style = Style(
+        fg = fg ?: StandardRole.DEFAULT,
+        bg = bg ?: StandardRole.DEFAULT,
+        bold = bold ?: false,
+        dim = dim ?: false,
+        italic = italic ?: false,
+        underline = underline ?: false,
+        inverse = inverse ?: false,
+        strikethrough = strikethrough ?: false,
+    )
 
     private fun setsEveryChannel(): Boolean =
         fg != null && bg != null && bold != null && dim != null && italic != null &&

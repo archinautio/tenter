@@ -10,6 +10,7 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Style
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import io.archinaut.tenter.screen.Buffer
 
 internal class ClearTest {
 
@@ -17,7 +18,7 @@ internal class ClearTest {
 
     @Test
     fun `clear resets every cell of its area to an unpainted blank`() {
-        val canvas = Canvas.offscreen(4, 2)
+        val canvas = Canvas.of(Buffer(4, 2))
         canvas.setString(0, 0, "ABCD", painted)
         canvas.setString(0, 1, "EFGH", painted)
 
@@ -31,7 +32,7 @@ internal class ClearTest {
 
     @Test
     fun `content drawn after clear does not inherit what was painted beneath`() {
-        val canvas = Canvas.offscreen(1, 1)
+        val canvas = Canvas.of(Buffer(1, 1))
         canvas.set(0, 0, Cell("X", painted))
 
         Clear.render(canvas)
@@ -42,7 +43,7 @@ internal class ClearTest {
 
     @Test
     fun `a wide glyph straddling the area's edge is left whole, as any clipped write leaves it`() {
-        val canvas = Canvas.offscreen(3, 1)
+        val canvas = Canvas.of(Buffer(3, 1))
         canvas.setString(0, 0, "中x", painted)
 
         Clear.render(canvas.region(Rect(1, 0, 2, 1)))

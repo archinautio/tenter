@@ -14,6 +14,7 @@ import org.junit.jupiter.api.assertThrows
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Cell
 import io.archinaut.tenter.screen.Buffer
+import io.archinaut.tenter.terminal.CompletedFrame
 
 internal class PreparedCompositionTest {
 
@@ -21,14 +22,14 @@ internal class PreparedCompositionTest {
     fun `width-only resize follows a fixed reveal and unchanged dimensions retain manual scroll`() {
         val state = ViewportState()
         val viewport = Viewport(EmptyWidget.fixedSize(30, 1).revealed(Rect(15, 0, 1, 1)))
-        viewport.render(Canvas.offscreen(20, 2), state)
+        viewport.render(Canvas.of(Buffer(20, 2)), state)
 
-        viewport.render(Canvas.offscreen(10, 2), state)
+        viewport.render(Canvas.of(Buffer(10, 2)), state)
         assertEquals(6, state.settled?.offset?.x)
         state.scrollBy(-100, 0)
-        viewport.render(Canvas.offscreen(10, 2), state)
+        viewport.render(Canvas.of(Buffer(10, 2)), state)
         assertEquals(0, state.settled?.offset?.x)
-        viewport.render(Canvas.offscreen(12, 2), state)
+        viewport.render(Canvas.of(Buffer(12, 2)), state)
 
         assertEquals(4, state.settled?.offset?.x)
     }
@@ -47,7 +48,7 @@ internal class PreparedCompositionTest {
 
         assertEquals(4, layout.width)
         assertEquals(5, layout.height)
-        assertEquals("B", render(layout, 4, 5).line(4, width = 4))
+        assertEquals("B", render(layout, 4, 5).region(Rect(0, 4, 4, 1)).line(0))
     }
 
     @Test
@@ -66,8 +67,8 @@ internal class PreparedCompositionTest {
 
         assertEquals(9, layout.width)
         assertEquals(4, layout.height)
-        assertEquals("AAAA BBBB", buffer.line(0, width = 9))
-        assertEquals("CCCC", buffer.line(3, width = 4))
+        assertEquals("AAAA BBBB", buffer.region(Rect(0, 0, 9, 1)).line(0))
+        assertEquals("CCCC", buffer.region(Rect(0, 3, 4, 1)).line(0))
     }
 
     @Test
@@ -108,15 +109,15 @@ internal class PreparedCompositionTest {
         assertEquals(590, state.settled?.maxOffset?.y)
         assertEquals(10, state.settled?.viewport?.height)
         assertEquals(600, state.settled?.content?.height)
-        assertEquals("row0", buffer.line(0, width = 10))
+        assertEquals("row0", CompletedFrame(buffer).region(Rect(0, 0, 10, 1)).line(0))
 
         state.scrollBy(0, 590)
-        assertEquals("row0", buffer.line(0, width = 10))
+        assertEquals("row0", CompletedFrame(buffer).region(Rect(0, 0, 10, 1)).line(0))
 
         viewport.render(Canvas.of(buffer), state)
 
         assertEquals(590, state.settled?.offset?.y)
-        assertEquals("row590", buffer.line(0, width = 10))
+        assertEquals("row590", CompletedFrame(buffer).region(Rect(0, 0, 10, 1)).line(0))
     }
 
     @Test
@@ -129,12 +130,12 @@ internal class PreparedCompositionTest {
             }
         })
 
-        viewport.render(Canvas.offscreen(10, 5), state)
+        viewport.render(Canvas.of(Buffer(10, 5)), state)
         state.scrollBy(0, -100)
-        viewport.render(Canvas.offscreen(10, 5), state)
+        viewport.render(Canvas.of(Buffer(10, 5)), state)
         assertEquals(0, state.settled?.offset?.y)
 
-        viewport.render(Canvas.offscreen(10, 10), state)
+        viewport.render(Canvas.of(Buffer(10, 10)), state)
 
         assertEquals(10, state.settled?.offset?.y)
         assertTrue(19 in state.settled!!.offset.y until state.settled!!.offset.y + 10)
@@ -149,14 +150,14 @@ internal class PreparedCompositionTest {
                 writer.draw(if (it == 10) line.revealed() else line)
             }
         })
-        viewport.render(Canvas.offscreen(10, 5), state)
+        viewport.render(Canvas.of(Buffer(10, 5)), state)
         val before = state.settled
 
         state.scrollBy(0, -100)
         state.requestRecenter()
         assertEquals(before, state.settled)
 
-        viewport.render(Canvas.offscreen(10, 5), state)
+        viewport.render(Canvas.of(Buffer(10, 5)), state)
 
         assertEquals(8, state.settled?.offset?.y)
     }
@@ -165,14 +166,14 @@ internal class PreparedCompositionTest {
     fun `zero-sized destination preserves the last snapshot and queued scroll`() {
         val state = ViewportState()
         val viewport = Viewport(MeasurableWidget { writer -> repeat(20) { writer.writeLine("row$it") } })
-        viewport.render(Canvas.offscreen(10, 5), state)
+        viewport.render(Canvas.of(Buffer(10, 5)), state)
         val before = state.settled
         state.scrollBy(0, 3)
 
-        viewport.render(Canvas.offscreen(10, 0), state)
+        viewport.render(Canvas.of(Buffer(10, 0)), state)
 
         assertEquals(before, state.settled)
-        viewport.render(Canvas.offscreen(10, 5), state)
+        viewport.render(Canvas.of(Buffer(10, 5)), state)
         assertEquals(3, state.settled?.offset?.y)
     }
 
@@ -205,7 +206,7 @@ internal class PreparedCompositionTest {
         val outerState = ViewportState()
         val outer = Viewport(inner.bind(ViewportState()).fixedSize(10, 20))
 
-        outer.render(Canvas.offscreen(10, 5), outerState)
+        outer.render(Canvas.of(Buffer(10, 5)), outerState)
 
         assertNull(outerState.settled?.revealed)
         assertEquals(0, outerState.settled?.offset?.y)
@@ -231,9 +232,9 @@ internal class PreparedCompositionTest {
         }
 
         val fixedState = ViewportState()
-        Viewport(fixedLast).render(Canvas.offscreen(10, 5), fixedState)
+        Viewport(fixedLast).render(Canvas.of(Buffer(10, 5)), fixedState)
         val preparedState = ViewportState()
-        Viewport(preparedLast).render(Canvas.offscreen(10, 5), preparedState)
+        Viewport(preparedLast).render(Canvas.of(Buffer(10, 5)), preparedState)
 
         assertEquals(10, fixedState.settled?.revealed?.y)
         assertEquals(0, preparedState.settled?.revealed?.y)
@@ -249,7 +250,7 @@ internal class PreparedCompositionTest {
         val state = ViewportState()
         val viewport = Viewport(content.block(Block(padding = Padding(top = 1))))
 
-        viewport.render(Canvas.offscreen(10, 5), state)
+        viewport.render(Canvas.of(Buffer(10, 5)), state)
 
         assertEquals(3, state.settled?.revealed?.y)
         assertEquals(0, state.settled?.offset?.y)
@@ -274,15 +275,15 @@ internal class PreparedCompositionTest {
         }
         val viewport = Viewport(content)
 
-        viewport.render(Canvas.offscreen(10, 5), ViewportState())
+        viewport.render(Canvas.of(Buffer(10, 5)), ViewportState())
 
         assertEquals(1, layoutCalls)
         assertEquals(1, renderCalls)
     }
 
-    private fun render(layout: ContentLayout, width: Int, height: Int): Buffer {
+    private fun render(layout: ContentLayout, width: Int, height: Int): CompletedFrame {
         val buffer = Buffer(width, height)
         layout.render(Canvas.of(buffer))
-        return buffer
+        return CompletedFrame(buffer)
     }
 }

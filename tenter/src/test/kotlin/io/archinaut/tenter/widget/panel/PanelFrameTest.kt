@@ -7,14 +7,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.color.StandardRole
-import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.widget.MeasurableWidget
 import io.archinaut.tenter.widget.ScrollState
 import io.archinaut.tenter.widget.Scrollbar
 import io.archinaut.tenter.widget.bind
-import io.archinaut.tenter.widget.line
 import io.archinaut.tenter.widget.render
+import io.archinaut.tenter.terminal.CompletedFrame
 
 /**
  * What a panel paints around its content: a bordered frame, a scrolling viewport inside it, and
@@ -33,7 +32,7 @@ internal class PanelFrameTest {
     private var panels: PanelSet<Id, Unit>? = null
 
     /** Draws a single panel showing [content] into a [width] by [height] frame, scrolled down by [scrollOffset]. */
-    private fun draw(content: MeasurableWidget, width: Int = 30, height: Int = 10, scrollOffset: Int = 0): Buffer {
+    private fun draw(content: MeasurableWidget, width: Int = 30, height: Int = 10, scrollOffset: Int = 0): CompletedFrame {
         val set = PanelSet(listOf(Panel<Id, Unit>(Id.ONLY, title = "T", badge = "0", normal = { content })))
         panels = set
         set.scroll(Id.ONLY, 0, scrollOffset)
@@ -47,8 +46,8 @@ internal class PanelFrameTest {
     fun `content at offset 0 starts at row y+2 col x+2`() {
         val buffer = draw(stubContent(5))
 
-        assertEquals("line0", buffer.line(2, 2, 10))
-        assertEquals("line1", buffer.line(3, 2, 10))
+        assertEquals("line0", buffer.region(Rect(2, 2, 10, 1)).line(0))
+        assertEquals("line1", buffer.region(Rect(2, 3, 10, 1)).line(0))
     }
 
     @Test
@@ -56,23 +55,23 @@ internal class PanelFrameTest {
         val buffer = draw(stubContent(20), scrollOffset = 3)
 
         // Row 1 is the viewport's first row now that the padding scrolls with the stream.
-        assertEquals("line2", buffer.line(1, 2, 10))
-        assertEquals("line3", buffer.line(2, 2, 10))
-        assertEquals("line4", buffer.line(3, 2, 10))
+        assertEquals("line2", buffer.region(Rect(2, 1, 10, 1)).line(0))
+        assertEquals("line3", buffer.region(Rect(2, 2, 10, 1)).line(0))
+        assertEquals("line4", buffer.region(Rect(2, 3, 10, 1)).line(0))
     }
 
     @Test
     fun `top padding shows at rest and is reclaimed once content scrolls`() {
         val atRest = draw(stubContent(20))
-        assertEquals("", atRest.line(1, 2, 10))
-        assertEquals("line0", atRest.line(2, 2, 10))
-        assertEquals("line6", atRest.line(8, 2, 10))
+        assertEquals("", atRest.region(Rect(2, 1, 10, 1)).line(0))
+        assertEquals("line0", atRest.region(Rect(2, 2, 10, 1)).line(0))
+        assertEquals("line6", atRest.region(Rect(2, 8, 10, 1)).line(0))
 
         val scrolled = draw(stubContent(20), scrollOffset = 1)
         // Content reclaims the padding row: line0 moves up into row 1...
-        assertEquals("line0", scrolled.line(1, 2, 10))
+        assertEquals("line0", scrolled.region(Rect(2, 1, 10, 1)).line(0))
         // ...and one more line becomes visible at the bottom than was shown at rest.
-        assertEquals("line7", scrolled.line(8, 2, 10))
+        assertEquals("line7", scrolled.region(Rect(2, 8, 10, 1)).line(0))
     }
 
     @Test
@@ -82,7 +81,7 @@ internal class PanelFrameTest {
         val viewportHeight = 8
         val streamHeight = 5 + 1 // the reclaimable top-padding row is prepended to the stream
         val maxOffset = maxOf(0, streamHeight - viewportHeight)
-        assertEquals("line$maxOffset", buffer.line(2, 2, 10))
+        assertEquals("line$maxOffset", buffer.region(Rect(2, 2, 10, 1)).line(0))
     }
 
     @Test

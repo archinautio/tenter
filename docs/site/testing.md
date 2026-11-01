@@ -18,9 +18,52 @@ rules: your application enters `withScreen` and draws through the `Screen`. Its
 keeps the last frame after the screen scope returns. A headless terminal's frames never change
 after they are drawn.
 
-- `frame.lines()` gives each row's text.
-- `frame.get(x, y)` gives a cell with its symbol and style. Styles hold color roles, so a test
-  does not depend on the color scheme.
+To test one widget, draw it on a headless terminal of its size:
+
+```kotlin
+val frame = Terminal.headless(9, 5).withScreen { screen ->
+    screen.draw { it.renderWidget(widget, it.area) }
+}
+```
+
+Pick the check that says what the test is about:
+
+- **The whole content:** compare `frame.text()` with a raw string. It joins the rows with `\n`,
+  trims each row's trailing spaces and drops the blank rows at the bottom, so the string holds
+  only what was drawn:
+
+  ```kotlin
+  assertEquals(
+      """
+      |╭──╮
+      |│hi│
+      |╰──╯
+      """.trimMargin(),
+      frame.text(),
+  )
+  ```
+
+- **One property:** `frame.get(x, y)` gives a cell with its symbol and style. Styles hold color
+  roles, so a test does not depend on the color scheme.
+- **Content and style together:** build the expected frame with `CompletedFrame.of(...)` from
+  strings or styled `Line`s, and compare it with `assertEquals`. It is as wide as its widest line,
+  so write out trailing spaces, or compare a `region` that holds only what matters:
+
+  ```kotlin
+  assertEquals(
+      CompletedFrame.of(Line("hi", Style(fg = StandardRole.ACCENT))),
+      frame.region(Rect(1, 1, 2, 1)),
+  )
+  ```
+
+  Two frames are equal when they have the same size and every cell shows the same symbol in the
+  same style as the terminal renders it: an unset color equals `StandardRole.DEFAULT` and an unset
+  attribute equals off. Where a frame sits does not count, so a region equals a frame built with
+  `of`. When they differ, the failure prints both frames as quoted rows followed by each change
+  of style.
+- **A large screen:** `frame.find(text)` gives the cell where the text starts, counting columns as
+  the terminal does, so a wide character before it counts twice. Use it to locate content, then
+  `region` to compare just that part, or `line(y)` to read one row.
 
 ## Script the input
 

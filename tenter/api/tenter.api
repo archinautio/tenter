@@ -248,7 +248,6 @@ public final class io/archinaut/tenter/input/KeySection {
 }
 
 public final class io/archinaut/tenter/screen/Canvas {
-	public static final field Companion Lio/archinaut/tenter/screen/Canvas$Companion;
 	public final fun get (II)Lio/archinaut/tenter/screen/Cell;
 	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
 	public final fun getHeight ()I
@@ -258,10 +257,6 @@ public final class io/archinaut/tenter/screen/Canvas {
 	public final fun set (IILio/archinaut/tenter/screen/Cell;)V
 	public final fun setString (IILjava/lang/String;Lio/archinaut/tenter/screen/Style;)Lio/archinaut/tenter/screen/Point;
 	public static synthetic fun setString$default (Lio/archinaut/tenter/screen/Canvas;IILjava/lang/String;Lio/archinaut/tenter/screen/Style;ILjava/lang/Object;)Lio/archinaut/tenter/screen/Point;
-}
-
-public final class io/archinaut/tenter/screen/Canvas$Companion {
-	public final fun offscreen (II)Lio/archinaut/tenter/screen/Canvas;
 }
 
 public final class io/archinaut/tenter/screen/Cell {
@@ -520,11 +515,23 @@ public final class io/archinaut/tenter/screen/Style$Companion {
 }
 
 public final class io/archinaut/tenter/terminal/CompletedFrame {
+	public static final field Companion Lio/archinaut/tenter/terminal/CompletedFrame$Companion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun find (Ljava/lang/String;)Lio/archinaut/tenter/screen/Point;
 	public final fun get (II)Lio/archinaut/tenter/screen/Cell;
 	public final fun getArea ()Lio/archinaut/tenter/screen/Rect;
 	public final fun getHeight ()I
 	public final fun getWidth ()I
-	public final fun lines ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun line (I)Ljava/lang/String;
+	public final fun region (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/terminal/CompletedFrame;
+	public final fun text ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/archinaut/tenter/terminal/CompletedFrame$Companion {
+	public final fun of ([Lio/archinaut/tenter/screen/Line;)Lio/archinaut/tenter/terminal/CompletedFrame;
+	public final fun of ([Ljava/lang/String;)Lio/archinaut/tenter/terminal/CompletedFrame;
 }
 
 public final class io/archinaut/tenter/terminal/Frame {

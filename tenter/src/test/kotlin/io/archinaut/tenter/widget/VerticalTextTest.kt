@@ -5,6 +5,7 @@ package io.archinaut.tenter.widget
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import io.archinaut.tenter.screen.Rect
 
 internal class VerticalTextTest {
 
@@ -14,7 +15,7 @@ internal class VerticalTextTest {
 
         val buffer = render(widget, 7, 10)
 
-        val topRow = buffer.line(0, width = 7)
+        val topRow = buffer.region(Rect(0, 0, 7, 1)).line(0)
         assert(!topRow.contains("╭") && !topRow.contains("╮")) { "Should draw no border, got: $topRow" }
     }
 

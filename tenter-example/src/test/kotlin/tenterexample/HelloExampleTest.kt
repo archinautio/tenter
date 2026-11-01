@@ -15,7 +15,7 @@ internal class HelloExampleTest {
     fun `hello paints before reading and stops reading at q`() {
         var keysRead = 0
         val terminal = Terminal.headless(width = 50, height = 8) {
-            assertTrue(frame.lines().first().startsWith("Hello from Tenter"))
+            assertTrue(frame.line(0).startsWith("Hello from Tenter"))
             key("x")
             keysRead++
             key("q")

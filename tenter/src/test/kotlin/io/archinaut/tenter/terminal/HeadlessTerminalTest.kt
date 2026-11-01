@@ -49,12 +49,12 @@ internal class HeadlessTerminalTest {
     @Test
     fun `the frame is blank before the first draw and keeps the last one after the scope`() {
         val terminal = Terminal.headless(width = 3, height = 1)
-        assertEquals(listOf("   "), terminal.frame.lines())
+        assertEquals(CompletedFrame.of("   "), terminal.frame)
 
         val drawn = terminal.withScreen { it.drawText("hi") }
 
         assertSame(drawn, terminal.frame)
-        assertEquals(listOf("hi "), terminal.frame.lines())
+        assertEquals(CompletedFrame.of("hi "), terminal.frame)
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class HeadlessTerminalTest {
         val terminal = Terminal.headless(width = 3, height = 1)
         terminal.withScreen { it.drawText("hi") }
 
-        terminal.withScreen { assertEquals(listOf("   "), terminal.frame.lines()) }
+        terminal.withScreen { assertEquals(CompletedFrame.of("   "), terminal.frame) }
     }
 
     @Test
@@ -73,7 +73,7 @@ internal class HeadlessTerminalTest {
             val first = screen.draw { it.renderWidget(Text("hi"), Rect(1, 1, 5, 1)) }
             screen.drawText("later")
 
-            assertEquals(listOf("      ", " hi   "), first.lines())
+            assertEquals(CompletedFrame.of("      ", " hi   "), first)
         }
     }
 
@@ -90,12 +90,12 @@ internal class HeadlessTerminalTest {
     }
 
     @Test
-    fun `lines show a wide character once`() {
+    fun `a line shows a wide character once`() {
         val terminal = Terminal.headless(width = 6, height = 1)
 
         val frame = terminal.withScreen { it.drawText("日本") }
 
-        assertEquals("日本  ", frame.lines().first())
+        assertEquals("日本", frame.line(0))
     }
 
     @Test
@@ -121,14 +121,14 @@ internal class HeadlessTerminalTest {
         val seen = mutableListOf<String>()
         val terminal = Terminal.headless(width = 3, height = 1) {
             key("a")
-            seen += frame.lines().single()
+            seen += frame.line(0)
             key("b")
-            seen += frame.lines().single()
+            seen += frame.line(0)
         }
 
         terminal.withScreen { screen -> screen.events().echoUntil(screen, quit = "q") }
 
-        assertEquals(listOf("a  ", "b  "), seen)
+        assertEquals(listOf("a", "b"), seen)
     }
 
     @Test

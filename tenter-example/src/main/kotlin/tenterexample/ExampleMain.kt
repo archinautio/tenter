@@ -8,8 +8,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.runBlocking
 import io.archinaut.tenter.widget.panel.PanelMode
-import io.archinaut.tenter.screen.Canvas
+import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Padding
+import io.archinaut.tenter.terminal.CompletedFrame
 import io.archinaut.tenter.terminal.Screen
 import io.archinaut.tenter.terminal.Terminal
 import io.archinaut.tenter.terminal.TerminalEvent
@@ -30,18 +31,17 @@ public fun runHeadlessSmoke(): SmokeResult {
     // --8<-- [start:padding]
     val framed = Paragraph("OK").revealed().block(Block.bordered(padding = Padding.uniform(1)))
     // --8<-- [end:padding]
-    val framedCanvas = Canvas.offscreen(8, 5)
-    framed.render(framedCanvas)
-    check(framedCanvas.get(2, 2).symbol == "O")
+    val framedFrame = Terminal.headless(8, 5).withScreen { screen -> screen.draw { it.renderWidget(framed, it.area) } }
+    check(framedFrame.find("OK") == Point(2, 2)) { "the block did not place the paragraph inside its border and padding" }
     val followed = ViewportState()
-    Viewport(framed).render(Canvas.offscreen(8, 3), followed)
+    Terminal.headless(8, 3).withScreen { screen -> screen.draw { it.renderStatefulWidget(Viewport(framed), it.area, followed) } }
     check(followed.settled?.content?.height == 5) { "the block did not add its border and padding" }
     check(followed.settled?.revealed?.y == 2) { "the block lost the child's reveal" }
 
     val app = ExampleApp()
     val terminal = Terminal.headless(width = 140, height = 24)
     var frame = terminal.withScreen { it.draw(app::render) }
-    val initialText = frame.lines().joinToString("\n")
+    val initialText = frame.text()
     check("row 0" in initialText) { "the rendered list did not contain its first generated row" }
     check("PgUp/PgDn" in initialText) { "the rendered help did not contain the keymap hints" }
 
@@ -51,7 +51,7 @@ public fun runHeadlessSmoke(): SmokeResult {
         app.handle(MouseEvent(x = wheelTarget.x + 1, y = wheelTarget.y + 1, wheelDown = true))
     }
     frame = terminal.withScreen { it.draw(app::render) }
-    val scrolledText = frame.lines().joinToString("\n")
+    val scrolledText = frame.text()
     check("row 599" in scrolledText) { "wheel scrolling did not reach the final generated row" }
 
     val scrolledLayout = checkNotNull(app.panels.layout)
@@ -144,8 +144,5 @@ private fun runInteractive(screen: Screen) {
     // --8<-- [end:input-loop]
 }
 
-private fun renderAnimationFrame(widget: Widget): Canvas {
-    val canvas = Canvas.offscreen(3, 1)
-    widget.render(canvas)
-    return canvas
-}
+private fun renderAnimationFrame(widget: Widget): CompletedFrame =
+    Terminal.headless(3, 1).withScreen { screen -> screen.draw { it.renderWidget(widget, it.area) } }

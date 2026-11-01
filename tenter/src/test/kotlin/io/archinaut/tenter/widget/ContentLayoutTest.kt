@@ -9,6 +9,7 @@ import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Constraint
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Buffer
+import io.archinaut.tenter.terminal.CompletedFrame
 
 internal class ContentLayoutTest {
 
@@ -27,10 +28,10 @@ internal class ContentLayoutTest {
         repeat(2) {
             val buffer = Buffer(8, 1)
             snapshot.render(Canvas.of(buffer))
-            assertEquals("before", buffer.line(0))
+            assertEquals("before", CompletedFrame(buffer).line(0))
             val liveBuffer = Buffer(8, 1)
             live.render(Canvas.of(liveBuffer))
-            assertEquals("after", liveBuffer.line(0))
+            assertEquals("after", CompletedFrame(liveBuffer).line(0))
         }
     }
 
@@ -64,7 +65,7 @@ internal class ContentLayoutTest {
         layout.render(Canvas.of(buffer))
 
         assertEquals(1_000, layout.height)
-        assertEquals("row999", buffer.line(999, width = 7))
+        assertEquals("row999", CompletedFrame(buffer).region(Rect(0, 999, 7, 1)).line(0))
     }
 
     @Test
@@ -88,7 +89,7 @@ internal class ContentLayoutTest {
         val buffer = Buffer(20, 1)
         layout.render(Canvas.of(buffer))
 
-        assertEquals("before", buffer.line(0))
+        assertEquals("before", CompletedFrame(buffer).line(0))
     }
 
     @Test
@@ -120,8 +121,8 @@ internal class ContentLayoutTest {
         assertEquals(8, layout.width)
         assertEquals(3, layout.height)
 
-        layout.render(Canvas.offscreen(8, 3))
-        layout.render(Canvas.offscreen(8, 3))
+        layout.render(Canvas.of(Buffer(8, 3)))
+        layout.render(Canvas.of(Buffer(8, 3)))
         assertEquals(2, drawCount)
     }
 
@@ -137,8 +138,8 @@ internal class ContentLayoutTest {
         val layout = parent.prepare(10)
         assertEquals(1, prepareCount)
 
-        layout.render(Canvas.offscreen(10, 1))
-        layout.render(Canvas.offscreen(10, 1))
+        layout.render(Canvas.of(Buffer(10, 1)))
+        layout.render(Canvas.of(Buffer(10, 1)))
 
         assertEquals(1, prepareCount)
     }
@@ -176,7 +177,7 @@ internal class ContentLayoutTest {
         parent.render(canvas)
 
         assertEquals(Rect(0, 2, 3, 1), parent.request()?.area)
-        assertEquals("hild", buffer.line(1, width = 4))
+        assertEquals("hild", CompletedFrame(buffer).region(Rect(0, 1, 4, 1)).line(0))
     }
 
     @Test

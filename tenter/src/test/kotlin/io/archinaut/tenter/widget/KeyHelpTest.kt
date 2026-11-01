@@ -8,18 +8,19 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.input.KeyHint
 import io.archinaut.tenter.input.KeySection
-import io.archinaut.tenter.screen.Buffer
+import io.archinaut.tenter.screen.Rect
+import io.archinaut.tenter.terminal.CompletedFrame
 
 internal class KeyHelpTest {
 
-    private fun renderHelp(sections: List<KeySection>, width: Int = 28, height: Int = 20): Buffer =
+    private fun renderHelp(sections: List<KeySection>, width: Int = 28, height: Int = 20): CompletedFrame =
         render(KeyHelp(sections), width, height)
 
     @Test
     fun `renders the KEYS header`() {
         val buffer = renderHelp(listOf(KeySection("MOVEMENT", listOf(KeyHint("Enter", "select unit")))))
 
-        assertEquals("─── KEYS " + "─".repeat(19), buffer.line(0, width = 28))
+        assertEquals("─── KEYS " + "─".repeat(19), buffer.region(Rect(0, 0, 28, 1)).line(0))
         assertEquals(io.archinaut.tenter.color.StandardRole.INFO, buffer.get(4, 0).style.fg)
     }
 
@@ -32,13 +33,13 @@ internal class KeyHelpTest {
             ),
         )
 
-        assertEquals("MOVEMENT", buffer.line(1, width = 28))
-        val hintRow = buffer.line(2, width = 28)
+        assertEquals("MOVEMENT", buffer.region(Rect(0, 1, 28, 1)).line(0))
+        val hintRow = buffer.region(Rect(0, 2, 28, 1)).line(0)
         assertTrue(hintRow.contains("Enter")) { "Expected key label, got: '$hintRow'" }
         assertTrue(hintRow.contains("select unit")) { "Expected description, got: '$hintRow'" }
 
-        assertEquals("GLOBAL", buffer.line(4, width = 28))
-        val globalRow = buffer.line(5, width = 28)
+        assertEquals("GLOBAL", buffer.region(Rect(0, 4, 28, 1)).line(0))
+        val globalRow = buffer.region(Rect(0, 5, 28, 1)).line(0)
         assertTrue(globalRow.contains("ctrl+c")) { "Expected key label, got: '$globalRow'" }
         assertTrue(globalRow.contains("quit")) { "Expected description, got: '$globalRow'" }
     }
@@ -52,15 +53,15 @@ internal class KeyHelpTest {
             ),
         )
 
-        assertEquals("", buffer.line(3, width = 28))
+        assertEquals("", buffer.region(Rect(0, 3, 28, 1)).line(0))
     }
 
     @Test
     fun `a single section renders with no trailing blank section gap`() {
         val buffer = renderHelp(listOf(KeySection("GLOBAL", listOf(KeyHint("ctrl+c", "quit")))))
 
-        assertEquals("GLOBAL", buffer.line(1, width = 28))
-        assertEquals("", buffer.line(3, width = 28))
+        assertEquals("GLOBAL", buffer.region(Rect(0, 1, 28, 1)).line(0))
+        assertEquals("", buffer.region(Rect(0, 3, 28, 1)).line(0))
     }
 
     @Test
@@ -71,8 +72,8 @@ internal class KeyHelpTest {
             width = 24,
         )
 
-        val firstLine = buffer.line(2, width = 24)
-        val secondLine = buffer.line(3, width = 24)
+        val firstLine = buffer.region(Rect(0, 2, 24, 1)).line(0)
+        val secondLine = buffer.region(Rect(0, 3, 24, 1)).line(0)
         assertTrue(firstLine.contains("alt+0-5")) { "Expected key label on first line, got: '$firstLine'" }
         assertTrue(secondLine.isNotEmpty()) { "Expected a wrapped continuation line" }
         // Continuation text starts under the key column (after the "key + 2 spaces" prefix),

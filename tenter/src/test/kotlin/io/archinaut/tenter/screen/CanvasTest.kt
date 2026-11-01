@@ -13,7 +13,7 @@ internal class CanvasTest {
 
     @Test
     fun `get and set within bounds`() {
-        val canvas = Canvas.offscreen(5, 5)
+        val canvas = Canvas.of(Buffer(5, 5))
         val cell = Cell("A", Style(StandardRole.DANGER, StandardRole.INFO))
 
         canvas.set(2, 3, cell)
@@ -23,7 +23,7 @@ internal class CanvasTest {
 
     @Test
     fun `a write changes only the channels its style sets`() {
-        val canvas = Canvas.offscreen(3, 1)
+        val canvas = Canvas.of(Buffer(3, 1))
         canvas.set(0, 0, Cell(" ", Style(bg = StandardRole.SUCCESS)))
         canvas.set(1, 0, Cell(" ", Style(fg = StandardRole.INFO, strikethrough = true)))
 
@@ -35,7 +35,7 @@ internal class CanvasTest {
 
     @Test
     fun `a write that sets a channel to the default replaces what was painted`() {
-        val canvas = Canvas.offscreen(1, 1)
+        val canvas = Canvas.of(Buffer(1, 1))
         canvas.set(0, 0, Cell("A", Style(bg = StandardRole.SUCCESS, strikethrough = true)))
 
         canvas.set(0, 0, Cell("B", Style(bg = StandardRole.DEFAULT, strikethrough = false)))
@@ -45,7 +45,7 @@ internal class CanvasTest {
 
     @Test
     fun `a wide glyph keeps the background painted under it`() {
-        val canvas = Canvas.offscreen(2, 1)
+        val canvas = Canvas.of(Buffer(2, 1))
         canvas.setString(0, 0, "  ", Style(bg = StandardRole.SUCCESS))
 
         canvas.setString(0, 0, "中", Style(fg = StandardRole.DANGER))
@@ -55,7 +55,7 @@ internal class CanvasTest {
 
     @Test
     fun `set out of bounds is ignored`() {
-        val canvas = Canvas.offscreen(3, 3)
+        val canvas = Canvas.of(Buffer(3, 3))
 
         canvas.set(-1, 0, Cell("X"))
         canvas.set(0, -1, Cell("X"))
@@ -67,7 +67,7 @@ internal class CanvasTest {
 
     @Test
     fun `get out of bounds throws`() {
-        val canvas = Canvas.offscreen(3, 3)
+        val canvas = Canvas.of(Buffer(3, 3))
 
         assertThrows<IndexOutOfBoundsException> { canvas.get(-1, 0) }
         assertThrows<IndexOutOfBoundsException> { canvas.get(3, 0) }
@@ -77,7 +77,7 @@ internal class CanvasTest {
 
     @Test
     fun `setString places characters horizontally`() {
-        val canvas = Canvas.offscreen(10, 1)
+        val canvas = Canvas.of(Buffer(10, 1))
 
         val ended = canvas.setString(2, 0, "Hi", Style(StandardRole.SUCCESS, StandardRole.TEXT_MUTED))
 
@@ -101,7 +101,7 @@ internal class CanvasTest {
 
     @Test
     fun `setString at a negative x drops leading cells and lands the tail at column 0`() {
-        val canvas = Canvas.offscreen(5, 1)
+        val canvas = Canvas.of(Buffer(5, 1))
 
         canvas.setString(-2, 0, "ABCDE")
 
@@ -112,7 +112,7 @@ internal class CanvasTest {
 
     @Test
     fun `setString without a style leaves every channel unset`() {
-        val canvas = Canvas.offscreen(5, 1)
+        val canvas = Canvas.of(Buffer(5, 1))
 
         canvas.setString(0, 0, "AB")
 
@@ -121,7 +121,7 @@ internal class CanvasTest {
 
     @Test
     fun `setString puts a non-BMP nerd-font icon in a single cell`() {
-        val canvas = Canvas.offscreen(10, 1)
+        val canvas = Canvas.of(Buffer(10, 1))
         val die = String(Character.toChars(0xF01CA)) // nf-md-dice_1, 2 UTF-16 chars
 
         canvas.setString(2, 0, "A" + die + "B")
@@ -135,7 +135,7 @@ internal class CanvasTest {
 
     @Test
     fun `setString reserves two cells for an East-Asian wide codepoint`() {
-        val canvas = Canvas.offscreen(10, 1)
+        val canvas = Canvas.of(Buffer(10, 1))
 
         canvas.setString(0, 0, "中A")
 
@@ -146,7 +146,7 @@ internal class CanvasTest {
 
     @Test
     fun `setString preserves zero-width combining marks in their cluster`() {
-        val canvas = Canvas.offscreen(5, 1)
+        val canvas = Canvas.of(Buffer(5, 1))
 
         // 'e' + combining acute (U+0301) + 'x'
         canvas.setString(0, 0, "e\u0301x")
@@ -158,7 +158,7 @@ internal class CanvasTest {
 
     @Test
     fun `setString replaces isolated surrogates and skips terminal controls`() {
-        val canvas = Canvas.offscreen(5, 1)
+        val canvas = Canvas.of(Buffer(5, 1))
 
         canvas.setString(0, 0, "\uD800\u001BA")
 
@@ -169,7 +169,7 @@ internal class CanvasTest {
 
     @Test
     fun `width and height are accessible`() {
-        val canvas = Canvas.offscreen(10, 20)
+        val canvas = Canvas.of(Buffer(10, 20))
 
         assertEquals(10, canvas.width)
         assertEquals(20, canvas.height)
@@ -187,7 +187,7 @@ internal class CanvasTest {
 
     @Test
     fun `region clamps to the parent rather than escaping it`() {
-        val canvas = Canvas.offscreen(10, 10)
+        val canvas = Canvas.of(Buffer(10, 10))
 
         val child = canvas.region(Rect(8, 8, 100, 100))
 
@@ -209,7 +209,7 @@ internal class CanvasTest {
 
     @Test
     fun `inset composes across nesting and clamps to zero rather than negative`() {
-        val canvas = Canvas.offscreen(10, 10)
+        val canvas = Canvas.of(Buffer(10, 10))
 
         val once = canvas.inner(Padding(2, 2, 2, 2))
         assertEquals(6, once.width)
@@ -249,7 +249,7 @@ internal class CanvasTest {
 
     @Test
     fun `a wide glyph clipped on the left paints only a blank surviving slot`() {
-        val canvas = Canvas.offscreen(3, 1)
+        val canvas = Canvas.of(Buffer(3, 1))
 
         canvas.setString(-1, 0, "中", Style(fg = StandardRole.ACCENT))
 
@@ -259,7 +259,7 @@ internal class CanvasTest {
 
     @Test
     fun `replacing either half of a wide glyph removes the complete glyph`() {
-        val canvas = Canvas.offscreen(4, 1)
+        val canvas = Canvas.of(Buffer(4, 1))
         canvas.setString(0, 0, "中A")
 
         canvas.set(1, 0, Cell("X"))
@@ -284,7 +284,7 @@ internal class CanvasTest {
 
     @Test
     fun `a wide glyph across a window's left edge paints only a blank surviving slot`() {
-        val canvas = Canvas.offscreen(4, 1)
+        val canvas = Canvas.of(Buffer(4, 1))
         val window = canvas.window(Rect(-1, 0, 5, 1))
 
         window.setString(0, 0, "中x", Style(fg = StandardRole.ACCENT))

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Buffer
+import io.archinaut.tenter.screen.Rect
+import io.archinaut.tenter.terminal.CompletedFrame
 
 internal class StackTest {
 
@@ -17,10 +19,10 @@ internal class StackTest {
         }
     }.fixedSize(width, height)
 
-    private fun render(stack: MeasurableWidget, width: Int, height: Int = 20): Buffer {
+    private fun render(stack: MeasurableWidget, width: Int, height: Int = 20): CompletedFrame {
         val buffer = Buffer(width, height)
         stack.render(Canvas.of(buffer))
-        return buffer
+        return CompletedFrame(buffer)
     }
 
     @Test
@@ -29,12 +31,12 @@ internal class StackTest {
 
         val buffer = render(stack, width = 4)
 
-        assertEquals("AAAA", buffer.line(0, width = 4))
-        assertEquals("AAAA", buffer.line(1, width = 4))
-        assertEquals("", buffer.line(2, width = 4))
+        assertEquals("AAAA", buffer.region(Rect(0, 0, 4, 1)).line(0))
+        assertEquals("AAAA", buffer.region(Rect(0, 1, 4, 1)).line(0))
+        assertEquals("", buffer.region(Rect(0, 2, 4, 1)).line(0))
         // Second child starts one row below the first child's measured height (2 + spacing 1 = 3).
-        assertEquals("BBBB", buffer.line(3, width = 4))
-        assertEquals("BBBB", buffer.line(4, width = 4))
+        assertEquals("BBBB", buffer.region(Rect(0, 3, 4, 1)).line(0))
+        assertEquals("BBBB", buffer.region(Rect(0, 4, 4, 1)).line(0))
     }
 
     @Test
@@ -43,8 +45,8 @@ internal class StackTest {
 
         val buffer = render(stack, width = 4)
 
-        assertEquals("AAAA", buffer.line(2, width = 4))
-        assertEquals("BBBB", buffer.line(3, width = 4))
+        assertEquals("AAAA", buffer.region(Rect(0, 2, 4, 1)).line(0))
+        assertEquals("BBBB", buffer.region(Rect(0, 3, 4, 1)).line(0))
     }
 
     @Test
@@ -53,12 +55,12 @@ internal class StackTest {
 
         val buffer = render(stack, width = 4, height = 10)
 
-        assertEquals("AAAA", buffer.line(0, width = 4))
-        assertEquals("BBBB", buffer.line(5, width = 4))
+        assertEquals("AAAA", buffer.region(Rect(0, 0, 4, 1)).line(0))
+        assertEquals("BBBB", buffer.region(Rect(0, 5, 4, 1)).line(0))
         // C would start at row 10, at/past the 10-tall canvas — skipped, not drawn out of bounds.
         for (row in 0 until 10) {
             org.junit.jupiter.api.Assertions.assertTrue(
-                buffer.line(row, width = 4) != "CCCC",
+                buffer.region(Rect(0, row, 4, 1)).line(0) != "CCCC",
                 "row $row unexpectedly shows C",
             )
         }
@@ -70,10 +72,10 @@ internal class StackTest {
 
         val buffer = render(stack, width = 4, height = 10)
 
-        assertEquals("AAAA", buffer.line(7, width = 4))
+        assertEquals("AAAA", buffer.region(Rect(0, 7, 4, 1)).line(0))
         // B starts at row 8, but the canvas is only 10 tall — only rows 8-9 of B fit.
-        assertEquals("BBBB", buffer.line(8, width = 4))
-        assertEquals("BBBB", buffer.line(9, width = 4))
+        assertEquals("BBBB", buffer.region(Rect(0, 8, 4, 1)).line(0))
+        assertEquals("BBBB", buffer.region(Rect(0, 9, 4, 1)).line(0))
     }
 
     @Test
@@ -82,7 +84,7 @@ internal class StackTest {
 
         val buffer = render(stack, width = 10, height = 10)
 
-        assertEquals("AAAA", buffer.line(2, width = 4))
-        assertEquals("", buffer.line(3, width = 4))
+        assertEquals("AAAA", buffer.region(Rect(0, 2, 4, 1)).line(0))
+        assertEquals("", buffer.region(Rect(0, 3, 4, 1)).line(0))
     }
 }

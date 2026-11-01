@@ -96,11 +96,8 @@ public class Canvas private constructor(
 
     private fun Rect.toAbsolute(): Rect = offset(bounds.x, bounds.y)
 
-    public companion object {
+    internal companion object {
         /** A canvas over the whole of [buffer]. */
         internal fun of(buffer: Buffer): Canvas = Canvas(buffer, Rect(0, 0, buffer.width, buffer.height))
-
-        /** A detached canvas over its own buffer, for rendering a widget off-screen. */
-        public fun offscreen(width: Int, height: Int): Canvas = of(Buffer(width, height))
     }
 }

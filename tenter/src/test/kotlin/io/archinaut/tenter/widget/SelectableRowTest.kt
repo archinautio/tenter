@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.color.StandardRole
-import io.archinaut.tenter.screen.Buffer
+import io.archinaut.tenter.terminal.CompletedFrame
 
 internal class SelectableRowTest {
 
@@ -68,9 +68,9 @@ internal class SelectableRowTest {
     }
 
     /** Renders [row] into a fresh buffer and returns it with the row's measured height. */
-    private fun draw(row: MeasurableWidget, width: Int = 32, height: Int = 5): Pair<Buffer, Int> =
+    private fun draw(row: MeasurableWidget, width: Int = 32, height: Int = 5): Pair<CompletedFrame, Int> =
         render(row, width, height) to row.measure(width).height
 
-    private fun rowText(buffer: Buffer, start: Int, length: Int, row: Int = 0): String =
+    private fun rowText(buffer: CompletedFrame, start: Int, length: Int, row: Int = 0): String =
         (start until start + length).joinToString("") { buffer.get(it, row).symbol }
 }

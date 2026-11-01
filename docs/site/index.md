@@ -83,7 +83,8 @@ Ratatui, the names map directly:
 | `Screen` | `Terminal` | The terminal while its scope runs: `draw` sends only what changed, and `events` reads input. |
 | `Frame` | `Frame` | One frame inside `screen.draw { frame -> }`: its `area` and `renderWidget` / `renderStatefulWidget`. |
 | `Widget`, `StatefulWidget` | `Widget`, `StatefulWidget` | Something that renders into an area, optionally with caller-owned state. |
-| `Canvas` | `Rect` + `Buffer` | The area a widget renders into: clipped, with local coordinates. Test a widget by rendering it into `Canvas.offscreen(width, height)`. |
+| `Canvas` | `Rect` + `Buffer` | The area a widget renders into: clipped, with local coordinates. |
+| `CompletedFrame` | `CompletedFrame` + `Buffer` | What a draw presented: compare it, narrow it to a `region`, and read its text. See [Testing](testing.md). |
 | `Cell`, `Style` | `Cell`, `Style` | A styled terminal cell, and its colors. |
 | `Layout`, `Constraint` | `Layout`, `Constraint` | Split a `Rect` into smaller rectangles. |
 | `Block`, `Borders`, `Padding` | `Block`, `Borders`, `Padding` | Borders with a title, and the space inside them. |

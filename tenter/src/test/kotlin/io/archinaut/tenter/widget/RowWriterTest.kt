@@ -13,12 +13,13 @@ import io.archinaut.tenter.screen.Span
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
+import io.archinaut.tenter.screen.Buffer
 
 internal class RowWriterTest {
 
     /** Writes [block] as a measurable widget painted into a fresh [width]x[height] canvas. */
     private fun paint(width: Int, height: Int, block: (RowWriter) -> Unit): Canvas =
-        Canvas.offscreen(width, height).also { MeasurableWidget(block).render(it) }
+        Canvas.of(Buffer(width, height)).also { MeasurableWidget(block).render(it) }
 
     /** The area the content [block] writes at [width] asks to keep visible, or null when it makes no request. */
     private fun requested(width: Int, block: (RowWriter) -> Unit): Rect? = MeasurableWidget(block).prepare(width).request()?.area

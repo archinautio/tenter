@@ -12,6 +12,7 @@ import io.archinaut.tenter.screen.Rect
 import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.color.StandardRole
+import io.archinaut.tenter.terminal.CompletedFrame
 
 /** Pixel parity for [Block]'s border, title, badge, and padding. */
 internal class BlockTest {
@@ -287,6 +288,6 @@ internal class BlockTest {
         assertEquals(Size(8, 1), content.measure(8))
     }
 
-    private fun rows(buffer: Buffer): List<String> =
+    private fun rows(buffer: CompletedFrame): List<String> =
         (0 until buffer.height).map { y -> (0 until buffer.width).joinToString("") { x -> buffer.get(x, y).symbol } }
 }
