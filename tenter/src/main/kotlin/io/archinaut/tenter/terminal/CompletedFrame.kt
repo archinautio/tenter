@@ -55,7 +55,7 @@ public class CompletedFrame private constructor(
     }
 
     /** Row [y]'s text, right-trimmed. A wide character appears once, not once per column it covers. */
-    public fun line(y: Int): String = row(y).trimEnd()
+    public fun line(y: Int): String = rowText(y).trimEnd()
 
     /** Every row's text, right-trimmed, joined by `\n`, without the blank rows at the bottom. */
     public fun text(): String = (0 until height).map(::line).dropLastWhile { it.isEmpty() }.joinToString("\n")
@@ -80,10 +80,10 @@ public class CompletedFrame private constructor(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is CompletedFrame || width != other.width || height != other.height) return false
-        return cells().all { (x, y) -> sameLook(get(x, y), other.get(x, y)) }
+        return positions().all { (x, y) -> sameLook(get(x, y), other.get(x, y)) }
     }
 
-    override fun hashCode(): Int = cells().fold(31 * width + height) { hash, (x, y) ->
+    override fun hashCode(): Int = positions().fold(31 * width + height) { hash, (x, y) ->
         val cell = get(x, y)
         (hash * 31 + cell.symbol.hashCode()) * 31 + cell.style.rendered().hashCode()
     }
@@ -91,10 +91,10 @@ public class CompletedFrame private constructor(
     /** Each row quoted, then the rendered style wherever it changes, scanning rows top to bottom. */
     override fun toString(): String = buildString {
         append("CompletedFrame ${width}x$height\n")
-        for (y in 0 until height) append("  \"").append(row(y)).append("\"\n")
+        for (y in 0 until height) append("  \"").append(rowText(y)).append("\"\n")
         append("styles:\n")
         var last: Style? = null
-        for ((x, y) in cells()) {
+        for ((x, y) in positions()) {
             val style = get(x, y).style.rendered()
             if (style != last) {
                 append("  ($x,$y) ").append(describe(style)).append('\n')
@@ -102,16 +102,6 @@ public class CompletedFrame private constructor(
             }
         }
     }
-
-    private fun row(y: Int): String {
-        if (y !in 0 until height) {
-            throw IndexOutOfBoundsException("row $y out of bounds for ${width}x$height frame")
-        }
-        return (0 until width).joinToString("") { x -> get(x, y).symbol }
-    }
-
-    private fun cells(): Sequence<Pair<Int, Int>> =
-        (0 until height).asSequence().flatMap { y -> (0 until width).asSequence().map { x -> x to y } }
 
     public companion object {
         /** A frame of [lines], one row each in [Style.DEFAULT], as wide as the widest; shorter rows end in blanks. */
@@ -143,3 +133,15 @@ public class CompletedFrame private constructor(
         }
     }
 }
+
+// File-private extensions rather than private members, so they never hide a caller's own extension
+// of the same name: Kotlin resolves a call to an inaccessible member before an extension.
+private fun CompletedFrame.rowText(y: Int): String {
+    if (y !in 0 until height) {
+        throw IndexOutOfBoundsException("row $y out of bounds for ${width}x$height frame")
+    }
+    return (0 until width).joinToString("") { x -> get(x, y).symbol }
+}
+
+private fun CompletedFrame.positions(): Sequence<Pair<Int, Int>> =
+    (0 until height).asSequence().flatMap { y -> (0 until width).asSequence().map { x -> x to y } }
