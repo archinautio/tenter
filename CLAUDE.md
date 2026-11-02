@@ -36,7 +36,6 @@ Kotlin 2.4, JVM 25, Gradle 9.7 (Kotlin DSL, convention plugins in `buildSrc/`), 
 - Lay content out with `Layout` and `Constraint` wherever possible.
 - Drawing flows top-down; anything that travels up is returned data, never a side channel.
 - Comment only what the code cannot say for itself.
-- The API is pre-1.0 and exploratory: break it freely, with no compatibility layer.
 
 ## Tool Preferences
 
