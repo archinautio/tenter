@@ -10,9 +10,7 @@ import org.junit.jupiter.api.Test
 /** Enforces the package layering `docs/architecture.md` describes, as an allowed-dependency matrix. */
 class LayeringTest {
 
-    private val mainFiles = Konsist.scopeFromProject()
-        .files
-        .filter { it.path.contains("/tenter/") && !it.path.contains("/test/") }
+    private val mainFiles = Konsist.scopeFromProduction("tenter").files
 
     private val allowed: Map<String, Set<String>> = mapOf(
         "text" to emptySet(),

@@ -13,9 +13,7 @@ import org.junit.jupiter.api.Test
  */
 class ArchitectureTest {
 
-    private val mainFiles = Konsist.scopeFromProject()
-        .files
-        .filter { it.path.contains("/tenter/src/main/") }
+    private val mainFiles = Konsist.scopeFromProduction("tenter").files
 
     private val allowedImportPrefixes = listOf(
         "io.archinaut.tenter",
@@ -49,9 +47,9 @@ class ArchitectureTest {
 
     @Test
     fun `managed panel mutations stay behind the panel set seam`() {
-        val panel = Konsist.scopeFromProject()
+        val panel = Konsist.scopeFromProduction("tenter")
             .classes(includeNested = false, includeLocal = false)
-            .single { it.name == "Panel" && it.path.contains("/tenter/src/main/") }
+            .single { it.name == "Panel" }
         val managedMutations = panel.functions(includeNested = false, includeLocal = false)
             .filter { it.name in setOf("cycleState", "demoteFromMaximized", "scrollBy", "requestRecenter", "render") }
 
