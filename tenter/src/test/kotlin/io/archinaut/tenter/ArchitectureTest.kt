@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 /**
- * Enforces `tenter`'s one architectural promise: it is a standalone terminal-UI toolkit that
- * knows nothing about BattleTech and depends on nothing beyond Kotlin/kotlinx/Mordant.
+ * Enforces `tenter`'s external dependency boundary: it depends on nothing beyond
+ * Kotlin/kotlinx/Mordant.
  */
 class ArchitectureTest {
 
@@ -22,17 +22,6 @@ class ArchitectureTest {
         "java",
         "com.github.ajalt",
     )
-
-    @Test
-    fun `tenter does not import battletech code`() {
-        mainFiles.forEach { file ->
-            val violations = file.imports.filter { it.name.startsWith("battletech.") }
-            assertTrue(
-                violations.isEmpty(),
-                "${file.name} imports battletech code: ${violations.map { it.name }}",
-            )
-        }
-    }
 
     @Test
     fun `tenter only imports from an approved set of packages`() {

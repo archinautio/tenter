@@ -38,8 +38,8 @@ maintainer must preserve.
 Two tests guard these boundaries:
 
 - `LayeringTest` enforces the "May use" column.
-- `ArchitectureTest` enforces the external dependency boundary, prevents BattleTech imports, and
-  keeps managed `Panel` mutations behind `PanelSet`.
+- `ArchitectureTest` enforces the external dependency boundary and keeps managed `Panel`
+  mutations behind `PanelSet`.
 
 `Terminal` is sealed, and each kind opens an internal `Session` per scope that presents frames:
 
