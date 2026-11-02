@@ -26,4 +26,4 @@ kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 spotless-gradle-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 
 [bundles]
-junit = ["junit-jupiter-api", "junit-jupiter-engine", "junit-jupiter-params"]
+junit = ["junit-jupiter-api", "junit-jupiter-params"]
