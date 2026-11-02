@@ -2,7 +2,7 @@
 
 Tenter is a JVM terminal-UI toolkit built on Mordant: the `tenter` library and `tenter-example`, an external-consumer showcase of every widget that depends on it.
 
-Kotlin 2.4, JVM 25, Gradle 9.7 (Kotlin DSL, convention plugins in `buildSrc/`), JUnit Jupiter + MockK + AssertJ. `explicitApi()` is on repo-wide, so declare `public`/`internal` explicitly.
+Kotlin 2.4, JVM 25, Gradle 9.8 (Kotlin DSL, convention plugins in `buildSrc/`), JUnit Jupiter + MockK + AssertJ. `explicitApi()` is on repo-wide, so declare `public`/`internal` explicitly.
 
 ## Commands
 
