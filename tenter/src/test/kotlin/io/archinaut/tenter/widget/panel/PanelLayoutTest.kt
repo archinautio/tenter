@@ -6,6 +6,7 @@ package io.archinaut.tenter.widget.panel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Rect
@@ -85,7 +86,7 @@ internal class PanelLayoutTest {
     fun `a published layout cannot be altered`() {
         val layout = render(mapOf(LayoutPanelId.A to Rect(0, 0, 50, 30)))
 
-        org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException::class.java) {
+        assertThrows<UnsupportedOperationException> {
             (layout.slots as MutableList).clear()
         }
     }

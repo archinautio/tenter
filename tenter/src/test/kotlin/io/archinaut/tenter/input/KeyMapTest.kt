@@ -6,10 +6,10 @@ package io.archinaut.tenter.input
 import com.github.ajalt.mordant.input.KeyboardEvent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class KeyMapTest {
 
@@ -131,7 +131,7 @@ internal class KeyMapTest {
         fun `a null-titled layer throws when asked for hints`() {
             val map = KeyMap(mapOf(Ctx.FIRST to KeyLayer<TestAction>(title = null, bindings = emptyList())))
 
-            assertThrows(IllegalArgumentException::class.java) { map.hints(Ctx.FIRST) }
+            assertThrows<IllegalArgumentException> { map.hints(Ctx.FIRST) }
         }
     }
 
@@ -304,10 +304,10 @@ internal class KeyMapTest {
             val map = KeyMap<Ctx, TestAction>(emptyMap())
 
             assertNull(map.resolve(emptyList(), KeyboardEvent("x")))
-            assertThrows(IllegalArgumentException::class.java) {
+            assertThrows<IllegalArgumentException> {
                 map.resolve(listOf(Ctx.FIRST), KeyboardEvent("x"))
             }
-            assertThrows(IllegalArgumentException::class.java) {
+            assertThrows<IllegalArgumentException> {
                 map.hints(Ctx.FIRST)
             }
         }
@@ -327,7 +327,7 @@ internal class KeyMapTest {
 
         @Test
         fun `an empty key is rejected`() {
-            assertThrows(IllegalArgumentException::class.java) {
+            assertThrows<IllegalArgumentException> {
                 KeyBinding(KeyboardEvent(""), actionA, "group")
             }
         }
@@ -340,7 +340,7 @@ internal class KeyMapTest {
     ): KeyLayer<TestAction> = KeyLayer(title = title, bindings = bindings, hintGroups = hintGroups)
 
     private fun assertInvalid(message: String, block: () -> Unit): Unit {
-        val error = assertThrows(IllegalArgumentException::class.java, block)
+        val error = assertThrows<IllegalArgumentException>(block)
         assertTrue(error.message.orEmpty().contains(message), "Expected '$message' in '${error.message}'")
     }
 }

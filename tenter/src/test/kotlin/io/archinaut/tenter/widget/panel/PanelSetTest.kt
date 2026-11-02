@@ -5,9 +5,9 @@ package io.archinaut.tenter.widget.panel
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.screen.Constraint
@@ -161,7 +161,7 @@ internal class PanelSetTest {
         set.scroll(SetPanelId.B, 0, 5)
         fail = true
 
-        assertThrows(IllegalStateException::class.java) { render(set, visible) }
+        assertThrows<IllegalStateException> { render(set, visible) }
 
         assertEquals(oldOffset, previous.offsetOf(SetPanelId.A))
         assertEquals(oldBHit, set.hitTest(42, 2))
@@ -198,7 +198,7 @@ internal class PanelSetTest {
             set.scroll(SetPanelId.A, 0, 5)
             fail = true
 
-            assertThrows(IllegalStateException::class.java) { render(set, visible, width = 40, height = 10) }
+            assertThrows<IllegalStateException> { render(set, visible, width = 40, height = 10) }
 
             assertEquals(oldHit, set.hitTest(2, 2))
             set.page(set.focused, 1)
@@ -217,7 +217,7 @@ internal class PanelSetTest {
         })
         val set = PanelSet(listOf(panel))
 
-        assertThrows(IllegalStateException::class.java) { render(set, setOf(SetPanelId.A)) }
+        assertThrows<IllegalStateException> { render(set, setOf(SetPanelId.A)) }
         assertNull(set.hitTest(2, 2))
         fail = false
         render(set, setOf(SetPanelId.A))
@@ -241,12 +241,12 @@ internal class PanelSetTest {
     fun `every id-addressed operation rejects a panel the set does not declare`() {
         val set = PanelSet(listOf(mainPanel(), sidePanel(SetPanelId.A)))
 
-        assertThrows(IllegalArgumentException::class.java) { set.focus(SetPanelId.B) }
-        assertThrows(IllegalArgumentException::class.java) { set.page(SetPanelId.B, 1) }
-        assertThrows(IllegalArgumentException::class.java) { set.scroll(SetPanelId.B, 0, 2) }
-        assertThrows(IllegalArgumentException::class.java) { set.requestRecenter(SetPanelId.B) }
-        assertThrows(IllegalArgumentException::class.java) { set.modeOf(SetPanelId.B) }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows<IllegalArgumentException> { set.focus(SetPanelId.B) }
+        assertThrows<IllegalArgumentException> { set.page(SetPanelId.B, 1) }
+        assertThrows<IllegalArgumentException> { set.scroll(SetPanelId.B, 0, 2) }
+        assertThrows<IllegalArgumentException> { set.requestRecenter(SetPanelId.B) }
+        assertThrows<IllegalArgumentException> { set.modeOf(SetPanelId.B) }
+        assertThrows<IllegalArgumentException> {
             renderAreas(set, mapOf(SetPanelId.B to Rect(0, 0, 10, 10)))
         }
 
@@ -371,26 +371,26 @@ internal class PanelSetTest {
 
         // Emptying the caller's list must not empty the set: the declaration was copied.
         assertEquals(SetPanelId.A, render(set, setOf(SetPanelId.A)).slots.single().id)
-        assertThrows(IllegalArgumentException::class.java) { PanelSet<SetPanelId, Unit>(emptyList()) }
+        assertThrows<IllegalArgumentException> { PanelSet<SetPanelId, Unit>(emptyList()) }
     }
 
     @Test
     fun `duplicate ids and instances fail before attachment`() {
         val duplicateIdA = sidePanel(SetPanelId.A)
         val duplicateIdB = sidePanel(SetPanelId.A)
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows<IllegalArgumentException> {
             PanelSet(listOf(duplicateIdA, duplicateIdB))
         }
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows<IllegalArgumentException> {
             PanelSet(listOf(duplicateIdA, duplicateIdA))
         }
         val fresh = sidePanel(SetPanelId.B)
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows<IllegalArgumentException> {
             PanelSet(listOf(fresh, sidePanel(SetPanelId.B)))
         }
         PanelSet(listOf(fresh))
-        assertThrows(IllegalArgumentException::class.java) { PanelSet(listOf(fresh)) }
+        assertThrows<IllegalArgumentException> { PanelSet(listOf(fresh)) }
     }
 
     @Test
@@ -398,7 +398,7 @@ internal class PanelSetTest {
         val panel = sidePanel(SetPanelId.A)
         PanelSet(listOf(panel))
 
-        val error = assertThrows(IllegalArgumentException::class.java) {
+        val error = assertThrows<IllegalArgumentException> {
             PanelSet(listOf(panel))
         }
 
