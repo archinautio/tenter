@@ -102,4 +102,4 @@ height, scrolling viewports, and managed panels on top of these concepts.
 - [Testing](testing.md): check the frames your application draws.
 - [Widgets and styling](styling.md): add selection, checkboxes, and colors.
 - [Animation](animation.md): render frames over time.
-- [Examples and troubleshooting](examples.md): run the full demonstration.
+- [Examples and troubleshooting](examples.md): run the widget showcase.

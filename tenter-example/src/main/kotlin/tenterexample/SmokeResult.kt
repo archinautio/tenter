@@ -3,8 +3,8 @@
 
 package tenterexample
 
+/** What [runHeadlessSmoke] exercised: every page at every size, and the marquee moving. */
 public data class SmokeResult(
-    public val renderedRows: Int,
-    public val helpContainsMovement: Boolean,
-    public val animationCompleted: Boolean,
+    public val pageRenders: Int,
+    public val marqueeMoved: Boolean,
 )

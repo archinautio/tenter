@@ -9,7 +9,7 @@ plugins {
 }
 
 application {
-    mainClass.set("tenterexample.ExampleMainKt")
+    mainClass.set("tenterexample.ShowcaseMainKt")
 }
 
 dependencies {

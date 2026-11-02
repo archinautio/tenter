@@ -28,29 +28,41 @@ without a real terminal, see [testing](testing.md).
 ## Collect events and repaint
 
 `screen.events()` delivers keyboard and mouse input and terminal resizes as one flow.
-The compiled [interactive example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt)
-collects it. This excerpt runs inside
-`runInteractive`, after creating `app` and drawing the initial frame. The loop reads events
-from and draws to the same `screen`.
-
-```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt:input-loop"
-```
 
 - `TerminalEvent.Input` carries a Mordant input event.
 - `TerminalEvent.Resized` supplies the new `Size` in cells. Drawing again is enough:
   `screen.draw` follows the terminal's size, and `frame.area` already has the new dimensions.
-- To quit, stop collecting: the example's quit key sets `app.running` to false, and
-  `takeWhile` ends collection, which lets the terminal scope close.
+- To quit, stop collecting, which lets the terminal scope close.
+
+An application that changes only on input can collect the flow directly and draw after each
+event, as the [greeting](index.md#the-main-loop) does: handle each event in `onEach`, stop with
+`takeWhile` once the quit key has been handled, and draw in `collect`.
+
+An application that also changes over time, such as an animation or a message that expires,
+must wake up without input too. The compiled
+[showcase](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ShowcaseMain.kt) does so in `runInteractive`: one coroutine
+forwards the events, and another waits until the time the last frame said it next changes.
+Its loop takes whichever comes first, from one channel, and draws to the same `screen`:
+
+```kotlin
+--8<-- "tenter-example/src/main/kotlin/tenterexample/ShowcaseMain.kt:input-loop"
+```
+
+- `showcase.nextChangeIn` is data the last draw returned: the earliest time any part of the
+  frame changes on its own, or null if none does.
+- Sending a new deadline to the conflated channel replaces the pending one, and
+  `collectLatest` cancels the wait for it.
+- Both coroutines run in `runBlocking`'s single thread, so state updates and drawing stay
+  together.
 
 ## Map keys to application actions
 
 Use `KeyMap` when you want bindings and help hints defined together. The following
-is the complete key-map object from the example, with its imports. `ExampleContext`
-and `ExampleAction` are the example application's own types.
+is the showcase's complete key-map object, with its imports. `ShellContext`
+and `ShellAction` are the showcase's own types.
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleKeyMap.kt:6:"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/shell/ShellKeyMap.kt:6:"
 ```
 
 Resolve a keyboard event with `map.resolve(listOf(context), event)` and handle the
@@ -67,5 +79,8 @@ Building the map checks its rules, and throws when one is broken:
 
 Actions are your own type, typically an enum, so `when` over `resolve`'s result is exhaustive;
 keep their identity stable once the map is built. If the application has several contexts, it
-chooses their precedence. See the [key-map source](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleKeyMap.kt)
-and [action handling](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt).
+chooses their precedence. The showcase resolves its `GLOBAL` context first, then the current
+page's own key map while the page has focus, then the focused panel's contexts. See the
+[key-map source](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/shell/ShellKeyMap.kt) and
+[action handling](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/shell/Showcase.kt). Its **Keys** page turns a second
+context on ahead of the first, and the help panel follows the contexts active at the time.

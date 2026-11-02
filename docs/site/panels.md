@@ -42,37 +42,41 @@ The content says what it wants kept visible; the viewport decides when to follow
 When several requests are made, the last one wins. Use `requestRecenter()` to center the
 content's current request on the next drawable frame.
 
+The showcase's **Scrolling** page puts two bordered viewports side by side: a list that follows
+its selection and scrolls sideways past a wide item, and a growing log that follows its end.
+
 ## Create a panel layout
 
 Panels combine content with a title, border, scrollbars, and scrolling. Keep one `PanelSet` for
 the screen's lifetime: it is the state of the `Panels` widget, which you render each
 frame with your current application state.
 
-This excerpt from the compiled [panel example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt)
-creates its four panels: the catalog, which declares no minimized content and so can only
-be maximized, the details and checked panels, which declare all three modes, and help.
-`ExamplePanelId` identifies each panel; `ExampleState` supplies the selected row and checked
-items. The example's `ExampleListView` and content functions produce the displayed content.
+The showcase is itself a panel layout. This excerpt from its compiled
+[shell](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/shell/Showcase.kt) creates its panels: the page list, which
+declares no maximized content and so can only be minimized, one panel per page, which can be
+maximized, and the help, which declares all three modes. `ShellPanelId` identifies each panel;
+`ShellInputs` carries what the panels show this frame, such as the current page's content.
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt:panels"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/shell/Showcase.kt:panels"
 ```
 
 - Each mode's builder returns the panel's content, and runs once per rendered frame.
 - A panel has no size: where it goes and how big it is, in each mode, is your application's
   decision.
-- Create the set with `PanelSet(listOf(rows, details, checked, help))`. Focus starts on the
-  first panel.
+- Create the set with `PanelSet(listOf(...))`. Focus starts on the first panel.
+- Give each page its own panel when every page should keep its own scroll position and mode,
+  as the showcase does.
 - A panel instance belongs to one set, so create fresh panels for independent sets.
 
 ## Render and control panels
 
-`ExampleApp.render(frame)` runs inside `terminal.draw`. It splits a status bar off the top
-of the frame, then renders a `Panels` widget, built from the current application state and a
-rectangle for each panel to draw, with the set as its state:
+`Showcase.render(frame)` runs inside `screen.draw`. It splits a title and a status bar off the
+top of the frame, then renders a `Panels` widget, built from the current application state and
+a rectangle for each panel to draw, with the set as its state:
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt:panel-render"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/shell/Showcase.kt:panel-render"
 ```
 
 Choose the rectangles every frame, usually by splitting the frame with `Layout` and picking
@@ -86,11 +90,12 @@ each panel's `Constraint` from `panels.modeOf(id)`:
 - Where two rectangles overlap, the one later in the map paints over the earlier and receives
   hits.
 
-This example lets the catalog fill the width the right-hand panels leave, each at its mode's
-width, and gives a maximized panel the whole area:
+The showcase lets the current page fill the width the page list and the help leave, each at
+its mode's width, and gives a maximized panel the whole area. Only the current page's panel gets
+a rectangle, so the others stay hidden:
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt:panel-layout"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/shell/Showcase.kt:panel-layout"
 ```
 
 Control the panels through the set, then repaint:
@@ -128,11 +133,12 @@ Call `hitTest(x, y)` with terminal coordinates after rendering. A hit identifies
 panel and, when applicable, the point in its content. Use that point rather than
 subtracting border widths or scroll offsets yourself.
 
-This excerpt handles wheel scrolling and toggles a clicked catalog row. `event`
-is a Mordant `MouseEvent`, and `state` belongs to the example application:
+This excerpt scrolls the panel under the wheel, and on a click focuses the panel and passes the
+content point on: to the page list to choose a page, or to the current page, such as the
+**Selection** page, which toggles the clicked task. `event` is a Mordant `MouseEvent`:
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt:mouse"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/shell/Showcase.kt:mouse"
 ```
 
 Clicks outside panels return null; clicks on panel chrome can have no content point.

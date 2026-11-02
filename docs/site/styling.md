@@ -4,17 +4,19 @@
 
 `SelectableRow` is a content widget that combines a label, optional check state, and
 selection highlighting. A selected row requests visibility, so an enclosing viewport
-follows it. This excerpt from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
-is inside a measurable widget's loop and draws each row with its row writer
-`column`; `index`, `label`, and `state` describe the row currently being drawn.
+follows it. This excerpt from the showcase's compiled [Selection page](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/pages/SelectionPage.kt)
+builds one row per task, with its size as the right-aligned value. `TASKS` pairs each label
+with its size, and `state` holds the selection and each task's check state.
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt:rows"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/pages/SelectionPage.kt:rows"
 ```
 
 Use `Checkbox` for a standalone checkbox, `Gauge` for a one-row ratio bar with an
 optional label, `VerticalText` for a minimized panel stub, `FlashMessage` for a transient status
 line, and `KeyHelp` for [keyboard hints](input.md#map-keys-to-application-actions).
+The showcase's **Selection** page shows rows and checkboxes in every state, and its **Progress**
+page gauges and flash messages.
 
 ## Choose glyphs
 
@@ -24,6 +26,9 @@ line, and `KeyHelp` for [keyboard hints](input.md#map-keys-to-application-action
 - Borders use Mordant's `BorderType` sets. `Block` and `Panel` default to
   `BorderType.ROUNDED`; pass `borderType = BorderType.ASCII` for terminals or fonts
   without box-drawing characters, or another set such as `SQUARE`, `HEAVY`, or `DOUBLE`.
+
+Cycle the checkbox glyphs on the showcase's **Selection** page, and the border sets on its
+**Composition** page.
 
 Tenter does not require Nerd Fonts. Text widths account for wide characters and
 combined Unicode characters. Prefer terminal-cell measurements over Kotlin string
@@ -54,7 +59,8 @@ render dim at normal intensity.
 To draw a popup, such as a dialog or a banner, over content without it showing through, render
 the `Clear` widget into the popup's area first: it resets every cell there to a blank in the
 default colors with no attribute. Then render the popup into the same area:
-`frame.renderWidget(Clear, area)` followed by `frame.renderWidget(popup, area)`.
+`frame.renderWidget(Clear, area)` followed by `frame.renderWidget(popup, area)`. Press `o` on
+the showcase's **Colors** page for such a popup over its color table.
 
 Applications add their own roles as an enum implementing `ColorRole`, such as the colors of a
 map's terrain. A color scheme written in Kotlin can resolve both sets with an exhaustive `when`,
@@ -85,6 +91,12 @@ To adjust the default color scheme:
 To choose a color scheme from the terminal's color support, read `terminal.colorSpace` before
 entering the scope; it is `null` when the terminal shows no color. A scope keeps its color
 scheme, so to switch themes, leave the scope and enter it again.
+
+The showcase picks one of [three schemes](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/colors/ShowcaseScheme.kt) this way, one
+per color space and each built differently: `ColorScheme.Default`, a `MapColorScheme` written
+in code, and one parsed from a theme text with `ColorSpace.parse`. Its **Colors** page shows
+every standard role and attribute in the scheme in use, and fixed colors beside them; see
+[choosing a scheme](examples.md#choose-a-color-scheme).
 
 For a color that must not change with the theme, use a `TerminalColor` directly as
 the role, as Ratatui uses `Color::Rgb`: `Style(fg = TerminalColor.TrueColor(255, 128, 0))`.

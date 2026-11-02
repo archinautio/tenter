@@ -21,7 +21,8 @@ val status = Paragraph(
 ```
 
 A string is split into lines at each `\n`. Without `wrap`, each line takes one row and
-is shortened with `…` to fit; with it, lines wrap at word boundaries.
+is shortened with `…` to fit; with it, lines wrap at word boundaries. The showcase's **Text**
+page wraps and ellipsizes a paragraph at a width you change with the arrow keys.
 
 ## Write a custom widget
 
@@ -57,21 +58,21 @@ wide too, so a viewport can scroll to it. Text past the edge is clipped instead.
 ## Stack content vertically
 
 Use `Stack(listOf(first, second))` to place measurable widgets one below another, with
-`spacing` blank rows between them. The example's
-[details panel](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt)
-stacks the selected row's label above whether it is checked.
+`spacing` blank rows between them. Every page of the
+[showcase](examples.md#run-the-showcase) is a `Stack` of headings and examples, and its
+**Composition** page changes the spacing live.
 A plain `Widget` cannot measure itself; to stack one, give it a size with
 `widget.fixedSize(width, height)`.
 
 ## Place content side by side
 
 `Row` places measurable widgets side by side with the same `Constraint`s as `Layout`, and
-never wraps. This excerpt from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
-places selection markers beside rows. `markerColumn` and `rowColumn` are measurable
-widgets defined earlier in that file; the rows take whatever width the markers leave.
+never wraps. This excerpt from the showcase's compiled [Composition page](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/pages/CompositionPage.kt)
+places three boxed labels side by side: one 14 cells wide, one taking 30% of the width, and one
+filling what is left. `box` frames a label in a bordered block.
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt:columns"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/pages/CompositionPage.kt:columns"
 ```
 
 `spacing` separates the children. Widths are display cells, so a wide character such as
@@ -86,6 +87,8 @@ val split = Row(
     spacing = 2,
 )
 ```
+
+Maximize the showcase's **Composition** page with `+` to watch its chips move between bands.
 
 The row is as tall as its tallest child, and each child gets that full height, so a block's
 border reaches the bottom of the row; a left border divides a child from its neighbour.
@@ -124,10 +127,11 @@ measurable: eight cells wide, it is five rows tall. This excerpt frames a label 
 bordered block with one cell of padding:
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt:padding"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/pages/CompositionPage.kt:padding"
 ```
 
-See the [complete source and imports](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt).
+See the [complete source and imports](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/pages/CompositionPage.kt), whose page
+also cycles a block's borders, border glyphs, and padding.
 `.revealed()` asks an enclosing viewport to keep the label visible; omit it for a static
 label. In an allocated area, render the block and then render the
 content into `block.inner(area)`:

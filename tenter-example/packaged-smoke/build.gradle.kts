@@ -41,7 +41,7 @@ sourceSets {
 }
 
 application {
-    mainClass.set("tenterexample.ExampleMainKt")
+    mainClass.set("tenterexample.ShowcaseMainKt")
 }
 
 tasks.named<JavaExec>("run") {

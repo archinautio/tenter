@@ -1,27 +1,49 @@
 # Examples and troubleshooting
 
-## Run the demonstration
+## Run the showcase
 
-From the Tenter checkout, build and run the installed launcher in a real terminal:
+The example application is a showcase of every Tenter widget. From the Tenter checkout, build
+and run the installed launcher in a real terminal:
 
 ```sh
 ./gradlew :tenter-example:installDist
 tenter-example/build/install/tenter-example/bin/tenter-example
 ```
 
-On Windows use `gradlew.bat` and the launcher's `.bat` file.
-The catalog demonstrates scrolling through 600 rows, selection, checkboxes, details,
-checked-row, and help panels, mouse handling, and resizing.
+On Windows use `gradlew.bat` and the launcher's `.bat` file. It is designed for a 100×30
+terminal and stays usable at 80×24:
+
+- Below 100 columns the help panel starts minimized.
+- Below 26 rows the title gives up its row.
+
+The page list on the left chooses what the middle panel shows. Each page explains itself, has
+keys of its own, and keeps its state while you look at other pages. The page list, the page,
+and the help are themselves a [panel layout](panels.md#create-a-panel-layout): move the focus,
+step a panel through its modes, scroll, and click to see one at work.
+
+| Page | What it shows | Guide |
+| --- | --- | --- |
+| Text | `Paragraph` wrapping and ellipsizing at a width you change, styled spans, `writeRow`, `VerticalText` | [Show text](layouts.md#show-text) |
+| Composition | `Block` borders, glyphs, and padding, `Stack`, `Row` constraints, `Flow` | [Layouts](layouts.md#stack-content-vertically) |
+| Selection | `SelectableRow` with a tri-state header, `Checkbox` in every state, checkbox glyphs | [Draw selectable rows](styling.md#draw-selectable-rows) |
+| Scrolling | Two `Viewport`s with `Scrollbar`s: a list following `revealed()`, a log following its end | [Scroll a single widget](panels.md#scroll-a-single-widget) |
+| Progress | `Gauge` styles, a timed task, `FlashMessage` in the status bar | [Widgets](styling.md#draw-selectable-rows) |
+| Colors | The schemes `--scheme` accepts, every `StandardRole` and text attribute, fixed colors, a popup over `Clear` | [Apply colors](styling.md#apply-colors) |
+| Animation | The "TENTER" marquee in block letters, its speed, and pausing it | [Animation](animation.md) |
+| Keys | A `KeyMap` with a second context turned on ahead of the first | [Map keys](input.md#map-keys-to-application-actions) |
+
+These keys work everywhere; the help panel lists the current page's keys as well:
 
 | Input | Action |
 | --- | --- |
-| Up / Down | Move the selected row; with a side panel focused, scroll it a row |
-| Space | Toggle the selected row |
-| 1 / 2 / 3 / h | Focus the catalog, details, checked, or help panel |
-| + / - | Grow or shrink the focused panel through its modes |
+| Tab / Shift-Tab | Focus the next or previous panel |
+| [ / ] | Show the previous or next page |
+| Up / Down | With the page list focused, choose a page; elsewhere, scroll the focused panel a row unless the page uses them |
+| Enter | Focus the page chosen in the page list |
+| + / - | Step the focused panel through its modes |
 | Page Up / Page Down | Scroll the focused panel |
 | Mouse wheel | Scroll the panel under the pointer |
-| Left click | Select and toggle a catalog row |
+| Left click | Focus a panel; choose a page or click inside it |
 | q | Quit and restore the terminal |
 
 For just the greeting:
@@ -29,6 +51,20 @@ For just the greeting:
 ```sh
 tenter-example/build/install/tenter-example/bin/tenter-example --hello
 ```
+
+### Choose a color scheme
+
+The showcase draws with the scheme that matches what your terminal shows: `truecolor`,
+`ansi256`, or `ansi16`, which it also uses when the terminal shows no color. Name one to
+override that choice:
+
+```sh
+tenter-example/build/install/tenter-example/bin/tenter-example --scheme=ansi256
+```
+
+- An unknown name lists the valid ones, and the launcher exits with status 2.
+- A scheme with more colors than the terminal shows prints a warning, then runs anyway.
+- The status bar names the scheme in use, and whether the terminal or `--scheme` chose it.
 
 ## Noninteractive check
 
@@ -38,9 +74,11 @@ Compile and run the example against the packaged library:
 ./gradlew :tenter-example:packagedSmoke
 ```
 
+It runs a headless check of every page at three terminal sizes.
+
 Browse the [example sources](https://github.com/archinautio/tenter/tree/main/tenter-example/src/main/kotlin/tenterexample)
-for the complete applications behind these guides. Types prefixed with `Example`
-are application code, not library types to import into your own application.
+for the complete applications behind these guides. Everything under the `tenterexample`
+package is application code, not library types to import into your own application.
 
 ## Dependency cannot be resolved
 
