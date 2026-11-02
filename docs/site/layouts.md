@@ -152,6 +152,10 @@ paint directly into a canvas, or `StatefulWidget<S>` when the widget needs state
 outlives a frame, such as a scroll position. Render the latter with
 `frame.renderStatefulWidget(widget, area, state)`.
 
+A widget paints with `canvas.set(x, y, symbol, style)` for one character and
+`canvas.setString(x, y, text, style)` for text. Both apply the [style](styling.md) to what the
+cell already shows, so a channel the style leaves unset keeps its painted value.
+
 ## Split the screen
 
 `Layout` splits a rectangle into adjacent rectangles along one axis, as Ratatui's
