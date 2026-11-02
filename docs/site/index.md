@@ -11,7 +11,7 @@ scrolling panels, keyboard and mouse input, and animation. It builds on Mordant.
 ## Install locally
 
 Use **JDK 25** and **Kotlin 2.4.21**. Tenter is JVM-only. Its public API uses Mordant
-3.0.2 and kotlinx-coroutines 1.11.0; both are included as transitive dependencies.
+3.1.0 and kotlinx-coroutines 1.11.0; both are included as transitive dependencies.
 
 Clone the project and publish it to your local Maven repository:
 
