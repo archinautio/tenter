@@ -68,9 +68,9 @@ private fun isTerminalControl(codePoint: Int): Boolean = codePoint < 0x20 || cod
 
 private val SURROGATE_RANGE: IntRange = 0xD800..0xDFFF
 private val NON_SPACING_TYPES: Set<Byte> = setOf(
-    Character.NON_SPACING_MARK.toByte(),
-    Character.COMBINING_SPACING_MARK.toByte(),
-    Character.ENCLOSING_MARK.toByte(),
-    Character.FORMAT.toByte(),
+    Character.NON_SPACING_MARK,
+    Character.COMBINING_SPACING_MARK,
+    Character.ENCLOSING_MARK,
+    Character.FORMAT,
 )
 private const val REPLACEMENT_CODE_POINT: Int = 0xFFFD

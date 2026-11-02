@@ -1,6 +1,6 @@
 [versions]
 jvm = "25"
-kotlin = "2.4.10"
+kotlin = "2.4.21"
 tenter = "0.2.0-SNAPSHOT"
 junit = "6.1.0"
 mockk = "1.14.11"
