@@ -15,7 +15,7 @@ class ArchitectureTest {
 
     private val mainFiles = Konsist.scopeFromProject()
         .files
-        .filter { it.path.contains("/tenter/") && !it.path.contains("/test/") }
+        .filter { it.path.contains("/tenter/src/main/") }
 
     private val allowedImportPrefixes = listOf(
         "io.archinaut.tenter",
