@@ -3,50 +3,49 @@
 
 package io.archinaut.tenter.widget
 
-import io.archinaut.tenter.screen.Cell
-import io.archinaut.tenter.palette.ChromeRole
-import io.archinaut.tenter.palette.ColorRole
-import io.archinaut.tenter.view.TextCursor
+import io.archinaut.tenter.color.StandardRole
+import io.archinaut.tenter.color.ColorRole
+import io.archinaut.tenter.screen.Style
 
-/** Renders one cursor-highlightable row with an optional checkbox and right-aligned value. */
-public object SelectableRow {
+/**
+ * One row with a selection marker, a checkbox, [label], and an optional right-aligned [right]
+ * value. A [selected] row is highlighted and revealed. [checkboxColor] overrides the checkbox's own
+ * color while the row is not selected.
+ */
+public class SelectableRow(
+    private val label: String,
+    private val checkState: CheckState,
+    private val selected: Boolean,
+    private val right: String? = null,
+    private val textColor: ColorRole = StandardRole.TEXT_PRIMARY,
+    private val checkboxColor: ColorRole? = null,
+    private val glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
+) : MeasurableWidget {
 
-    /**
-     * Draws [label] with the standard cursor marker, highlight color, checkbox, and reveal
-     * behavior. When [right] is non-null, the row uses [ValueRow] and renders [subLines] below it.
-     * [checkboxColor] overrides the intrinsic checkbox color when the row is not highlighted.
-     * [glyphs] selects the immutable checkbox glyph set without changing row colors.
-     */
-    public fun draw(
-        content: TextCursor,
-        label: String,
-        checkState: CheckState,
-        cursor: Boolean,
-        right: String? = null,
-        subLines: List<String> = emptyList(),
-        textColor: ColorRole = ChromeRole.TEXT_PRIMARY,
-        checkboxColor: ColorRole? = null,
-        glyphs: CheckboxGlyphs = CheckboxGlyphs.DEFAULT,
-    ) {
-        val row = content.row
-        if (cursor) content.markReveal()
+    override fun write(writer: RowWriter) {
+        val row = MeasurableWidget(::writeRow)
+        writer.draw(if (selected) row.revealed() else row)
+    }
 
-        val color = if (cursor) ChromeRole.ACCENT else textColor
-        val cursorGlyph = if (cursor) "▶" else " "
-        val left = "$cursorGlyph   $label"
+    private fun writeRow(writer: RowWriter) {
+        val color = if (selected) StandardRole.ACCENT else textColor
+        val marker = if (selected) "▶" else " "
+        val left = "$marker   $label"
         if (right == null) {
-            content.writeLine(left, Cell.Style(color))
+            writer.writeLine(left, Style(color))
         } else {
-            ValueRow.draw(content, left, right, subLines, color)
+            writer.writeRow(left, right, Style(color))
         }
 
         val resolvedCheckboxColor = when {
-            cursor -> ChromeRole.ACCENT
+            selected -> StandardRole.ACCENT
             checkboxColor != null -> checkboxColor
             else -> Checkbox.intrinsicColor(checkState)
         }
-        Checkbox.draw(content, CHECKBOX_COLUMN, row, checkState, resolvedCheckboxColor, glyphs)
+        writer.write(CHECKBOX_COLUMN, checkboxIcon(checkState, glyphs), Style(resolvedCheckboxColor), row = 0)
     }
 
-    private const val CHECKBOX_COLUMN = 2
+    private companion object {
+        const val CHECKBOX_COLUMN = 2
+    }
 }

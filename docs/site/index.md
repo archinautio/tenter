@@ -4,7 +4,7 @@ Tenter is a Kotlin/JVM toolkit for building terminal applications with text, wid
 scrolling panels, keyboard and mouse input, and animation. It builds on Mordant.
 
 !!! note "Development documentation"
-    These guides follow `main`, currently `0.1.0-SNAPSHOT`. The API is pre-1.0 and may
+    These guides follow `main`, currently `0.2.0-SNAPSHOT`. The API is pre-2.0 and may
     change. Pin the version and review API changes before upgrading. Installation
     currently requires building the library locally.
 
@@ -39,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.archinaut:tenter:0.1.0-SNAPSHOT")
+    implementation("io.archinaut:tenter:0.2.0-SNAPSHOT")
 }
 
 kotlin { jvmToolchain(25) }
@@ -50,8 +50,8 @@ The dependency above resolves from your machine's Maven Local repository.
 
 ### The main loop
 
-Save the following as `src/main/kotlin/Main.kt`. This is a complete program: it paints
-a greeting and waits for `q`. The code is included from the compiled
+Save the following as `src/main/kotlin/Main.kt`. This is a complete program: it draws
+one frame with a greeting and waits for `q`. The code is included from the compiled
 [hello example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/hello/HelloMain.kt),
 with its example package declaration omitted (use whichever package you want).
 
@@ -72,11 +72,34 @@ On Windows, use `gradlew.bat` and the generated `hello-tenter.bat` launcher.
 See [input and lifecycle](input.md) for managing terminal cleanup and your application
 event loop.
 
+## Core concepts
+
+Tenter follows the shape of [Ratatui](https://ratatui.rs/concepts/). If you know
+Ratatui, the names map directly:
+
+| Tenter | Ratatui | Role |
+| --- | --- | --- |
+| `Terminal` | `Terminal` | A real terminal over Mordant, or a headless one for tests. `withScreen { screen -> }` opens its `Screen`. |
+| `Screen` | `Terminal` | The terminal while its scope runs: `draw` sends only what changed, and `events` reads input. |
+| `Frame` | `Frame` | One frame inside `screen.draw { frame -> }`: its `area` and `renderWidget` / `renderStatefulWidget`. |
+| `Widget`, `StatefulWidget` | `Widget`, `StatefulWidget` | Something that renders into an area, optionally with caller-owned state. |
+| `Canvas` | `Rect` + `Buffer` | The area a widget renders into: clipped, with local coordinates. |
+| `CompletedFrame` | `CompletedFrame` + `Buffer` | What a draw presented: compare it, narrow it to a `region`, and read its text. See [Testing](testing.md). |
+| `Cell`, `Style` | `Cell`, `Style` | What a terminal cell shows, and the change a write applies to it. |
+| `Layout`, `Constraint` | `Layout`, `Constraint` | Split a `Rect` into smaller rectangles. |
+| `Block`, `Borders`, `Padding` | `Block`, `Borders`, `Padding` | Borders with a title, and the space inside them. |
+| `Scrollbar` | `Scrollbar` | A thumb showing a viewport's position, drawn over the border beside it. |
+| `Paragraph`, `Line`, `Span` | `Paragraph`, `Line`, `Span` | Text: lines made of styled spans, shown by a paragraph widget. |
+
+Tenter adds measurable widgets (`MeasurableWidget`) for content that measures its own
+height, scrolling viewports, and managed panels on top of these concepts.
+
 ## Continue with:
 
-- [Content and layouts](layouts.md): compose text, columns, padding, and borders.
+- [Content and layouts](layouts.md): compose text, side-by-side content, padding, and borders.
 - [Scrolling and panels](panels.md): show more content than fits on screen.
 - [Input and resizing](input.md): update your application in response to events.
+- [Testing](testing.md): check the frames your application draws.
 - [Widgets and styling](styling.md): add selection, checkboxes, and colors.
 - [Animation](animation.md): render frames over time.
-- [Examples and troubleshooting](examples.md): run the full demonstration.
+- [Examples and troubleshooting](examples.md): run the widget showcase.

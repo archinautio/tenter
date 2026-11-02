@@ -2,23 +2,33 @@
 
 ## Draw selectable rows
 
-`SelectableRow` combines a label, optional check state, and selection highlighting.
-This excerpt from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
-is inside a `contentView` loop. `cursor` is its text cursor; `index`, `label`, and
-`state` describe the row currently being drawn.
+`SelectableRow` is a content widget that combines a label, optional check state, and
+selection highlighting. A selected row requests visibility, so an enclosing viewport
+follows it. This excerpt from the showcase's compiled [Selection page](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/pages/SelectionPage.kt)
+builds one row per task, with its size as the right-aligned value. `TASKS` pairs each label
+with its size, and `state` holds the selection and each task's check state.
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt:rows"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/pages/SelectionPage.kt:rows"
 ```
 
-Use `Checkbox` for a standalone checkbox, `Gauge` for a bounded value display,
-and `HelpView` for [keyboard hints](input.md#map-keys-to-application-actions).
+Use `Checkbox` for a standalone checkbox, `Gauge` for a one-row ratio bar with an
+optional label, `VerticalText` for a minimized panel stub, `FlashMessage` for a transient status
+line, and `KeyHelp` for [keyboard hints](input.md#map-keys-to-application-actions).
+The showcase's **Selection** page shows rows and checkboxes in every state, and its **Progress**
+page gauges and flash messages.
 
 ## Choose glyphs
 
 - `CheckboxGlyphs.DEFAULT` uses Unicode glyphs.
 - `CheckboxGlyphs.ASCII` is a conservative choice for varied terminal fonts.
 - `CheckboxGlyphs.NERD_FONT` requires an appropriate Nerd Font and is opt-in.
+- Borders use Mordant's `BorderType` sets. `Block` and `Panel` default to
+  `BorderType.ROUNDED`; pass `borderType = BorderType.ASCII` for terminals or fonts
+  without box-drawing characters, or another set such as `SQUARE`, `HEAVY`, or `DOUBLE`.
+
+Cycle the checkbox glyphs on the showcase's **Selection** page, and the border sets on its
+**Composition** page.
 
 Tenter does not require Nerd Fonts. Text widths account for wide characters and
 combined Unicode characters. Prefer terminal-cell measurements over Kotlin string
@@ -26,22 +36,71 @@ length when allocating widths.
 
 ## Apply colors
 
-Start with `DefaultRolePalette` in `terminal.withScreen(DefaultRolePalette)`.
-Use `Cell.Style(ChromeRole.ACCENT)` when writing highlighted text, for example as
-the second argument to `cursor.writeLine`. The default palette supplies the toolkit's
-`ChromeRole` colors using the terminal's ANSI-16 palette.
+`withScreen` draws with `ColorScheme.Default` unless you pass another color scheme.
+Use `Style(StandardRole.ACCENT)` when writing highlighted text, for example as
+the second argument to `writer.writeLine`. The default color scheme supplies the
+toolkit's `StandardRole` colors using the terminal's ANSI-16 palette.
 
-For custom colors, construct `MapRolePalette` with a name, an `AnsiLevel`, a
-`defaultBackground`, and a map from roles to `PaletteColor` values. Include every
-`ChromeRole`, plus any application-specific roles. All colors must match the
-chosen tier: `Ansi16`, `Xterm256`, or `TrueColor`.
+A style is the change a write makes, and it sets only the channels you give it. Writing
+`Style(fg = StandardRole.DANGER)` over an already painted cell changes its glyph and foreground
+and keeps its background, so a marker drawn over a colored area keeps the color under it. Set a
+channel explicitly to replace it, including back to the default: `Style(bg = StandardRole.DEFAULT)`
+or `Style(strikethrough = false)`.
 
-A simple customization is to start with
-`ChromeRole.entries.associateWith { DefaultRolePalette.foreground(it) }`, replace
-an entry such as `ChromeRole.ACCENT`, and supply that map with `AnsiLevel.ANSI16`
-and `DefaultRolePalette.defaultBackground`. Pass the new palette to `withScreen`.
-Keep the palette stable for that renderer's lifetime. `AnsiLevel.NONE` is a terminal
-capability, not a palette authoring tier; do not use it to construct a map palette.
+A `Cell` is what a cell shows after every write: its symbol, `fg`, `bg`, and each attribute,
+never unset. A cell no write touched shows `StandardRole.DEFAULT` with every attribute off.
+
+Besides the two colors, a style carries the text attributes `bold`, `dim`, `italic`,
+`underline`, `inverse`, and `strikethrough`, each a channel of its own:
+`Style(fg = StandardRole.WARNING, bold = true)`. Tenter renders them through Mordant, so
+each looks however the terminal draws that attribute; some terminals ignore italic or
+render dim at normal intensity.
+
+To draw a popup, such as a dialog or a banner, over content without it showing through, render
+the `Clear` widget into the popup's area first: it resets every cell there to a blank in the
+default colors with no attribute. Then render the popup into the same area:
+`frame.renderWidget(Clear, area)` followed by `frame.renderWidget(popup, area)`. Press `o` on
+the showcase's **Colors** page for such a popup over its color table.
+
+Applications add their own roles as an enum implementing `ColorRole`, such as the colors of a
+map's terrain. A color scheme written in Kotlin can resolve both sets with an exhaustive `when`,
+so adding a role to either enum is a compile error until every color scheme handles it:
+
+```kotlin
+override fun foreground(role: ColorRole): TerminalColor = when (role) {
+    is StandardRole -> when (role) { /* every standard role */ }
+    is TerrainRole -> when (role) { /* every terrain role */ }
+    else -> error("unknown color role: $role")
+}
+```
+
+For custom colors loaded from data, construct `MapColorScheme` with a name, a `ColorSpace`, a
+`defaultBackground`, and a map from roles to `TerminalColor` values. Include every
+`StandardRole`, plus any application-specific roles. All colors must be in the
+chosen space: `Ansi16`, `Ansi256`, or `TrueColor`. To read colors from text, such as a
+theme file, use `ColorSpace.parse`.
+
+To adjust the default color scheme:
+
+1. Start from `StandardRole.entries.associateWith { ColorScheme.Default.foreground(it) }`.
+2. Replace an entry, such as `StandardRole.ACCENT`.
+3. Build a `MapColorScheme` from a name, that map, `ColorSpace.ANSI16`, and
+   `ColorScheme.Default.defaultBackground`.
+4. Pass it as `terminal.withScreen(colorScheme) { ... }`.
+
+To choose a color scheme from the terminal's color support, read `terminal.colorSpace` before
+entering the scope; it is `null` when the terminal shows no color. A scope keeps its color
+scheme, so to switch themes, leave the scope and enter it again.
+
+The showcase picks one of [three schemes](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/colors/ShowcaseScheme.kt) this way, one
+per color space and each built differently: `ColorScheme.Default`, a `MapColorScheme` written
+in code, and one parsed from a theme text with `ColorSpace.parse`. Its **Colors** page shows
+every standard role and attribute in the scheme in use, and fixed colors beside them; see
+[choosing a scheme](examples.md#choose-a-color-scheme).
+
+For a color that must not change with the theme, use a `TerminalColor` directly as
+the role, as Ratatui uses `Color::Rgb`: `Style(fg = TerminalColor.TrueColor(255, 128, 0))`.
+The terminal renders it as given, without consulting the color scheme.
 
 If the terminal reports no color support, Tenter suppresses color escapes while
 keeping text and layout usable.

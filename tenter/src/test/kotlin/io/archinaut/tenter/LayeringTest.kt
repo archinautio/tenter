@@ -7,16 +7,7 @@ import com.lemonappdev.konsist.api.Konsist
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-/**
- * Enforces the internal layering `docs/architecture.md` describes for this module —
- * `text/input -> palette -> screen -> view -> widget/panel`, with terminal consuming input,
- * palette, and screen for scoped
- * lifecycle, never the reverse — as an allowed-dependency matrix
- * between `tenter`'s direct child packages. [ArchitectureTest] enforces the module's *external*
- * seam (no `battletech.*` import, nothing outside an approved third-party allowlist); this
- * enforces the seams *between* its own packages, which nothing previously checked — a
- * a `io.archinaut.tenter.screen` file importing `io.archinaut.tenter.panel` passed every existing test.
- */
+/** Enforces the package layering `docs/architecture.md` describes, as an allowed-dependency matrix. */
 class LayeringTest {
 
     private val mainFiles = Konsist.scopeFromProject()
@@ -26,16 +17,14 @@ class LayeringTest {
     private val allowed: Map<String, Set<String>> = mapOf(
         "text" to emptySet(),
         "input" to emptySet(),
-        "palette" to emptySet(),
-        "screen" to setOf("palette", "text"),
-        "animation" to setOf("screen", "text", "view"),
-        "terminal" to setOf("input", "palette", "screen"),
-        "view" to setOf("input", "palette", "screen", "text"),
-        "widget" to setOf("palette", "screen", "text", "view"),
-        "panel" to setOf("palette", "screen", "view"),
+        "color" to emptySet(),
+        "screen" to setOf("color", "text"),
+        "animation" to setOf("screen", "text", "widget"),
+        "terminal" to setOf("input", "color", "screen", "widget"),
+        "widget" to setOf("input", "color", "screen", "text"),
     )
 
-    /** The direct child of `tenter` [packageName] belongs to, e.g. `io.archinaut.tenter.view.scrolling` -> `"view"`. */
+    /** The direct child of `tenter` [packageName] belongs to, e.g. `io.archinaut.tenter.widget` -> `"widget"`. */
     private fun topPackage(packageName: String): String =
         packageName.removePrefix("io.archinaut.tenter.").substringBefore('.')
 

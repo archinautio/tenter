@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2026 Alejandro Pérez García
+// SPDX-License-Identifier: Apache-2.0
+
+package io.archinaut.tenter.widget.panel
+
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import io.archinaut.tenter.widget.MeasurableWidget
+
+private enum class TestPanelId : PanelId { A, B }
+
+internal class PanelModeTest {
+
+    private fun panel(
+        minimized: Boolean = true,
+        maximized: Boolean = true,
+    ): Panel<TestPanelId, Unit> = Panel(
+        id = TestPanelId.A,
+        title = "T",
+        normal = { MeasurableWidget { } },
+        minimized = if (minimized) ({ MeasurableWidget { } }) else null,
+        maximized = if (maximized) ({ MeasurableWidget { } }) else null,
+    )
+
+    @Test
+    fun `modes list exactly the declared modes in cycle order`() {
+        assertEquals(
+            listOf(PanelMode.MINIMIZED, PanelMode.NORMAL, PanelMode.MAXIMIZED),
+            panel().modes,
+        )
+        assertEquals(listOf(PanelMode.NORMAL), panel(false, false).modes)
+        assertEquals(listOf(PanelMode.MINIMIZED, PanelMode.NORMAL), panel(true, false).modes)
+    }
+
+    @Test
+    fun `set operations cycle forward and backward and skip undeclared modes`() {
+        val set = PanelSet(listOf(panel()))
+
+        set.cycleFocusedMode(1)
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(TestPanelId.A))
+        set.cycleFocusedMode(1)
+        assertEquals(PanelMode.MINIMIZED, set.modeOf(TestPanelId.A))
+        set.cycleFocusedMode(-1)
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(TestPanelId.A))
+
+        val minimizedAndNormal = PanelSet(listOf(panel(minimized = true, maximized = false)))
+        minimizedAndNormal.cycleFocusedMode(1)
+        assertEquals(PanelMode.MINIMIZED, minimizedAndNormal.modeOf(TestPanelId.A))
+    }
+
+    @Test
+    fun `maximized state restores to the state from which it was entered`() {
+        val a = panel()
+        val b = Panel<TestPanelId, Unit>(
+            id = TestPanelId.B,
+            title = "B",
+                normal = { MeasurableWidget { } },
+        )
+        val set = PanelSet(listOf(a, b))
+        set.cycleFocusedMode(-1)
+        set.cycleFocusedMode(-1)
+        assertEquals(PanelMode.MAXIMIZED, set.modeOf(TestPanelId.A))
+        set.focus(TestPanelId.B)
+        assertEquals(PanelMode.MINIMIZED, set.modeOf(TestPanelId.A))
+    }
+}

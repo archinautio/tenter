@@ -1,62 +1,209 @@
 # Content and layouts
 
-Start with `contentView { cursor -> ... }` to write flowing text. Use `writeLine`
-for a line and `newLine` for a blank line. A `ContentView` can measure itself for
-the available width and can be composed with other content.
+Tenter has two kinds of widget. A `Widget` paints into whatever area it is given, as in
+Ratatui. A `MeasurableWidget` can also measure its height for a width before painting,
+so it can be stacked, placed side by side, and scrolled.
+
+## Show text
+
+`Paragraph` shows lines of text, as Ratatui's `Paragraph` does. A `Line` is made of
+`Span`s, each with its own `Style`, so one line can mix colors without computing columns:
+
+```kotlin
+val greeting = Paragraph("Hello from Tenter")
+val status = Paragraph(
+    listOf(
+        Line("Connected", Style(StandardRole.SUCCESS)),
+        Line(Span("key ", Style(StandardRole.INFO)), Span("description")),
+    ),
+    wrap = true,
+)
+```
+
+A string is split into lines at each `\n`. Without `wrap`, each line takes one row and
+is shortened with `…` to fit; with it, lines wrap at word boundaries. The showcase's **Text**
+page wraps and ellipsizes a paragraph at a width you change with the arrow keys.
+
+## Write a custom widget
+
+For content that is not plain text, implement `MeasurableWidget` and write it row by
+row with a `RowWriter`; its height follows from what you wrote:
+
+```kotlin
+class Summary(private val items: List<String>) : MeasurableWidget {
+    override fun write(writer: RowWriter) {
+        items.forEach { writer.writeLine(it) }
+    }
+}
+```
+
+A `RowWriter` offers:
+
+- `writer.width`: the available width.
+- `writeLine(text)`: writes a `String` or a `Line`, shortened to fit, and advances.
+- `writeRow(left, right)`: writes text flush left and flush right on one row, and advances.
+- `write(column, text, row = …)`: places text at a column without advancing, on the current
+  row unless you name an earlier one.
+- `newLine()`: leaves a blank row.
+- `draw(child)`: places a measurable child and advances past it. Never call a child's `write`
+  yourself, since it would write into your rows instead of its own.
+- `draw(widget, height)`: paints a plain `Widget` across the full width.
+
+`write` and `writeLine` return the `Point` where the text ended, as Ratatui's
+`Buffer::set_line` does, so the next piece can follow it: `writer.write(label.x + 1, value)`.
+
+A child wider than `writer.width`, such as a large `fixedSize` drawing, makes your widget that
+wide too, so a viewport can scroll to it. Text past the edge is clipped instead.
 
 ## Stack content vertically
 
-Use `Stack(listOf(first, second))` to place content one below another. The example's
-[help panel](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleApp.kt)
-combines a `HelpView` with text showing the selected row and checked count.
-A plain `View` only paints into an allocated area; if you need to compose one,
-wrap it with `fixedContent(width, height, view)` using its known dimensions.
+Use `Stack(listOf(first, second))` to place measurable widgets one below another, with
+`spacing` blank rows between them. Every page of the
+[showcase](examples.md#run-the-showcase) is a `Stack` of headings and examples, and its
+**Composition** page changes the spacing live.
+A plain `Widget` cannot measure itself; to stack one, give it a size with
+`widget.fixedSize(width, height)`.
 
-## Arrange columns
+## Place content side by side
 
-Give each `Columns.Child` a width in terminal cells and a `ContentView`. This excerpt
-from the compiled [list example](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt)
-places selection markers beside rows. `markerColumn` and `rowColumn` are content
-views defined earlier in that file; the widths account for the available space.
-
-```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleListView.kt:columns"
-```
-
-`gutter` separates columns. Columns that wrap into another band have a blank row
-between bands. Combine the resulting columns with other content using `Stack`.
-Widths are display cells, so a wide character such as `中` occupies more than one.
-
-## Add padding and borders
-
-Use the `prepared` factories when padding or borders participate in a stack or
-column layout. This excerpt prepares a bordered label with one cell of padding,
-then measures it for an available width of eight cells:
+`Row` places measurable widgets side by side with the same `Constraint`s as `Layout`, and
+never wraps. This excerpt from the showcase's compiled [Composition page](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/pages/CompositionPage.kt)
+places three boxed labels side by side: one 14 cells wide, one taking 30% of the width, and one
+filling what is left. `box` frames a label in a bordered block.
 
 ```kotlin
---8<-- "tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt:padding"
+--8<-- "tenter-example/src/main/kotlin/tenterexample/pages/CompositionPage.kt:columns"
 ```
 
-The excerpt uses `Bordered`, `Padded`, `Insets`, and `contentView` from Tenter.
-See the [complete source and imports](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/ExampleMain.kt).
-`markRevealAt(0)` asks an enclosing viewport to keep the marked row visible; omit
-it for a static label. Use the ordinary `Padded` and `Bordered` constructors only
-when painting a raw view into an already allocated area.
+`spacing` separates the children. Widths are display cells, so a wide character such as
+`中` occupies more than one. A detail pane beside a list is a row too:
+
+```kotlin
+val split = Row(
+    listOf(
+        Constraint.Length(24) to list,
+        Constraint.Fill(1) to detail.block(Block(borders = Borders.LEFT, padding = Padding(left = 2))),
+    ),
+    spacing = 2,
+)
+```
+
+Maximize the showcase's **Composition** page with `+` to watch its chips move between bands.
+
+The row is as tall as its tallest child, and each child gets that full height, so a block's
+border reaches the bottom of the row; a left border divides a child from its neighbour.
+Composites never clip: a child measured wider than its share, such as a `fixedSize` drawing,
+widens it and pushes the later children right, so a viewport can scroll to it. Only a
+viewport clips.
+
+## Flow content into bands
+
+`Flow` lays children out at declared widths and wraps to a new band when the next one does
+not fit, as text flows. Each band is a `Row`, and bands are stacked with a blank row between
+them; a child wider than the available space keeps its width alone in its band:
+
+```kotlin
+val sheet = Flow(
+    listOf(
+        Constraint.Length(30) to summary,
+        Constraint.Length(24) to equipment,
+        Constraint.Length(40) to diagram,
+    ),
+    spacing = 2,
+)
+```
+
+## Add borders and padding
+
+A `Block` holds borders, a title, and padding, as Ratatui's `Block` does:
+
+- `Block.bordered(...)` draws all four sides, and `Block()` none.
+- `borders` chooses the sides, such as `Borders.TOP` for a titled divider.
+- `borderType` chooses their glyphs, one of Mordant's `BorderType` sets.
+- A block without borders adds padding alone.
+
+Surround measurable content with a block using `.block(...)`. The result is still
+measurable: eight cells wide, it is five rows tall. This excerpt frames a label in a
+bordered block with one cell of padding:
+
+```kotlin
+--8<-- "tenter-example/src/main/kotlin/tenterexample/pages/CompositionPage.kt:padding"
+```
+
+See the [complete source and imports](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/pages/CompositionPage.kt), whose page
+also cycles a block's borders, border glyphs, and padding.
+`.revealed()` asks an enclosing viewport to keep the label visible; omit it for a static
+label. In an allocated area, render the block and then render the
+content into `block.inner(area)`:
+
+```kotlin
+val block = Block.bordered(title = "LOG")
+frame.renderWidget(block, area)
+frame.renderWidget(content, block.inner(area))
+```
 
 ## Draw a frame
 
-Create a `ScreenBuffer` for the current terminal size, wrap it with `Canvas.of(buffer)`,
-call your content's `draw` method, and send the buffer to the renderer. The
+Each call to `terminal.draw { frame -> ... }` starts from a blank frame the size of the
+terminal. Render widgets into rectangles of `frame.area`. When the block returns, Tenter
+sends only the cells that changed since the previous frame. The
 [getting started program](index.md#write-your-first-application-hello-tenter) shows these steps.
 For content taller than the destination, add a [viewport or panels](panels.md).
 
+Every widget receives a `Canvas` already clipped to its area, with `(0, 0)` at the
+area's top-left corner, so it cannot paint over its neighbours. Implement `Widget` to
+paint directly into a canvas, or `StatefulWidget<S>` when the widget needs state that
+outlives a frame, such as a scroll position. Render the latter with
+`frame.renderStatefulWidget(widget, area, state)`.
+
+A widget paints with `canvas.set(x, y, symbol, style)` for one character and
+`canvas.setString(x, y, text, style)` for text. Both apply the [style](styling.md) to what the
+cell already shows, so a channel the style leaves unset keeps its painted value.
+
+## Split the screen
+
+`Layout` splits a rectangle into adjacent rectangles along one axis, as Ratatui's
+`Layout` does. Each segment takes a `Constraint`:
+
+```kotlin
+val (header, body, footer) = Layout.vertical(
+    Constraint.Length(1),
+    Constraint.Fill(1),
+    Constraint.Length(1),
+).split(frame.area)
+val (list, details) = Layout.horizontal(Constraint.Percentage(40), Constraint.Fill(1))
+    .spacing(1)
+    .split(body)
+```
+
+| Constraint | Size |
+| --- | --- |
+| `Length(n)` | exactly `n` cells |
+| `Percentage(p)`, `Ratio(a, b)` | that share of the available cells, rounded down |
+| `Min(n)` | at least `n`; grows into leftover space when there is no `Fill` |
+| `Max(n)` | at most `n`; shrinks before any `Min` when space is short |
+| `Fill(weight)` | leftover space, shared among fills by weight |
+
+Leftover cells with no fill or min segment to take them stay empty after the last
+segment. When the requests exceed the space, the last segments shrink first. Inside
+a widget, split `canvas.area` and render children into `canvas.region(rect)`.
+
 ## Reuse content safely
 
-Recorded text and placements are snapshots, but raw views and color-role objects
-are retained rather than deep-copied. Capture stable frame data in raw views when
-you need repeatable output. `fixedContent` uses the dimensions you supply without
-painting to measure; it calls the original view each time it paints.
+Written text and placements are snapshots, but plain widgets given a size and
+color-role objects are retained rather than deep-copied. Capture stable frame data in
+those widgets when you need repeatable output. `fixedSize` uses the dimensions you
+supply without painting to measure; it calls the original widget each time it paints.
 
-Prepared layouts retain all logical content for scrolling. Very long content uses
-proportionally more memory, so limit or page the application data you prepare when
-working with large datasets.
+What costs what:
+
+- **Painting** costs the visible area, not the content length: a viewport paints only the
+  rows and children inside its window.
+- **Preparation** records all logical content, so very long content uses proportionally more
+  memory and time. Limit or page the application data you prepare for large datasets.
+- **A `fixedSize` widget** is painted once per frame, straight into the viewport's buffer. It
+  receives a canvas of its full size and writes outside the visible window are dropped, so a
+  large drawing that is costly to paint should skip what it cannot show.
+
+A `fixedSize` widget makes no visibility request of its own. Declare one where you give it
+its size, such as `board.fixedSize(w, h).revealed(cursorArea)`.

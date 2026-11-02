@@ -3,18 +3,14 @@
 
 package io.archinaut.tenter.text
 
-public object TextWrap {
+internal object TextWrap {
 
     /**
-     * The wrap engine, expressed as index ranges into [text] so a caller carrying per-index
-     * decoration (styling, e.g.) slices its own representation at exactly the boundaries this
-     * chose, instead of re-implementing the break rules. Each element of the result is one
-     * output row, given as the inclusive index ranges of the words it holds, in order;
-     * consecutive words on a row were separated by exactly one space in [text], so a renderer
-     * joins them with one space. A word wider than the row capacity is hard-split by grapheme
-     * cluster, so a range never ends inside a cluster.
+     * Each output row as the inclusive index ranges of its words in [text], so a caller carrying
+     * per-index styling slices at the same breaks. Words on a row are joined by one space; a word
+     * wider than the row is split between grapheme clusters.
      */
-    public fun <T> wrapBy(
+    fun <T> wrapBy(
         text: String,
         firstWidth: Int,
         continuationWidth: Int = firstWidth,
@@ -80,7 +76,7 @@ public object TextWrap {
         return rows
     }
 
-    public fun wrap(text: String, firstWidth: Int, continuationWidth: Int = firstWidth): List<String> =
+    fun wrap(text: String, firstWidth: Int, continuationWidth: Int = firstWidth): List<String> =
         wrapBy(text, firstWidth, continuationWidth) { ranges ->
             ranges.joinToString(" ") { text.substring(it.first, it.last + 1) }
         }

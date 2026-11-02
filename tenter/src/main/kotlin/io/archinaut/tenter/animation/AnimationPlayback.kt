@@ -3,20 +3,16 @@
 
 package io.archinaut.tenter.animation
 
+import io.archinaut.tenter.screen.Size
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
-import io.archinaut.tenter.view.View
+import io.archinaut.tenter.widget.Widget
 
 /**
- * Samples a finite collection of animations against elapsed monotonic time.
- *
- * Playback owns the timeline only. It does not own a clock, a renderer, or the application data
- * carried by each [Clip]. Sampling is pure: a caller may sample the same elapsed time repeatedly,
- * or sample times out of order. The input list and each animation's metadata are copied at
- * construction, so later mutation cannot change the timeline or its original ordering. A clip is
- * visible exactly while `startAfter <= elapsed < startAfter + frameDuration * frameCount`; its
- * frame zero is visible at the exact start and it is absent at the exact end. Construction and
- * sampling reject invalid or non-finite timeline values with [IllegalArgumentException].
+ * The timeline of a finite set of animations, sampled at elapsed time; it owns no clock. Sampling
+ * is pure, so any time may be sampled in any order. A clip is visible exactly while
+ * `startAfter <= elapsed < startAfter + frameDuration * frameCount`. The clips are copied when it
+ * is built, and invalid or non-finite times throw [IllegalArgumentException].
  */
 public class AnimationPlayback<T>(clips: List<Clip<T>>) {
     private val timelines: List<Timeline<T>> = clips.map(::Timeline)
@@ -29,35 +25,28 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
     )
 
     /** A visible animation frame and its application-owned value. */
-    public data class Frame<T>(
+    public data class VisibleFrame<T>(
         public val value: T,
-        public val size: AnimationSize,
-        public val content: View,
+        public val size: Size,
+        public val content: Widget,
     )
 
     /**
-     * The visible frames at a sampled time and the next positive timeline transition.
-     *
-     * A non-null [nextChangeIn] is the shortest positive delay until a pending clip starts, a
-     * visible clip changes frame, or a visible clip ends. It is null only when every clip has
-     * finished, including an empty playback. Therefore an empty [frames] list with a non-null
-     * delay represents a gap before a future clip starts.
+     * The visible frames at a sampled time, and [nextChangeIn], the delay until a clip starts,
+     * changes frame, or ends, or null once every clip has finished.
      */
     public data class Sample<T>(
-        public val frames: List<Frame<T>>,
+        public val frames: List<VisibleFrame<T>>,
         public val nextChangeIn: Duration?,
     )
 
-    /**
-     * Samples all clips at [elapsed], omitting clips that have not started or have finished.
-     * At an exact start this returns frame zero; at an exact end the clip is omitted.
-     */
+    /** The clips visible at [elapsed]. */
     public fun sample(elapsed: Duration): Sample<T> {
         require(elapsed.isFinite() && elapsed >= ZERO) {
             "elapsed must be finite and non-negative, was $elapsed"
         }
 
-        val frames = ArrayList<Frame<T>>()
+        val frames = ArrayList<VisibleFrame<T>>()
         var nextChange: Duration? = null
 
         timelines.forEach { timeline ->
@@ -68,7 +57,7 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
 
                 elapsed < timeline.endAt -> {
                     val frameIndex = timeline.frameIndexAt(elapsed)
-                    frames += Frame(
+                    frames += VisibleFrame(
                         value = timeline.value,
                         size = timeline.size,
                         content = timeline.animation.frame(frameIndex),
@@ -89,13 +78,14 @@ public class AnimationPlayback<T>(clips: List<Clip<T>>) {
     private class Timeline<T>(clip: Clip<T>) {
         internal val animation: Animation = clip.animation
         internal val value: T = clip.value
-        internal val size: AnimationSize = animation.size
+        internal val size: Size = animation.size
         internal val frameCount: Int = animation.frameCount
         internal val frameDuration: Duration = animation.frameDuration
         internal val startAfter: Duration = clip.startAfter
         internal val endAt: Duration
 
         init {
+            require(size.width > 0 && size.height > 0) { "animation size must be positive, was $size" }
             require(frameCount > 0) { "frameCount must be positive, was $frameCount" }
             require(frameDuration.isFinite() && frameDuration > ZERO) {
                 "frameDuration must be finite and positive, was $frameDuration"
