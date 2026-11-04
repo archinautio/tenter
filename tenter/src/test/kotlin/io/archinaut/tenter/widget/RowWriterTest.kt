@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget
 
+import com.github.ajalt.mordant.rendering.TextAlign
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.screen.Canvas
@@ -178,5 +179,21 @@ internal class RowWriterTest {
             writer.writeLine("b")
         }
         assertEquals(Rect(0, 0, 4, 2), requested(4) { writer -> writer.draw(inner.revealed()) })
+    }
+
+    @Test
+    fun `writeLine places a line by its alignment and returns where it ended`() {
+        var ended: Point? = null
+        val canvas = paint(7, 1) { writer -> ended = writer.writeLine("中a", align = TextAlign.RIGHT) }
+
+        assertEquals("中", canvas.get(4, 0).symbol)
+        assertEquals(Point(7, 0), ended)
+    }
+
+    @Test
+    fun `writeLine justifies a single row across the width`() {
+        val canvas = paint(7, 1) { writer -> writer.writeLine(Line("a b c"), TextAlign.JUSTIFY) }
+
+        assertEquals("a  b  c", (0 until 7).joinToString("") { canvas.get(it, 0).symbol.ifEmpty { " " } })
     }
 }

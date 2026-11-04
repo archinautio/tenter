@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget
 
+import com.github.ajalt.mordant.rendering.TextAlign
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.color.StandardRole
@@ -62,5 +63,51 @@ internal class ParagraphTest {
 
         assertEquals(Size(6, 3), framed.measure(6))
         assertEquals("│hi  │", render(framed, 6, 3).line(1))
+    }
+
+    @Test
+    fun `centers and right-aligns each row within the width`() {
+        assertEquals("  ab", render(Paragraph("ab", align = TextAlign.CENTER), 6, 1).line(0))
+        assertEquals("    ab", render(Paragraph("ab", align = TextAlign.RIGHT), 6, 1).line(0))
+    }
+
+    @Test
+    fun `centering leaves the odd cell on the right`() {
+        assertEquals(" ab", render(Paragraph("ab", align = TextAlign.CENTER), 5, 1).line(0))
+    }
+
+    @Test
+    fun `aligns each wrapped row on its own`() {
+        val paragraph = Paragraph("the quick fox", wrap = true, align = TextAlign.RIGHT)
+
+        val buffer = render(paragraph, 9, 2)
+
+        assertEquals(listOf("the quick", "      fox"), listOf(buffer.line(0), buffer.line(1)))
+    }
+
+    @Test
+    fun `a line too wide for any alignment is ellipsized at its end`() {
+        val buffer = render(Paragraph("the quick brown fox", align = TextAlign.RIGHT), 8, 1)
+
+        assertEquals("the qui…", buffer.line(0))
+    }
+
+    @Test
+    fun `justify fills every wrapped row but a line's last`() {
+        val paragraph = Paragraph("a bc de fgh ij", wrap = true, align = TextAlign.JUSTIFY)
+
+        val buffer = render(paragraph, 9, 2)
+
+        assertEquals(listOf("a  bc  de", "fgh ij"), listOf(buffer.line(0), buffer.line(1)))
+    }
+
+    @Test
+    fun `an unwrapped justified paragraph stays flush left`() {
+        assertEquals("a b", render(Paragraph("a b", align = TextAlign.JUSTIFY), 9, 1).line(0))
+    }
+
+    @Test
+    fun `none aligns flush left`() {
+        assertEquals("ab", render(Paragraph("ab", align = TextAlign.NONE), 6, 1).line(0))
     }
 }

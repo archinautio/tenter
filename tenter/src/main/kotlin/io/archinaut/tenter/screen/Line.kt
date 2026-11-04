@@ -50,6 +50,42 @@ public class Line(spans: List<Span>) {
         return Line(slice(0, keep) + Span(TextTruncation.ELLIPSIS, styleAt(spans, keep)))
     }
 
+    /**
+     * This line widened to [width] by spreading the missing cells over the space runs between its
+     * words, earlier runs taking the remainder; each run's added spaces keep its last space's style.
+     * A line without such a run, or already as wide, is returned unchanged.
+     */
+    internal fun justify(width: Int): Line {
+        val missing = width - this.width
+        if (missing <= 0) return this
+        val clusters = textClusters(plain).toList()
+        val firstWord = clusters.indexOfFirst { it.sourceText != " " }
+        val lastWord = clusters.indexOfLast { it.sourceText != " " }
+        if (firstWord < 0) return this
+        // The code-unit index each interior run ends at, which is where its widening goes.
+        val runEnds = (firstWord + 1..lastWord)
+            .filter { clusters[it].sourceText != " " && clusters[it - 1].sourceText == " " }
+            .map { clusters[it].startIndex }
+        if (runEnds.isEmpty()) return this
+        val each = missing / runEnds.size
+        val remainder = missing % runEnds.size
+        val widening = runEnds.withIndex().associate { (i, end) -> end to each + if (i < remainder) 1 else 0 }
+
+        var offset = 0
+        return Line(
+            spans.map { span ->
+                val text = buildString {
+                    span.text.forEachIndexed { i, char ->
+                        append(char)
+                        widening[offset + i + 1]?.let { append(" ".repeat(it)) }
+                    }
+                }
+                offset += span.text.length
+                span.copy(text = text)
+            },
+        )
+    }
+
     /** The `[startIndex, endIndex)` slice of [plain], carrying its styling. */
     private fun slice(startIndex: Int, endIndex: Int): List<Span> = buildList {
         var offset = 0

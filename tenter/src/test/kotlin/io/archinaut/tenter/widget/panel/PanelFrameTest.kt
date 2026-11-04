@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget.panel
 
+import io.archinaut.tenter.widget.Title
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -33,7 +34,7 @@ internal class PanelFrameTest {
 
     /** Draws a single panel showing [content] into a [width] by [height] frame, scrolled down by [scrollOffset]. */
     private fun draw(content: MeasurableWidget, width: Int = 30, height: Int = 10, scrollOffset: Int = 0): CompletedFrame {
-        val set = PanelSet(listOf(Panel<Id, Unit>(Id.ONLY, title = "T", badge = "0", normal = { content })))
+        val set = PanelSet(listOf(Panel<Id, Unit>(Id.ONLY, title = Title("T", badge = "0"), normal = { content })))
         panels = set
         set.scroll(Id.ONLY, 0, scrollOffset)
         return render(Panels(Unit, mapOf(Id.ONLY to Rect(0, 0, width, height))).bind(set), width, height)

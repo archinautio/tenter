@@ -12,7 +12,7 @@ viewport into `block.inner(area)`, and then a `Scrollbar` over the border beside
 settled state:
 
 ```kotlin
-val block = Block.bordered(title = "LOG")
+val block = Block.bordered(title = Title("LOG"))
 frame.renderWidget(block, area)
 val inner = block.inner(area)
 frame.renderStatefulWidget(Viewport(content), inner, state)

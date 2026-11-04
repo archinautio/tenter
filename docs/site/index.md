@@ -87,7 +87,7 @@ Ratatui, the names map directly:
 | `CompletedFrame` | `CompletedFrame` + `Buffer` | What a draw presented: compare it, narrow it to a `region`, and read its text. See [Testing](testing.md). |
 | `Cell`, `Style` | `Cell`, `Style` | What a terminal cell shows, and the change a write applies to it. |
 | `Layout`, `Constraint` | `Layout`, `Constraint` | Split a `Rect` into smaller rectangles. |
-| `Block`, `Borders`, `Padding` | `Block`, `Borders`, `Padding` | Borders with a title, and the space inside them. |
+| `Block`, `Title`, `Borders`, `Padding` | `Block`, `Line` as a title, `Borders`, `Padding` | Borders with a title, and the space inside them. |
 | `Scrollbar` | `Scrollbar` | A thumb showing a viewport's position, drawn over the border beside it. |
 | `Paragraph`, `Line`, `Span` | `Paragraph`, `Line`, `Span` | Text: lines made of styled spans, shown by a paragraph widget. |
 

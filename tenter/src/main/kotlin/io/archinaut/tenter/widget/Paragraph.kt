@@ -3,28 +3,38 @@
 
 package io.archinaut.tenter.widget
 
+import com.github.ajalt.mordant.rendering.TextAlign
 import io.archinaut.tenter.screen.Line
 import io.archinaut.tenter.screen.Style
 
 /**
- * Lines of text. Without [wrap], each line takes one row and is ellipsized to the available width;
- * with it, lines wrap at word boundaries and a word wider than a row is split. An empty line is a
- * blank row.
+ * Lines of text, each row placed by [align]. Without [wrap], each line takes one row and is
+ * ellipsized to the available width; with it, lines wrap at word boundaries and a word wider than a
+ * row is split. An empty line is a blank row. [TextAlign.JUSTIFY] fills every row of a wrapped line
+ * but its last, which stays flush left, so an unwrapped paragraph is never justified.
  */
 public class Paragraph(
     private val lines: List<Line>,
     private val wrap: Boolean = false,
+    private val align: TextAlign = TextAlign.LEFT,
 ) : MeasurableWidget {
 
     /** [text] split into lines at each `\n`, all in [style]. */
-    public constructor(text: String, style: Style = Style.DEFAULT, wrap: Boolean = false) :
-        this(text.split('\n').map { Line(it, style) }, wrap)
+    public constructor(
+        text: String,
+        style: Style = Style.DEFAULT,
+        wrap: Boolean = false,
+        align: TextAlign = TextAlign.LEFT,
+    ) : this(text.split('\n').map { Line(it, style) }, wrap, align)
 
     override fun write(writer: RowWriter) {
         for (line in lines) {
             val rows = if (wrap) line.wrap(writer.width) else listOf(line)
             if (rows.isEmpty()) writer.newLine()
-            rows.forEach(writer::writeLine)
+            rows.forEachIndexed { index, row -> writer.writeLine(row, alignOf(index == rows.lastIndex)) }
         }
     }
+
+    private fun alignOf(lastRow: Boolean): TextAlign =
+        if (lastRow && align == TextAlign.JUSTIFY) TextAlign.LEFT else align
 }

@@ -70,7 +70,7 @@ internal class VerticalTextTest {
         val buffer = render(VerticalText("e\u0301👩‍💻X"), 7, 4)
 
         assertEquals("e\u0301", buffer.get(3, 0).symbol)
-        assertEquals("👩‍💻", buffer.get(3, 1).symbol)
+        assertEquals("👩‍💻", buffer.get(2, 1).symbol, "a wide glyph centers on its own width")
         assertEquals("X", buffer.get(3, 2).symbol)
     }
 }

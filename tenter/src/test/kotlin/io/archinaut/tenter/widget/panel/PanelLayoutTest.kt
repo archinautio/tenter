@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget.panel
 
+import io.archinaut.tenter.widget.Title
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -18,7 +19,7 @@ internal class PanelLayoutTest {
 
     private fun panel(id: LayoutPanelId): Panel<LayoutPanelId, Unit> = Panel(
         id = id,
-        title = id.name,
+        title = Title(id.name),
         normal = { MeasurableWidget { writer -> repeat(40) { writer.writeLine("row$it") } } },
     )
 

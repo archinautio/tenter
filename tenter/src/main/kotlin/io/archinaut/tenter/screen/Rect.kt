@@ -3,6 +3,9 @@
 
 package io.archinaut.tenter.screen
 
+import com.github.ajalt.mordant.rendering.TextAlign
+import com.github.ajalt.mordant.rendering.VerticalAlign
+
 /** An immutable, nonnegative cell rectangle. */
 public data class Rect(
     public val x: Int,
@@ -69,6 +72,26 @@ public data class Rect(
             y = y + top,
             width = maxOf(0, width - left - padding.right),
             height = maxOf(0, height - top - padding.bottom),
+        )
+    }
+
+    /**
+     * A rectangle of [size] placed inside this one by [horizontal] and [vertical]; a dimension
+     * larger than this rectangle's shrinks to it, so the result always lies inside.
+     * [TextAlign.NONE] and [TextAlign.JUSTIFY] place it flush left.
+     */
+    public fun aligned(
+        size: Size,
+        horizontal: TextAlign = TextAlign.CENTER,
+        vertical: VerticalAlign = VerticalAlign.MIDDLE,
+    ): Rect {
+        val alignedWidth = minOf(size.width, width)
+        val alignedHeight = minOf(size.height, height)
+        return Rect(
+            x = x + horizontal.offset(alignedWidth, width),
+            y = y + vertical.offset(alignedHeight, height),
+            width = alignedWidth,
+            height = alignedHeight,
         )
     }
 }

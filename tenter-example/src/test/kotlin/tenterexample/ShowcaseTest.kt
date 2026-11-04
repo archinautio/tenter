@@ -3,6 +3,7 @@
 
 package tenterexample
 
+import io.archinaut.tenter.widget.Title
 import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.input.MouseEvent
 import io.archinaut.tenter.color.ColorSpace
@@ -201,7 +202,7 @@ internal class ShowcaseTest {
         draw()
         Terminal.headless(width = 120, height = 30).withScreen { it.draw(other::render) }
 
-        val shared = Panel<ShellPanelId, ShellInputs>(id = ShellPanelId.Pages, title = "PAGES", normal = { Paragraph("") })
+        val shared = Panel<ShellPanelId, ShellInputs>(id = ShellPanelId.Pages, title = Title("PAGES"), normal = { Paragraph("") })
         PanelSet(listOf(shared))
 
         assertThat(other.panels).isNotSameAs(showcase.panels)

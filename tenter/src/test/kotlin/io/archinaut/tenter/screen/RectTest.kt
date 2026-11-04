@@ -3,6 +3,8 @@
 
 package io.archinaut.tenter.screen
 
+import com.github.ajalt.mordant.rendering.VerticalAlign
+import com.github.ajalt.mordant.rendering.TextAlign
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -38,5 +40,24 @@ internal class RectTest {
         assertTrue(Rect(3, 3, 0, 5).isEmpty)
         assertTrue(Rect(3, 3, 5, 0).isEmpty)
         assertFalse(Rect(3, 3, 1, 1).isEmpty)
+    }
+
+    @Test
+    fun `aligned centers a size by default, the odd cell after it`() {
+        assertEquals(Rect(5, 3, 3, 2), Rect(2, 2, 10, 5).aligned(Size(3, 2)))
+    }
+
+    @Test
+    fun `aligned places a size at the chosen edges`() {
+        val area = Rect(2, 2, 10, 5)
+
+        assertEquals(Rect(9, 5, 3, 2), area.aligned(Size(3, 2), TextAlign.RIGHT, VerticalAlign.BOTTOM))
+        assertEquals(Rect(2, 2, 3, 2), area.aligned(Size(3, 2), TextAlign.LEFT, VerticalAlign.TOP))
+        assertEquals(Rect(2, 2, 3, 2), area.aligned(Size(3, 2), TextAlign.JUSTIFY, VerticalAlign.TOP))
+    }
+
+    @Test
+    fun `aligned shrinks a size larger than the area to fit inside it`() {
+        assertEquals(Rect(2, 4, 10, 1), Rect(2, 2, 10, 5).aligned(Size(20, 1)))
     }
 }

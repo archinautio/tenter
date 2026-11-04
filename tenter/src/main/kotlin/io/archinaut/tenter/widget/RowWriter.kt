@@ -3,7 +3,9 @@
 
 package io.archinaut.tenter.widget
 
+import com.github.ajalt.mordant.rendering.TextAlign
 import io.archinaut.tenter.screen.Line
+import io.archinaut.tenter.screen.offset
 import io.archinaut.tenter.screen.Point
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.text.CellWidth
@@ -37,14 +39,20 @@ public class RowWriter internal constructor(
         draw(widget.fixedSize(width, height))
     }
 
-    /** Writes [text] on the current row, ellipsized to [width], advances, and returns the point after it. */
-    public fun writeLine(text: String, style: Style = Style.DEFAULT): Point = writeLine(Line(text, style))
+    /** Writes [text] as [writeLine] writes a [Line] in [style]. */
+    public fun writeLine(text: String, style: Style = Style.DEFAULT, align: TextAlign = TextAlign.LEFT): Point =
+        writeLine(Line(text, style), align)
 
-    /** Writes [line] on the current row, ellipsized to [width], advances, and returns the point after it. */
-    public fun writeLine(line: Line): Point {
+    /**
+     * Writes [line] on the current row, ellipsized to [width] and placed by [align], advances, and
+     * returns the point after it. [TextAlign.JUSTIFY] widens the gaps between words to fill the row,
+     * and [TextAlign.NONE] writes flush left. A line that does not fit fills the row whatever [align].
+     */
+    public fun writeLine(line: Line, align: TextAlign = TextAlign.LEFT): Point {
         val written = row
-        var column = 0
-        for (span in line.ellipsize(width).spans) {
+        val visible = line.ellipsize(width).let { if (align == TextAlign.JUSTIFY) it.justify(width) else it }
+        var column = align.offset(visible.width, width)
+        for (span in visible.spans) {
             builder.text(column, written, span.text, span.style)
             column += CellWidth.of(span.text)
         }

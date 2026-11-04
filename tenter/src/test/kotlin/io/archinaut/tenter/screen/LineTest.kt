@@ -194,4 +194,28 @@ internal class LineTest {
 
         assertEquals(listOf(Span("👩‍💻", Style(StandardRole.DANGER))), text.spans)
     }
+
+    @Test
+    fun `justify spreads the missing cells over inner gaps, earlier ones first`() {
+        assertEquals(Line("a   b  c"), Line("a b c").justify(8))
+    }
+
+    @Test
+    fun `justify keeps each gap's style and leaves edge spaces alone`() {
+        val gap = Style(StandardRole.DANGER)
+        val justified = Line(Span(" a"), Span(" ", gap), Span("b ")).justify(6)
+
+        assertEquals(Line(Span(" a"), Span("  ", gap), Span("b ")), justified)
+    }
+
+    @Test
+    fun `justify leaves a line without inner gaps unchanged`() {
+        assertEquals(Line("  word "), Line("  word ").justify(10))
+        assertEquals(Line("a b"), Line("a b").justify(2))
+    }
+
+    @Test
+    fun `justify treats a wide glyph as one word`() {
+        assertEquals(10, Line("中文 ab").justify(10).width)
+    }
 }

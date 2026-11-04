@@ -12,6 +12,7 @@ import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.widget.Block
 import io.archinaut.tenter.widget.MeasurableWidget
 import io.archinaut.tenter.widget.Scrollbar
+import io.archinaut.tenter.widget.Title
 import io.archinaut.tenter.widget.Viewport
 import io.archinaut.tenter.widget.ViewportState
 import io.archinaut.tenter.widget.block
@@ -23,8 +24,7 @@ import io.archinaut.tenter.widget.block
  */
 public class Panel<K : PanelId, I>(
     internal val id: K,
-    private val title: String,
-    private val badge: String? = null,
+    private val title: Title,
     private val normal: (I) -> MeasurableWidget,
     private val minimized: ((I) -> MeasurableWidget)? = null,
     private val maximized: ((I) -> MeasurableWidget)? = null,
@@ -89,7 +89,6 @@ public class Panel<K : PanelId, I>(
         val role = if (focused) StandardRole.PANEL_BORDER_FOCUSED else StandardRole.PANEL_BORDER
         val frame = Block.bordered(
             title = title,
-            badge = badge,
             padding = Padding.horizontal(FRAME_PADDING),
             borderColor = role,
             titleColor = role,

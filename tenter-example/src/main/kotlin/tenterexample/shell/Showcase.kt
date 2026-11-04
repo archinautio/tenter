@@ -3,6 +3,8 @@
 
 package tenterexample.shell
 
+import io.archinaut.tenter.widget.Title
+import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.input.InputEvent
 import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.input.MouseEvent
@@ -10,9 +12,7 @@ import io.archinaut.tenter.input.KeySection
 import io.archinaut.tenter.screen.Constraint
 import io.archinaut.tenter.screen.Layout
 import io.archinaut.tenter.screen.Rect
-import io.archinaut.tenter.screen.Size
 import io.archinaut.tenter.terminal.Frame
-import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.widget.Clear
 import io.archinaut.tenter.widget.KeyHelp
 import io.archinaut.tenter.widget.MeasurableWidget
@@ -95,7 +95,7 @@ internal class Showcase(
             Constraint.Fill(1),
         ).split(frame.area)
 
-        frame.renderWidget(TITLE, centered(titleArea, Size(CellWidth.of(TITLE_TEXT), 1)))
+        frame.renderWidget(TITLE, titleArea)
 
         val page = current.view(now)
         val location = "Tenter showcase  •  ${currentPage + 1}/${entries.size} ${current.page.title}  •  Tab moves the focus"
@@ -131,15 +131,9 @@ internal class Showcase(
     /** Draws [popup] centered over the page's panel, on cells cleared of what the panel drew. */
     private fun renderPopup(frame: Frame, popup: Popup) {
         val slot = panels.layout?.slotOf(demo) ?: return
-        val area = centered(slot.content, popup.size)
+        val area = slot.content.aligned(popup.size)
         frame.renderWidget(Clear, area)
         frame.renderWidget(popup.content, area)
-    }
-
-    private fun centered(area: Rect, size: Size): Rect {
-        val (_, column, _) = Layout.horizontal(Constraint.Fill(1), Constraint.Length(size.width), Constraint.Fill(1)).split(area)
-        val (_, cell, _) = Layout.vertical(Constraint.Fill(1), Constraint.Length(size.height), Constraint.Fill(1)).split(column)
-        return cell
     }
 
     /** The current page's keys, then those of the showcase active for the focused panel. */
@@ -245,7 +239,7 @@ internal class Showcase(
         // The page list has no maximized content, so it only minimizes.
         val pages = Panel<ShellPanelId, ShellInputs>(
             id = ShellPanelId.Pages,
-            title = "PAGES",
+            title = Title("PAGES"),
             normal = { input -> pageList(input) },
             minimized = { VerticalText("PAGES") },
         )
@@ -253,14 +247,14 @@ internal class Showcase(
         val demos = pageTitles.mapIndexed { index, title ->
             Panel<ShellPanelId, ShellInputs>(
                 id = ShellPanelId.Demo(index),
-                title = title.uppercase(),
+                title = Title(title.uppercase()),
                 normal = { input -> input.page.content },
                 maximized = { input -> input.page.content },
             )
         }
         val help = Panel<ShellPanelId, ShellInputs>(
             id = ShellPanelId.Help,
-            title = "HELP",
+            title = Title("HELP"),
             normal = { input -> KeyHelp(input.help) },
             minimized = { VerticalText("HELP") },
             maximized = { input -> KeyHelp(input.help) },
@@ -293,7 +287,7 @@ internal class Showcase(
         internal const val TITLE_MIN_HEIGHT: Int = 26
 
         internal const val TITLE_TEXT: String = "T E N T E R      S H O W C A S E"
-        private val TITLE: Paragraph = Paragraph(TITLE_TEXT, Style(StandardRole.ACCENT, bold = true))
+        private val TITLE: Paragraph = Paragraph(TITLE_TEXT, Style(StandardRole.ACCENT, bold = true), align = TextAlign.CENTER)
 
         private const val WHEEL_STEP: Int = 2
         private val GLOBAL: List<ShellContext> = listOf(ShellContext.GLOBAL)

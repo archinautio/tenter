@@ -23,8 +23,8 @@ step a panel through its modes, scroll, and click to see one at work.
 
 | Page | What it shows | Guide |
 | --- | --- | --- |
-| Text | `Paragraph` wrapping and ellipsizing at a width you change, styled spans, `writeRow`, `VerticalText` | [Show text](layouts.md#show-text) |
-| Composition | `Block` borders, glyphs, and padding, `Stack`, `Row` constraints, `Flow` | [Layouts](layouts.md#stack-content-vertically) |
+| Text | `Paragraph` wrapping, ellipsizing, and alignment at a width you change, a styled `Title` with a badge, aligned `writeLine`, styled spans, `writeRow`, `VerticalText` | [Show text](layouts.md#show-text) |
+| Composition | `Block` borders, glyphs, and padding, `Stack`, `Row` constraints, `Flow`, `Rect.aligned` | [Layouts](layouts.md#stack-content-vertically) |
 | Selection | `SelectableRow` with a tri-state header, `Checkbox` in every state, checkbox glyphs | [Draw selectable rows](styling.md#draw-selectable-rows) |
 | Scrolling | Two `Viewport`s with `Scrollbar`s: a list following `revealed()`, a log following its end | [Scroll a single widget](panels.md#scroll-a-single-widget) |
 | Progress | `Gauge` styles, a timed task, `FlashMessage` in the status bar | [Widgets](styling.md#draw-selectable-rows) |

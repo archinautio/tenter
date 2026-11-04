@@ -21,8 +21,25 @@ val status = Paragraph(
 ```
 
 A string is split into lines at each `\n`. Without `wrap`, each line takes one row and
-is shortened with `…` to fit; with it, lines wrap at word boundaries. The showcase's **Text**
-page wraps and ellipsizes a paragraph at a width you change with the arrow keys.
+is shortened with `…` to fit; with it, lines wrap at word boundaries.
+
+`align` places each row, using Mordant's `TextAlign`:
+
+```kotlin
+val heading = Paragraph("Match over", align = TextAlign.CENTER)
+val body = Paragraph(report, wrap = true, align = TextAlign.JUSTIFY)
+```
+
+- `LEFT`, the default, and `NONE` start each row at the left edge.
+- `CENTER` and `RIGHT` place each row, wrapped rows included, within the width. A centered
+  row that cannot split its spare cells evenly puts the extra cell on its right.
+- `JUSTIFY` widens the spaces between words until a wrapped row fills the width. The last row
+  of each line stays flush left, so a paragraph without `wrap` is never justified.
+- A line wider than the space is shortened with `…` at its end, whatever the alignment.
+
+Alignment belongs to the paragraph, not to its lines. To center a heading above a
+left-aligned body, stack two paragraphs. The showcase's **Text** page wraps, ellipsizes, and
+aligns a paragraph at a width you change with the arrow keys.
 
 ## Write a custom widget
 
@@ -40,7 +57,8 @@ class Summary(private val items: List<String>) : MeasurableWidget {
 A `RowWriter` offers:
 
 - `writer.width`: the available width.
-- `writeLine(text)`: writes a `String` or a `Line`, shortened to fit, and advances.
+- `writeLine(text, align = …)`: writes a `String` or a `Line`, shortened to fit and placed
+  by a `TextAlign` as a paragraph row is, and advances. `JUSTIFY` fills this one row.
 - `writeRow(left, right)`: writes text flush left and flush right on one row, and advances.
 - `write(column, text, row = …)`: places text at a column without advancing, on the current
   row unless you name an earlier one.
@@ -120,7 +138,26 @@ A `Block` holds borders, a title, and padding, as Ratatui's `Block` does:
 - `Block.bordered(...)` draws all four sides, and `Block()` none.
 - `borders` chooses the sides, such as `Borders.TOP` for a titled divider.
 - `borderType` chooses their glyphs, one of Mordant's `BorderType` sets.
+- `title` takes a `Title`, described below.
 - A block without borders adds padding alone.
+
+A `Title` is the text on the top row, as a `String` or a styled `Line`. It can also carry a
+badge, such as the key that focuses a panel, and an alignment:
+
+```kotlin
+val log = Block.bordered(title = Title("LOG", badge = "2"))
+val match = Block.bordered(
+    title = Title(Line(Span("MATCH "), Span("OVER", Style(bold = true))), align = TextAlign.CENTER),
+    titleColor = StandardRole.ACCENT,
+)
+```
+
+- `align` places the title and badge at the left, center, or right of the top row, clear of the
+  corners.
+- The block's `titleColor` fills every channel a span leaves unset, so a plain title follows a
+  panel's focus color. A span that sets its own color keeps it, even on a focused panel.
+- A title too wide for the row is shortened with `…`. When not even its first character fits,
+  the badge shows alone, as on a minimized panel.
 
 Surround measurable content with a block using `.block(...)`. The result is still
 measurable: eight cells wide, it is five rows tall. This excerpt frames a label in a
@@ -137,7 +174,7 @@ label. In an allocated area, render the block and then render the
 content into `block.inner(area)`:
 
 ```kotlin
-val block = Block.bordered(title = "LOG")
+val block = Block.bordered(title = Title("LOG"))
 frame.renderWidget(block, area)
 frame.renderWidget(content, block.inner(area))
 ```
@@ -187,6 +224,16 @@ val (list, details) = Layout.horizontal(Constraint.Percentage(40), Constraint.Fi
 Leftover cells with no fill or min segment to take them stay empty after the last
 segment. When the requests exceed the space, the last segments shrink first. Inside
 a widget, split `canvas.area` and render children into `canvas.region(rect)`.
+
+To place one rectangle of a known size inside an area, such as a popup, use `aligned`. It
+centers by default. Pass Mordant's `TextAlign` and `VerticalAlign` to place it at an edge:
+
+```kotlin
+val popup = frame.area.aligned(Size(40, 7))
+val toast = frame.area.aligned(Size(30, 1), TextAlign.RIGHT, VerticalAlign.BOTTOM)
+```
+
+A size larger than the area shrinks to it, so the result always lies inside.
 
 ## Reuse content safely
 

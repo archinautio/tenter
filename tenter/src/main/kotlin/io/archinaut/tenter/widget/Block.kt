@@ -4,22 +4,30 @@
 package io.archinaut.tenter.widget
 
 import com.github.ajalt.mordant.rendering.BorderType
+import com.github.ajalt.mordant.rendering.TextAlign
 import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.color.ColorRole
 import io.archinaut.tenter.screen.Canvas
+import io.archinaut.tenter.screen.Line
 import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.screen.Rect
+import io.archinaut.tenter.screen.Span
 import io.archinaut.tenter.screen.Style
+import io.archinaut.tenter.screen.offset
 import io.archinaut.tenter.text.CellWidth
+import io.archinaut.tenter.text.TextTruncation
 
 /**
- * Borders, a title and badge on the top row, and padding; it paints only this chrome, around the
- * content rendered into [inner]. The title sits on the top border, or on its own row without one.
+ * Borders, a [title] on the top row, and padding; it paints only this chrome, around the content
+ * rendered into [inner]. The title sits on the top border, or on its own row without one.
  * [borderType]'s head section gives the top row, its body the sides, and its foot the bottom row.
+ *
+ * The title is placed by its alignment, clear of the corners; [TextAlign.NONE] and
+ * [TextAlign.JUSTIFY] place it as [TextAlign.LEFT] does. Text too wide for the row ends in an
+ * ellipsis, and when not even its first glyph fits, a badge shows alone, as on a minimized stub.
  */
 public class Block(
-    private val title: String = "",
-    private val badge: String? = null,
+    private val title: Title? = null,
     private val borders: Borders = Borders.NONE,
     private val padding: Padding = Padding.ZERO,
     private val borderColor: ColorRole = StandardRole.PANEL_BORDER,
@@ -30,7 +38,7 @@ public class Block(
     /** Everything this block consumes on each side: borders (or the title row) plus [padding]. */
     internal val insets: Padding = Padding(
         left = if (borders.left) 1 else 0,
-        top = if (borders.top || title.isNotEmpty() || badge != null) 1 else 0,
+        top = if (borders.top || title?.isEmpty == false) 1 else 0,
         right = if (borders.right) 1 else 0,
         bottom = if (borders.bottom) 1 else 0,
     ) + padding
@@ -68,37 +76,48 @@ public class Block(
     }
 
     private fun drawTitle(canvas: Canvas) {
-        val width = canvas.width
-        val titleWidth = CellWidth.of(title)
-        val badgeWidth = badge?.let(CellWidth::of) ?: 0
-        val badgeRunWidth = badge?.let { CellWidth.of("[$it]") } ?: 0
-        if (title.isNotEmpty()) {
-            if (badge != null && width > titleWidth + badgeWidth + 7) {
-                canvas.setString(2, 0, "[$badge] $title", Style(titleColor))
-                canvas.set(5 + badgeWidth + titleWidth, 0, " ", Style(borderColor))
-            } else if (badge == null && width > titleWidth + 6) {
-                canvas.set(3, 0, " ", Style(borderColor))
-                canvas.setString(4, 0, title, Style(titleColor))
-                canvas.set(4 + titleWidth, 0, " ", Style(borderColor))
-            } else if (badge != null && width > 2 + badgeRunWidth) {
-                // Too narrow for "[badge] title", as a minimized stub is: the badge alone still helps.
-                canvas.setString(2, 0, "[$badge]", Style(titleColor))
-            }
-        } else if (badge != null && width > 2 + badgeRunWidth) {
-            canvas.setString(2, 0, "[$badge]", Style(titleColor))
-        }
+        val title = title ?: return
+        val (margin, run) = titleRun(title, canvas.width) ?: return
+        var column = margin + title.align.offset(run.width, canvas.width - 2 * margin)
+        for (span in run.spans) column = canvas.setString(column, 0, span.text, span.style).x
     }
+
+    /**
+     * What of [title] fits on the top row of a [width]-cell block, and the cells kept clear of each
+     * corner: `" text "`, `"[badge] text "`, or the badge alone.
+     */
+    private fun titleRun(title: Title, width: Int): Pair<Int, Line>? {
+        val titleStyle = Style(titleColor)
+        val gap = Span(" ", Style(borderColor))
+        val text = Line(title.line.spans.map { Span(it.text, titleStyle.patch(it.style)) })
+        val badge = title.badge?.let { Span("[$it]", titleStyle) }
+        if (text.width > 0) {
+            if (badge == null) {
+                fitted(text, width - 7)?.let { return 3 to Line(gap) + it + Line(gap) }
+            } else {
+                fitted(text, width - CellWidth.of(badge.text) - 6)?.let {
+                    return 2 to Line(badge, Span(" ", titleStyle)) + it + Line(gap)
+                }
+            }
+        }
+        return badge?.takeIf { width > 2 + CellWidth.of(it.text) }?.let { 2 to Line(it) }
+    }
+
+    /** [text] within [maxWidth], ellipsized if need be, or null when not even its first glyph fits. */
+    private fun fitted(text: Line, maxWidth: Int): Line? =
+        if (text.width <= maxWidth) text else text.ellipsize(maxWidth).takeIf { it.width > ELLIPSIS_WIDTH }
 
     public companion object {
         /** A block with all four borders. */
         public fun bordered(
-            title: String = "",
-            badge: String? = null,
+            title: Title? = null,
             padding: Padding = Padding.ZERO,
             borderColor: ColorRole = StandardRole.PANEL_BORDER,
             titleColor: ColorRole = StandardRole.ACCENT,
             borderType: BorderType = BorderType.ROUNDED,
-        ): Block = Block(title, badge, Borders.ALL, padding, borderColor, titleColor, borderType)
+        ): Block = Block(title, Borders.ALL, padding, borderColor, titleColor, borderType)
+
+        private val ELLIPSIS_WIDTH: Int = CellWidth.of(TextTruncation.ELLIPSIS)
     }
 }
 

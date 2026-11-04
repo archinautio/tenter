@@ -3,6 +3,7 @@
 
 package io.archinaut.tenter.widget.panel
 
+import io.archinaut.tenter.widget.Title
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import io.archinaut.tenter.widget.MeasurableWidget
@@ -16,7 +17,7 @@ internal class PanelModeTest {
         maximized: Boolean = true,
     ): Panel<TestPanelId, Unit> = Panel(
         id = TestPanelId.A,
-        title = "T",
+        title = Title("T"),
         normal = { MeasurableWidget { } },
         minimized = if (minimized) ({ MeasurableWidget { } }) else null,
         maximized = if (maximized) ({ MeasurableWidget { } }) else null,
@@ -53,7 +54,7 @@ internal class PanelModeTest {
         val a = panel()
         val b = Panel<TestPanelId, Unit>(
             id = TestPanelId.B,
-            title = "B",
+            title = Title("B"),
                 normal = { MeasurableWidget { } },
         )
         val set = PanelSet(listOf(a, b))

@@ -3,6 +3,10 @@
 
 package io.archinaut.tenter.widget
 
+import io.archinaut.tenter.screen.Style
+import io.archinaut.tenter.screen.Span
+import io.archinaut.tenter.screen.Line
+import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.rendering.BorderType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -60,7 +64,7 @@ internal class BlockTest {
 
     @Test
     fun `renders title`() {
-        val widget = Block.bordered(title = "TEST")
+        val widget = Block.bordered(title = Title("TEST"))
 
         val buffer = render(widget, 20, 3)
 
@@ -85,7 +89,7 @@ internal class BlockTest {
 
     @Test
     fun `renders single-char badge title`() {
-        val widget = Block.bordered(title = "TEST", badge = "2")
+        val widget = Block.bordered(title = Title("TEST", badge = "2"))
 
         val buffer = render(widget, 20, 3)
 
@@ -104,7 +108,7 @@ internal class BlockTest {
 
     @Test
     fun `renders letter badge title, e g HELP`() {
-        val widget = Block.bordered(title = "HELP", badge = "h")
+        val widget = Block.bordered(title = Title("HELP", badge = "h"))
 
         val buffer = render(widget, 20, 3)
 
@@ -122,8 +126,8 @@ internal class BlockTest {
     }
 
     @Test
-    fun `skips title when box too narrow`() {
-        val widget = Block.bordered(title = "TOOLONG")
+    fun `skips a title when not even its first glyph fits beside the ellipsis`() {
+        val widget = Block.bordered(title = Title("TOOLONG"))
 
         val buffer = render(widget, 8, 3)
 
@@ -132,7 +136,7 @@ internal class BlockTest {
 
     @Test
     fun `renders a badge alone, with no title to anchor it to — e g a minimized panel's stub`() {
-        val widget = Block.bordered(badge = "0")
+        val widget = Block.bordered(title = Title("", badge = "0"))
 
         val buffer = render(widget, 7, 3)
 
@@ -143,7 +147,7 @@ internal class BlockTest {
 
     @Test
     fun `omits a badge that has no room, even alone`() {
-        val widget = Block.bordered(badge = "0")
+        val widget = Block.bordered(title = Title("", badge = "0"))
 
         val buffer = render(widget, 5, 3)
 
@@ -154,7 +158,7 @@ internal class BlockTest {
     fun `falls back to the badge alone when a title is present but the full run does not fit`() {
         // A title too long to fit as "[badge] title" must not draw nothing — the badge alone is
         // still worth showing (e.g. a minimized panel's stub, too narrow for its full title).
-        val widget = Block.bordered(title = "TOOLONGTOFIT", badge = "1")
+        val widget = Block.bordered(title = Title("TOOLONGTOFIT", badge = "1"))
 
         val buffer = render(widget, 7, 3)
 
@@ -211,7 +215,7 @@ internal class BlockTest {
 
     @Test
     fun `title placement uses display width rather than UTF-16 length`() {
-        val widget = Block.bordered(title = "中")
+        val widget = Block.bordered(title = Title("中"))
 
         val buffer = render(widget, 12, 3)
 
@@ -221,7 +225,7 @@ internal class BlockTest {
 
     @Test
     fun `wide badge leaves the right border intact when shown alone`() {
-        val widget = Block.bordered(badge = "中")
+        val widget = Block.bordered(title = Title("", badge = "中"))
 
         val buffer = render(widget, 7, 3)
 
@@ -252,7 +256,7 @@ internal class BlockTest {
 
     @Test
     fun `a top border with a title draws a titled divider and keeps the sides open`() {
-        val block = Block(title = "KEYS", borders = Borders.TOP)
+        val block = Block(title = Title("KEYS"), borders = Borders.TOP)
 
         val buffer = render(block, 12, 3)
 
@@ -263,7 +267,7 @@ internal class BlockTest {
 
     @Test
     fun `a title without a top border still takes the top row`() {
-        val block = Block(title = "T")
+        val block = Block(title = Title("T"))
 
         assertEquals(Rect(0, 1, 5, 2), block.inner(Rect(0, 0, 5, 3)))
     }
@@ -290,4 +294,48 @@ internal class BlockTest {
 
     private fun rows(buffer: CompletedFrame): List<String> =
         (0 until buffer.height).map { y -> (0 until buffer.width).joinToString("") { x -> buffer.get(x, y).symbol } }
+
+    @Test
+    fun `centers and right-aligns the title clear of the corners`() {
+        val centered = render(Block.bordered(title = Title("AB", align = TextAlign.CENTER)), 12, 3)
+        val right = render(Block.bordered(title = Title("AB", align = TextAlign.RIGHT)), 12, 3)
+
+        assertEquals("╭─── AB ───╮", centered.line(0))
+        assertEquals("╭──── AB ──╮", right.line(0))
+    }
+
+    @Test
+    fun `right-aligns a badge and title as one run`() {
+        val buffer = render(Block.bordered(title = Title("AB", badge = "1", align = TextAlign.RIGHT)), 14, 3)
+
+        assertEquals("╭────[1] AB ─╮", buffer.line(0))
+    }
+
+    @Test
+    fun `ellipsizes a title too wide for the top row`() {
+        assertEquals("╭── TOOL… ─╮", render(Block.bordered(title = Title("TOOLONGTITLE")), 12, 3).line(0))
+    }
+
+    @Test
+    fun `keeps the badge and ellipsizes the title beside it`() {
+        val buffer = render(Block.bordered(title = Title("TOOLONGTITLE", badge = "1")), 13, 3)
+
+        assertEquals("╭─[1] TOO… ─╮", buffer.line(0))
+    }
+
+    @Test
+    fun `a styled title keeps the channels its spans set and takes the title color for the rest`() {
+        val title = Title(Line(Span("A", Style(bold = true)), Span("B", Style(StandardRole.DANGER))))
+
+        val buffer = render(Block.bordered(title = title, titleColor = StandardRole.INFO), 10, 3)
+
+        assertEquals(StandardRole.INFO, buffer.get(4, 0).fg)
+        assertEquals(true, buffer.get(4, 0).bold)
+        assertEquals(StandardRole.DANGER, buffer.get(5, 0).fg)
+    }
+
+    @Test
+    fun `an empty title takes no row`() {
+        assertEquals(Rect(0, 0, 4, 2), Block(title = Title("")).inner(Rect(0, 0, 4, 2)))
+    }
 }
