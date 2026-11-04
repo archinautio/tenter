@@ -2,7 +2,7 @@
 
 # Tenter
 
-A Kotlin/JVM terminal-UI toolkit built on Mordant.
+A Kotlin/JVM terminal-UI toolkit built on [Mordant](https://github.com/ajalt/mordant).
 
 <img src="docs/site/assets/showcase.png" alt="Tenter showcase: a page list, the Text page with wrapped and justified paragraphs and styled spans, and a key help panel" width="852">
 
