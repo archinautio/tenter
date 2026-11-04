@@ -4,6 +4,8 @@
 
 A Kotlin/JVM terminal-UI toolkit built on Mordant.
 
+<img src="docs/site/assets/showcase.png" alt="Tenter showcase: a page list, the Text page with wrapped and justified paragraphs and styled spans, and a key help panel" width="852">
+
 - [User documentation](https://archinautio.github.io/tenter/) — installation and usage guides.
 - [Documentation source](docs/site/index.md) — read the guides in this checkout.
 - [Architecture](docs/architecture.md) — module boundaries and implementation invariants.

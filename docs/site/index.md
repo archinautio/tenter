@@ -3,6 +3,8 @@
 Tenter is a Kotlin/JVM toolkit for building terminal applications with text, widgets,
 scrolling panels, keyboard and mouse input, and animation. It builds on Mordant.
 
+![Tenter showcase: a page list, the Text page with wrapped and justified paragraphs and styled spans, and a key help panel](assets/showcase.png)
+
 !!! note "Development documentation"
     These guides follow `main`, currently `0.2.0-SNAPSHOT`. The API is pre-2.0 and may
     change. Pin the version and review API changes before upgrading. Installation
