@@ -19,7 +19,7 @@ Only the contents of generated `build/site/` are uploaded to Pages.
 
 ## Preview locally
 
-From the repository root, using Python 3.14:
+From the repository root, using Python 3.15:
 
 ```sh
 python3 -m venv .venv-docs
