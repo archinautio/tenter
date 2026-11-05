@@ -12,7 +12,7 @@ viewport into `block.inner(area)`, and then a `Scrollbar` over the border beside
 settled state:
 
 ```kotlin
-val block = Block.bordered(title = Title("LOG"))
+val block = Block.bordered(titles = listOf(Title("LOG")))
 frame.renderWidget(block, area)
 val inner = block.inner(area)
 frame.renderStatefulWidget(Viewport(content), inner, state)
@@ -47,9 +47,13 @@ its selection and scrolls sideways past a wide item, and a growing log that foll
 
 ## Create a panel layout
 
-Panels combine content with a title, border, scrollbars, and scrolling. Keep one `PanelSet` for
+Panels combine content with titles, border, scrollbars, and scrolling. Keep one `PanelSet` for
 the screen's lifetime: it is the state of the `Panels` widget, which you render each
 frame with your current application state.
+
+A panel's `titles` are a [block's titles](layouts.md#add-borders-and-padding), so the order you
+give them decides what a narrow, minimized panel keeps. Its horizontal scrollbar runs along the
+bottom border, over any bottom title, while its content scrolls sideways.
 
 The showcase is itself a panel layout. This excerpt from its compiled
 [shell](https://github.com/archinautio/tenter/blob/main/tenter-example/src/main/kotlin/tenterexample/shell/Showcase.kt) creates its panels: the page list, which

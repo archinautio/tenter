@@ -167,7 +167,7 @@ internal class ScrollingPage : ShowcasePage<ScrollingPage.State, ScrollingPage.A
         private val state: ViewportState,
     ) : Widget {
         override fun render(canvas: Canvas) {
-            val block = Block.bordered(title = Title(title))
+            val block = Block.bordered(titles = listOf(Title(title)))
             block.render(canvas)
             val inner = block.inner(canvas.area)
             if (inner.isEmpty) return

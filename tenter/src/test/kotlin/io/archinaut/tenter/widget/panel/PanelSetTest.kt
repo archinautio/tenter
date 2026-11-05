@@ -33,7 +33,7 @@ internal class PanelSetTest {
             listOf(
                 Panel<SetPanelId, Unit>(
                     SetPanelId.A,
-                    Title("A"),
+                    listOf(Title("A")),
                     normal = { MeasurableWidget { writer -> repeat(rows) { writer.writeLine("row$it") } }.followingEnd() },
                 ),
             ),
@@ -51,7 +51,7 @@ internal class PanelSetTest {
     fun `multiple hidden panels retain independent recenter requests until drawable`() {
         val ids = setOf(SetPanelId.A, SetPanelId.B)
         val set = PanelSet(ids.map { id ->
-            Panel<SetPanelId, Unit>(id, Title(id.name), normal = {
+            Panel<SetPanelId, Unit>(id, listOf(Title(id.name)), normal = {
                 MeasurableWidget { writer ->
                     repeat(100) {
                         val line = Paragraph("row$it")
@@ -137,7 +137,7 @@ internal class PanelSetTest {
     @Test
     fun `a failed later paint keeps the published layout and the failed panel's queued scrolling`() {
         var fail = false
-        val a = Panel<SetPanelId, Unit>(SetPanelId.A, Title("A"), normal = {
+        val a = Panel<SetPanelId, Unit>(SetPanelId.A, listOf(Title("A")), normal = {
             MeasurableWidget { writer ->
                 repeat(100) {
                     val line = Paragraph("row$it")
@@ -145,7 +145,7 @@ internal class PanelSetTest {
                 }
             }
         })
-        val b = Panel<SetPanelId, Unit>(SetPanelId.B, Title("B"), normal = {
+        val b = Panel<SetPanelId, Unit>(SetPanelId.B, listOf(Title("B")), normal = {
             object : Widget {
                 public override fun render(canvas: Canvas) { check(!fail) }
             }.fixedSize(20, 100)
@@ -183,7 +183,7 @@ internal class PanelSetTest {
         for (failedId in listOf(SetPanelId.A, SetPanelId.B)) {
             var fail = false
             val panels = listOf(SetPanelId.A, SetPanelId.B).map { id ->
-                Panel<SetPanelId, Unit>(id, Title(id.name), normal = {
+                Panel<SetPanelId, Unit>(id, listOf(Title(id.name)), normal = {
                     object : Widget {
                         override fun render(canvas: Canvas) {
                             if (fail && id == failedId) error("paint failed")
@@ -211,7 +211,7 @@ internal class PanelSetTest {
     @Test
     fun `a failed initial paint publishes no geometry and can be retried`() {
         var fail = true
-        val panel = Panel<SetPanelId, Unit>(SetPanelId.A, Title("A"), normal = {
+        val panel = Panel<SetPanelId, Unit>(SetPanelId.A, listOf(Title("A")), normal = {
             object : Widget {
                 override fun render(canvas: Canvas) { check(!fail) }
             }.fixedSize(10, 10)
@@ -461,13 +461,13 @@ internal class PanelSetTest {
 
     private fun mainPanel() = Panel<SetPanelId, Unit>(
         id = SetPanelId.MAIN,
-        title = Title("MAIN"),
+        titles = listOf(Title("MAIN")),
         normal = { stubView() },
     )
 
     private fun sidePanel(id: SetPanelId, builds: (() -> Unit)? = null) = Panel<SetPanelId, Unit>(
         id = id,
-        title = Title(id.name),
+        titles = listOf(Title(id.name)),
         normal = {
             builds?.invoke()
             stubView()

@@ -629,16 +629,16 @@ public final class io/archinaut/tenter/text/CellWidth {
 public final class io/archinaut/tenter/widget/Block : io/archinaut/tenter/widget/Widget {
 	public static final field Companion Lio/archinaut/tenter/widget/Block$Companion;
 	public fun <init> ()V
-	public fun <init> (Lio/archinaut/tenter/widget/Title;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/widget/Title;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;)V
+	public synthetic fun <init> (Ljava/util/List;Lio/archinaut/tenter/widget/Borders;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun inner (Lio/archinaut/tenter/screen/Canvas;)Lio/archinaut/tenter/screen/Canvas;
 	public final fun inner (Lio/archinaut/tenter/screen/Rect;)Lio/archinaut/tenter/screen/Rect;
 	public fun render (Lio/archinaut/tenter/screen/Canvas;)V
 }
 
 public final class io/archinaut/tenter/widget/Block$Companion {
-	public final fun bordered (Lio/archinaut/tenter/widget/Title;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;)Lio/archinaut/tenter/widget/Block;
-	public static synthetic fun bordered$default (Lio/archinaut/tenter/widget/Block$Companion;Lio/archinaut/tenter/widget/Title;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;ILjava/lang/Object;)Lio/archinaut/tenter/widget/Block;
+	public final fun bordered (Ljava/util/List;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;)Lio/archinaut/tenter/widget/Block;
+	public static synthetic fun bordered$default (Lio/archinaut/tenter/widget/Block$Companion;Ljava/util/List;Lio/archinaut/tenter/screen/Padding;Lio/archinaut/tenter/color/ColorRole;Lio/archinaut/tenter/color/ColorRole;Lcom/github/ajalt/mordant/rendering/BorderType;ILjava/lang/Object;)Lio/archinaut/tenter/widget/Block;
 }
 
 public final class io/archinaut/tenter/widget/BlockKt {
@@ -841,10 +841,18 @@ public abstract interface class io/archinaut/tenter/widget/StatefulWidget {
 }
 
 public final class io/archinaut/tenter/widget/Title {
-	public fun <init> (Lio/archinaut/tenter/screen/Line;Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/TextAlign;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/screen/Line;Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/TextAlign;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/TextAlign;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/TextAlign;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/archinaut/tenter/screen/Line;Lcom/github/ajalt/mordant/rendering/TextAlign;Lio/archinaut/tenter/widget/TitlePosition;Lio/archinaut/tenter/screen/Padding;)V
+	public synthetic fun <init> (Lio/archinaut/tenter/screen/Line;Lcom/github/ajalt/mordant/rendering/TextAlign;Lio/archinaut/tenter/widget/TitlePosition;Lio/archinaut/tenter/screen/Padding;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/TextAlign;Lio/archinaut/tenter/widget/TitlePosition;Lio/archinaut/tenter/screen/Padding;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/github/ajalt/mordant/rendering/TextAlign;Lio/archinaut/tenter/widget/TitlePosition;Lio/archinaut/tenter/screen/Padding;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class io/archinaut/tenter/widget/TitlePosition : java/lang/Enum {
+	public static final field BOTTOM Lio/archinaut/tenter/widget/TitlePosition;
+	public static final field TOP Lio/archinaut/tenter/widget/TitlePosition;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/archinaut/tenter/widget/TitlePosition;
+	public static fun values ()[Lio/archinaut/tenter/widget/TitlePosition;
 }
 
 public final class io/archinaut/tenter/widget/VerticalText : io/archinaut/tenter/widget/MeasurableWidget {
@@ -876,8 +884,8 @@ public final class io/archinaut/tenter/widget/WidgetKt {
 }
 
 public final class io/archinaut/tenter/widget/panel/Panel {
-	public fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Lio/archinaut/tenter/widget/Title;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;)V
-	public synthetic fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Lio/archinaut/tenter/widget/Title;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;)V
+	public synthetic fun <init> (Lio/archinaut/tenter/widget/panel/PanelId;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lcom/github/ajalt/mordant/rendering/BorderType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class io/archinaut/tenter/widget/panel/PanelHit {

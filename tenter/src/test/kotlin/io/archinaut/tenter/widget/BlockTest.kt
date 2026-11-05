@@ -10,6 +10,7 @@ import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.rendering.BorderType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import io.archinaut.tenter.screen.Canvas
 import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.screen.Rect
@@ -18,11 +19,131 @@ import io.archinaut.tenter.screen.Buffer
 import io.archinaut.tenter.color.StandardRole
 import io.archinaut.tenter.terminal.CompletedFrame
 
-/** Pixel parity for [Block]'s border, title, badge, and padding. */
+/** Pixel parity for [Block]'s border, titles, and padding. */
 internal class BlockTest {
 
     private val blank: Widget = object : Widget {
         override fun render(canvas: Canvas) = Unit
+    }
+
+    @Test
+    fun `renders a title one border cell clear of the corner, with a cell of padding on each side`() {
+        val buffer = render(Block.bordered(titles = listOf(Title("TEST"))), 20, 3)
+
+        assertEquals("╭─ TEST " + "─".repeat(11) + "╮", buffer.line(0))
+        assertEquals(StandardRole.ACCENT, buffer.get(3, 0).fg)
+        assertEquals(StandardRole.PANEL_BORDER, buffer.get(0, 0).fg)
+    }
+
+    @Test
+    fun `padding sets the blank cells on each side of a title`() {
+        val buffer = render(Block.bordered(titles = listOf(Title("AB", padding = Padding(left = 0, right = 3)))), 10, 3)
+
+        assertEquals("╭─AB   ──╮", buffer.line(0))
+    }
+
+    @Test
+    fun `a title's padding has no top or bottom`() {
+        assertThrows<IllegalArgumentException> { Title("A", padding = Padding.uniform(1)) }
+    }
+
+    @Test
+    fun `titles of one alignment sit side by side, separated only by their padding`() {
+        val titles = listOf(Title("[1]", padding = Padding.ZERO), Title("TEST"))
+
+        assertEquals("╭─[1] TEST ──╮", render(Block.bordered(titles = titles), 14, 3).line(0))
+    }
+
+    @Test
+    fun `ellipsizes a title too wide for the top row`() {
+        assertEquals("╭─ TOOLO… ─╮", render(Block.bordered(titles = listOf(Title("TOOLONGTITLE"))), 12, 3).line(0))
+    }
+
+    @Test
+    fun `skips a title when not even its first glyph fits beside the ellipsis`() {
+        assertEquals("╭─────╮", render(Block.bordered(titles = listOf(Title("TOOLONG"))), 7, 3).line(0))
+    }
+
+    @Test
+    fun `an earlier title keeps its room and a later one is ellipsized beside it`() {
+        val titles = listOf(Title("[1]", padding = Padding.ZERO), Title("TOOLONGTITLE"))
+
+        assertEquals("╭─[1] TOO… ─╮", render(Block.bordered(titles = titles), 13, 3).line(0))
+    }
+
+    @Test
+    fun `an earlier title keeps its room and a later one is dropped once not even its first glyph fits`() {
+        val titles = listOf(Title("[0]", padding = Padding.ZERO), Title("LOG"))
+
+        assertEquals("╭─[0]─╮", render(Block.bordered(titles = titles), 7, 3).line(0))
+    }
+
+    @Test
+    fun `a later title still shows where an earlier one is dropped`() {
+        val titles = listOf(Title("TOOLONG"), Title("X", padding = Padding.ZERO))
+
+        assertEquals("╭─X───╮", render(Block.bordered(titles = titles), 7, 3).line(0))
+    }
+
+    @Test
+    fun `centers and right-aligns a title clear of the corners`() {
+        val centered = render(Block.bordered(titles = listOf(Title("AB", align = TextAlign.CENTER))), 12, 3)
+        val right = render(Block.bordered(titles = listOf(Title("AB", align = TextAlign.RIGHT))), 12, 3)
+
+        assertEquals("╭─── AB ───╮", centered.line(0))
+        assertEquals("╭───── AB ─╮", right.line(0))
+    }
+
+    @Test
+    fun `left, centered, and right titles share a row, the centered one moving aside rather than cover another`() {
+        val three = listOf(Title("L"), Title("C", align = TextAlign.CENTER), Title("R", align = TextAlign.RIGHT))
+        val crowded = listOf(Title("LEFTY"), Title("C", align = TextAlign.CENTER))
+
+        assertEquals("╭─ L ─── C ──── R ─╮", render(Block.bordered(titles = three), 20, 3).line(0))
+        assertEquals("╭─ LEFTY  C ─╮", render(Block.bordered(titles = crowded), 14, 3).line(0))
+    }
+
+    @Test
+    fun `a bottom title sits on the bottom border`() {
+        val buffer = render(Block.bordered(titles = listOf(Title("3/9", align = TextAlign.RIGHT, position = TitlePosition.BOTTOM))), 12, 3)
+
+        assertEquals("╭──────────╮", buffer.line(0))
+        assertEquals("╰──── 3/9 ─╯", buffer.line(2))
+    }
+
+    @Test
+    fun `a bottom title without a bottom border still takes the bottom row`() {
+        val block = Block(titles = listOf(Title("T", position = TitlePosition.BOTTOM)))
+
+        assertEquals(Rect(0, 0, 5, 2), block.inner(Rect(0, 0, 5, 3)))
+    }
+
+    @Test
+    fun `title placement uses display width rather than UTF-16 length`() {
+        val buffer = render(Block.bordered(titles = listOf(Title("中"))), 12, 3)
+
+        assertEquals("中", buffer.get(3, 0).symbol)
+        assertEquals(" ", buffer.get(5, 0).symbol)
+    }
+
+    @Test
+    fun `a wide title leaves the right border intact`() {
+        val buffer = render(Block.bordered(titles = listOf(Title("中", padding = Padding.ZERO))), 6, 3)
+
+        assertEquals("中", buffer.get(2, 0).symbol)
+        assertEquals("─", buffer.get(4, 0).symbol)
+        assertEquals("╮", buffer.get(5, 0).symbol)
+    }
+
+    @Test
+    fun `a top border with a title draws a titled divider and keeps the sides open`() {
+        val block = Block(titles = listOf(Title("KEYS")), borders = Borders.TOP)
+
+        val buffer = render(block, 12, 3)
+
+        assertEquals("── KEYS ────", buffer.line(0))
+        assertEquals("", buffer.line(1))
+        assertEquals(Rect(0, 1, 12, 2), block.inner(Rect(0, 0, 12, 3)))
     }
 
     @Test
@@ -63,109 +184,12 @@ internal class BlockTest {
     }
 
     @Test
-    fun `renders title`() {
-        val widget = Block.bordered(title = Title("TEST"))
-
-        val buffer = render(widget, 20, 3)
-
-        assertEquals(" ", buffer.get(3, 0).symbol)
-        assertEquals("T", buffer.get(4, 0).symbol)
-        assertEquals("E", buffer.get(5, 0).symbol)
-        assertEquals("S", buffer.get(6, 0).symbol)
-        assertEquals("T", buffer.get(7, 0).symbol)
-        assertEquals(" ", buffer.get(8, 0).symbol)
-        assertEquals(StandardRole.ACCENT, buffer.get(4, 0).fg)
-        assertEquals(StandardRole.PANEL_BORDER, buffer.get(0, 0).fg)
-    }
-
-    @Test
     fun `uses specified colors`() {
         val widget = Block.bordered(borderColor = StandardRole.DANGER, titleColor = StandardRole.TEXT_PRIMARY)
 
         val buffer = render(widget, 10, 3)
 
         assertEquals(StandardRole.DANGER, buffer.get(0, 0).fg)
-    }
-
-    @Test
-    fun `renders single-char badge title`() {
-        val widget = Block.bordered(title = Title("TEST", badge = "2"))
-
-        val buffer = render(widget, 20, 3)
-
-        assertEquals("[", buffer.get(2, 0).symbol)
-        assertEquals("2", buffer.get(3, 0).symbol)
-        assertEquals("]", buffer.get(4, 0).symbol)
-        assertEquals(" ", buffer.get(5, 0).symbol)
-        assertEquals("T", buffer.get(6, 0).symbol)
-        assertEquals("E", buffer.get(7, 0).symbol)
-        assertEquals("S", buffer.get(8, 0).symbol)
-        assertEquals("T", buffer.get(9, 0).symbol)
-        assertEquals(" ", buffer.get(10, 0).symbol)
-        assertEquals(StandardRole.ACCENT, buffer.get(2, 0).fg)
-        assertEquals(StandardRole.ACCENT, buffer.get(6, 0).fg)
-    }
-
-    @Test
-    fun `renders letter badge title, e g HELP`() {
-        val widget = Block.bordered(title = Title("HELP", badge = "h"))
-
-        val buffer = render(widget, 20, 3)
-
-        assertEquals("[", buffer.get(2, 0).symbol)
-        assertEquals("h", buffer.get(3, 0).symbol)
-        assertEquals("]", buffer.get(4, 0).symbol)
-        assertEquals(" ", buffer.get(5, 0).symbol)
-        assertEquals("H", buffer.get(6, 0).symbol)
-        assertEquals("E", buffer.get(7, 0).symbol)
-        assertEquals("L", buffer.get(8, 0).symbol)
-        assertEquals("P", buffer.get(9, 0).symbol)
-        assertEquals(" ", buffer.get(10, 0).symbol)
-        assertEquals(StandardRole.ACCENT, buffer.get(3, 0).fg)
-        assertEquals(StandardRole.ACCENT, buffer.get(6, 0).fg)
-    }
-
-    @Test
-    fun `skips a title when not even its first glyph fits beside the ellipsis`() {
-        val widget = Block.bordered(title = Title("TOOLONG"))
-
-        val buffer = render(widget, 8, 3)
-
-        assertEquals("─", buffer.get(3, 0).symbol)
-    }
-
-    @Test
-    fun `renders a badge alone, with no title to anchor it to — e g a minimized panel's stub`() {
-        val widget = Block.bordered(title = Title("", badge = "0"))
-
-        val buffer = render(widget, 7, 3)
-
-        assertEquals("[", buffer.get(2, 0).symbol)
-        assertEquals("0", buffer.get(3, 0).symbol)
-        assertEquals("]", buffer.get(4, 0).symbol)
-    }
-
-    @Test
-    fun `omits a badge that has no room, even alone`() {
-        val widget = Block.bordered(title = Title("", badge = "0"))
-
-        val buffer = render(widget, 5, 3)
-
-        assertEquals("─", buffer.get(3, 0).symbol, "5-wide box has no room for [0] at column 2")
-    }
-
-    @Test
-    fun `falls back to the badge alone when a title is present but the full run does not fit`() {
-        // A title too long to fit as "[badge] title" must not draw nothing — the badge alone is
-        // still worth showing (e.g. a minimized panel's stub, too narrow for its full title).
-        val widget = Block.bordered(title = Title("TOOLONGTOFIT", badge = "1"))
-
-        val buffer = render(widget, 7, 3)
-
-        assertEquals("[", buffer.get(2, 0).symbol)
-        assertEquals("1", buffer.get(3, 0).symbol)
-        assertEquals("]", buffer.get(4, 0).symbol)
-        assertEquals(StandardRole.ACCENT, buffer.get(3, 0).fg)
     }
 
     @Test
@@ -214,29 +238,6 @@ internal class BlockTest {
     }
 
     @Test
-    fun `title placement uses display width rather than UTF-16 length`() {
-        val widget = Block.bordered(title = Title("中"))
-
-        val buffer = render(widget, 12, 3)
-
-        assertEquals("中", buffer.get(4, 0).symbol)
-        assertEquals(" ", buffer.get(6, 0).symbol)
-    }
-
-    @Test
-    fun `wide badge leaves the right border intact when shown alone`() {
-        val widget = Block.bordered(title = Title("", badge = "中"))
-
-        val buffer = render(widget, 7, 3)
-
-        assertEquals("[", buffer.get(2, 0).symbol)
-        assertEquals("中", buffer.get(3, 0).symbol)
-        assertEquals("", buffer.get(4, 0).symbol)
-        assertEquals("]", buffer.get(5, 0).symbol)
-        assertEquals("╮", buffer.get(6, 0).symbol)
-    }
-
-    @Test
     fun `inner removes the border and padding from an area`() {
         val block = Block.bordered(padding = Padding(left = 2, top = 1))
 
@@ -255,19 +256,8 @@ internal class BlockTest {
     }
 
     @Test
-    fun `a top border with a title draws a titled divider and keeps the sides open`() {
-        val block = Block(title = Title("KEYS"), borders = Borders.TOP)
-
-        val buffer = render(block, 12, 3)
-
-        assertEquals("─── KEYS ───", buffer.line(0))
-        assertEquals("", buffer.line(1))
-        assertEquals(Rect(0, 1, 12, 2), block.inner(Rect(0, 0, 12, 3)))
-    }
-
-    @Test
     fun `a title without a top border still takes the top row`() {
-        val block = Block(title = Title("T"))
+        val block = Block(titles = listOf(Title("T")))
 
         assertEquals(Rect(0, 1, 5, 2), block.inner(Rect(0, 0, 5, 3)))
     }
@@ -296,46 +286,18 @@ internal class BlockTest {
         (0 until buffer.height).map { y -> (0 until buffer.width).joinToString("") { x -> buffer.get(x, y).symbol } }
 
     @Test
-    fun `centers and right-aligns the title clear of the corners`() {
-        val centered = render(Block.bordered(title = Title("AB", align = TextAlign.CENTER)), 12, 3)
-        val right = render(Block.bordered(title = Title("AB", align = TextAlign.RIGHT)), 12, 3)
-
-        assertEquals("╭─── AB ───╮", centered.line(0))
-        assertEquals("╭──── AB ──╮", right.line(0))
-    }
-
-    @Test
-    fun `right-aligns a badge and title as one run`() {
-        val buffer = render(Block.bordered(title = Title("AB", badge = "1", align = TextAlign.RIGHT)), 14, 3)
-
-        assertEquals("╭────[1] AB ─╮", buffer.line(0))
-    }
-
-    @Test
-    fun `ellipsizes a title too wide for the top row`() {
-        assertEquals("╭── TOOL… ─╮", render(Block.bordered(title = Title("TOOLONGTITLE")), 12, 3).line(0))
-    }
-
-    @Test
-    fun `keeps the badge and ellipsizes the title beside it`() {
-        val buffer = render(Block.bordered(title = Title("TOOLONGTITLE", badge = "1")), 13, 3)
-
-        assertEquals("╭─[1] TOO… ─╮", buffer.line(0))
-    }
-
-    @Test
     fun `a styled title keeps the channels its spans set and takes the title color for the rest`() {
-        val title = Title(Line(Span("A", Style(bold = true)), Span("B", Style(StandardRole.DANGER))))
+        val titles = listOf(Title(Line(Span("A", Style(bold = true)), Span("B", Style(StandardRole.DANGER)))))
 
-        val buffer = render(Block.bordered(title = title, titleColor = StandardRole.INFO), 10, 3)
+        val buffer = render(Block.bordered(titles = titles, titleColor = StandardRole.INFO), 10, 3)
 
-        assertEquals(StandardRole.INFO, buffer.get(4, 0).fg)
-        assertEquals(true, buffer.get(4, 0).bold)
-        assertEquals(StandardRole.DANGER, buffer.get(5, 0).fg)
+        assertEquals(StandardRole.INFO, buffer.get(3, 0).fg)
+        assertEquals(true, buffer.get(3, 0).bold)
+        assertEquals(StandardRole.DANGER, buffer.get(4, 0).fg)
     }
 
     @Test
     fun `an empty title takes no row`() {
-        assertEquals(Rect(0, 0, 4, 2), Block(title = Title("")).inner(Rect(0, 0, 4, 2)))
+        assertEquals(Rect(0, 0, 4, 2), Block(titles = listOf(Title(""))).inner(Rect(0, 0, 4, 2)))
     }
 }

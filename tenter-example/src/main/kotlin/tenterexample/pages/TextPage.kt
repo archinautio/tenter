@@ -4,6 +4,7 @@
 package tenterexample.pages
 
 import io.archinaut.tenter.widget.Title
+import io.archinaut.tenter.widget.TitlePosition
 import com.github.ajalt.mordant.input.KeyboardEvent
 import com.github.ajalt.mordant.rendering.TextAlign
 import io.archinaut.tenter.color.StandardRole
@@ -13,6 +14,7 @@ import io.archinaut.tenter.input.KeyLayer
 import io.archinaut.tenter.input.KeySection
 import io.archinaut.tenter.screen.Constraint
 import io.archinaut.tenter.screen.Line
+import io.archinaut.tenter.screen.Padding
 import io.archinaut.tenter.screen.Span
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.widget.Block
@@ -27,8 +29,8 @@ import tenterexample.pages.PageSections.heading
 import tenterexample.pages.PageSections.note
 
 /**
- * Paragraph wrapping, ellipsizing, and alignment at a width the user changes, a styled block title
- * with a badge, aligned single lines, styled spans, and vertical text.
+ * Paragraph wrapping, ellipsizing, and alignment at a width the user changes, styled block titles
+ * on the top and bottom borders, aligned single lines, styled spans, and vertical text.
  */
 internal class TextPage : ShowcasePage<TextPage.State, TextPage.Action> {
 
@@ -75,21 +77,22 @@ internal class TextPage : ShowcasePage<TextPage.State, TextPage.Action> {
     override fun view(state: State, now: Duration): PageView {
         val mode = if (state.wrap) "wrapped" else "ellipsized"
         val align = state.align.name.lowercase()
-        val title = Title(
-            Line(Span("${state.width} cells"), Span(", $align", Style(StandardRole.TEXT_MUTED))),
-            badge = "a",
-            align = state.align,
+        val titles = listOf(
+            // Declared first, so it keeps its room when the column narrows.
+            Title("[a]", align = state.align, padding = Padding.ZERO),
+            Title(Line(Span("${state.width} cells"), Span(", $align", Style(StandardRole.TEXT_MUTED))), align = state.align),
+            Title(mode, align = TextAlign.RIGHT, position = TitlePosition.BOTTOM),
         )
-        val sample = Paragraph(SAMPLE, wrap = state.wrap, align = state.align).block(Block.bordered(title = title))
+        val sample = Paragraph(SAMPLE, wrap = state.wrap, align = state.align).block(Block.bordered(titles = titles))
         val lines = MeasurableWidget { writer ->
             writer.writeLine("tenter-0.2.0.jar", Style(StandardRole.TEXT_PRIMARY), state.align)
             writer.writeLine(Line(Span("312 KB", Style(StandardRole.ACCENT)), Span(" packed")), state.align)
             writer.writeLine("a single line too long for the column ends in an ellipsis", align = state.align)
-        }.block(Block.bordered(title = Title("writeLine", align = state.align)))
+        }.block(Block.bordered(titles = listOf(Title("writeLine", align = state.align))))
         val rows = MeasurableWidget { writer ->
             writer.writeRow("tenter-0.2.0.jar", "312 KB", Style(StandardRole.TEXT_PRIMARY), Style(StandardRole.TEXT_MUTED))
             writer.writeRow("a left label long enough to give way to the value", "right", Style(StandardRole.TEXT_PRIMARY))
-        }.block(Block.bordered(title = Title("writeRow")))
+        }.block(Block.bordered(titles = listOf(Title("writeRow"))))
         return PageView(
             Stack(
                 listOf(
@@ -112,7 +115,7 @@ internal class TextPage : ShowcasePage<TextPage.State, TextPage.Action> {
                     note(
                         "Widths are display cells: a wide glyph takes two, a decomposed accent one. " +
                             "Without wrapping, each line is cut with an ellipsis. Narrow the column and the " +
-                            "title is ellipsized too, until only its badge is left.",
+                            "titles are ellipsized too, until only the first, [a], is left.",
                     ),
                 ),
             ),

@@ -239,7 +239,7 @@ internal class Showcase(
         // The page list has no maximized content, so it only minimizes.
         val pages = Panel<ShellPanelId, ShellInputs>(
             id = ShellPanelId.Pages,
-            title = Title("PAGES"),
+            titles = listOf(Title("PAGES")),
             normal = { input -> pageList(input) },
             minimized = { VerticalText("PAGES") },
         )
@@ -247,14 +247,14 @@ internal class Showcase(
         val demos = pageTitles.mapIndexed { index, title ->
             Panel<ShellPanelId, ShellInputs>(
                 id = ShellPanelId.Demo(index),
-                title = Title(title.uppercase()),
+                titles = listOf(Title(title.uppercase())),
                 normal = { input -> input.page.content },
                 maximized = { input -> input.page.content },
             )
         }
         val help = Panel<ShellPanelId, ShellInputs>(
             id = ShellPanelId.Help,
-            title = Title("HELP"),
+            titles = listOf(Title("HELP")),
             normal = { input -> KeyHelp(input.help) },
             minimized = { VerticalText("HELP") },
             maximized = { input -> KeyHelp(input.help) },

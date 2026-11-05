@@ -86,7 +86,7 @@ internal class ColorsPage(private val choice: SchemeChoice) : ShowcasePage<Color
     /** The schemes, the active one marked, and the option that picks one. */
     private class SchemeList(private val choice: SchemeChoice) : Widget {
         override fun render(canvas: Canvas) {
-            val block = Block.bordered(title = Title("COLOR SCHEMES"), padding = Padding.horizontal(1))
+            val block = Block.bordered(titles = listOf(Title("COLOR SCHEMES")), padding = Padding.horizontal(1))
             block.render(canvas)
             val footer = listOf(
                 Line(""),

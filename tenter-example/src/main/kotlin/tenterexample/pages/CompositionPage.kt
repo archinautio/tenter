@@ -84,7 +84,7 @@ internal class CompositionPage : ShowcasePage<CompositionPage.State, Composition
         val borders = BORDERS[state.borders]
         val (typeName, borderType) = BORDER_TYPES[state.borderType]
         val block = Block(
-            title = Title("Block"),
+            titles = listOf(Title("Block")),
             borders = borders,
             padding = Padding.uniform(state.padding),
             borderType = borderType,

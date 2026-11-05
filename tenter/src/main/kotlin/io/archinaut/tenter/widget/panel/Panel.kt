@@ -24,7 +24,7 @@ import io.archinaut.tenter.widget.block
  */
 public class Panel<K : PanelId, I>(
     internal val id: K,
-    private val title: Title,
+    private val titles: List<Title>,
     private val normal: (I) -> MeasurableWidget,
     private val minimized: ((I) -> MeasurableWidget)? = null,
     private val maximized: ((I) -> MeasurableWidget)? = null,
@@ -88,7 +88,7 @@ public class Panel<K : PanelId, I>(
     ): PanelLayout.Slot<K> {
         val role = if (focused) StandardRole.PANEL_BORDER_FOCUSED else StandardRole.PANEL_BORDER
         val frame = Block.bordered(
-            title = title,
+            titles = titles,
             padding = Padding.horizontal(FRAME_PADDING),
             borderColor = role,
             titleColor = role,

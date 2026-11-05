@@ -19,7 +19,7 @@ internal class PanelLayoutTest {
 
     private fun panel(id: LayoutPanelId): Panel<LayoutPanelId, Unit> = Panel(
         id = id,
-        title = Title(id.name),
+        titles = listOf(Title(id.name)),
         normal = { MeasurableWidget { writer -> repeat(40) { writer.writeLine("row$it") } } },
     )
 

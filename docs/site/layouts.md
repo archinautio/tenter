@@ -133,31 +133,45 @@ val sheet = Flow(
 
 ## Add borders and padding
 
-A `Block` holds borders, a title, and padding, as Ratatui's `Block` does:
+A `Block` holds borders, titles, and padding, as Ratatui's `Block` does:
 
 - `Block.bordered(...)` draws all four sides, and `Block()` none.
 - `borders` chooses the sides, such as `Borders.TOP` for a titled divider.
 - `borderType` chooses their glyphs, one of Mordant's `BorderType` sets.
-- `title` takes a `Title`, described below.
+- `titles` takes a list of `Title`s, described below.
 - A block without borders adds padding alone.
 
-A `Title` is the text on the top row, as a `String` or a styled `Line`. It can also carry a
-badge, such as the key that focuses a panel, and an alignment:
+A `Title` is text on the top or bottom row, as a `String` or a styled `Line`, with an alignment,
+a position, and the padding around it. Tenter adds nothing to it but that padding, so a decoration
+such as the key that focuses a panel is a title of its own:
 
 ```kotlin
-val log = Block.bordered(title = Title("LOG", badge = "2"))
+val log = Block.bordered(
+    titles = listOf(
+        Title("[2]", padding = Padding.ZERO),
+        Title("LOG"),
+        Title("12/40", align = TextAlign.RIGHT, position = TitlePosition.BOTTOM),
+    ),
+)
 val match = Block.bordered(
-    title = Title(Line(Span("MATCH "), Span("OVER", Style(bold = true))), align = TextAlign.CENTER),
+    titles = listOf(Title(Line(Span("MATCH "), Span("OVER", Style(bold = true))), align = TextAlign.CENTER)),
     titleColor = StandardRole.ACCENT,
 )
 ```
 
-- `align` places the title and badge at the left, center, or right of the top row, clear of the
-  corners.
+`log` draws `╭─[2] LOG ─…` on its top border and `…─ 12/40 ─╯` on its bottom one.
+
+- `align` places a title at the left, center, or right of its row, keeping the corner and one
+  border cell clear of each edge. Titles of one alignment sit side by side in the order given.
+- `position` puts a title on the top row, the default, or the bottom one. A title takes its row
+  even without a border there.
+- `padding` sets the blank cells on each side of a title, one by default; only its left and right
+  edges may be set. Neighbouring titles are separated only by their padding.
 - The block's `titleColor` fills every channel a span leaves unset, so a plain title follows a
   panel's focus color. A span that sets its own color keeps it, even on a focused panel.
-- A title too wide for the row is shortened with `…`. When not even its first character fits,
-  the badge shows alone, as on a minimized panel.
+- When a row is too narrow, earlier titles keep their room. A later title is shortened with `…`,
+  keeping its padding, and dropped once not even its first character fits. In `log` above, a
+  seven-cell-wide block, such as a minimized panel, still shows `╭─[2]─╮`.
 
 Surround measurable content with a block using `.block(...)`. The result is still
 measurable: eight cells wide, it is five rows tall. This excerpt frames a label in a
@@ -174,7 +188,7 @@ label. In an allocated area, render the block and then render the
 content into `block.inner(area)`:
 
 ```kotlin
-val block = Block.bordered(title = Title("LOG"))
+val block = Block.bordered(titles = listOf(Title("LOG")))
 frame.renderWidget(block, area)
 frame.renderWidget(content, block.inner(area))
 ```

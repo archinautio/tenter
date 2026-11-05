@@ -38,7 +38,7 @@ public class KeyHelp(private val sections: List<KeySection>) : MeasurableWidget 
 
     private companion object {
         private val HEADING = Block(
-            title = Title("KEYS"),
+            titles = listOf(Title("KEYS")),
             borders = Borders.TOP,
             borderColor = StandardRole.INFO,
             titleColor = StandardRole.INFO,

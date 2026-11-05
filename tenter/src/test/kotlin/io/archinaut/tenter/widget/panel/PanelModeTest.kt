@@ -17,7 +17,7 @@ internal class PanelModeTest {
         maximized: Boolean = true,
     ): Panel<TestPanelId, Unit> = Panel(
         id = TestPanelId.A,
-        title = Title("T"),
+        titles = listOf(Title("T")),
         normal = { MeasurableWidget { } },
         minimized = if (minimized) ({ MeasurableWidget { } }) else null,
         maximized = if (maximized) ({ MeasurableWidget { } }) else null,
@@ -54,7 +54,7 @@ internal class PanelModeTest {
         val a = panel()
         val b = Panel<TestPanelId, Unit>(
             id = TestPanelId.B,
-            title = Title("B"),
+            titles = listOf(Title("B")),
                 normal = { MeasurableWidget { } },
         )
         val set = PanelSet(listOf(a, b))

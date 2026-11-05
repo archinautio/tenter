@@ -188,8 +188,8 @@ private fun checkPopup() {
     harness.press("o")
     val open = harness.draw()
     val title = checkNotNull(open.find("COLOR SCHEMES")) { "the scheme popup did not open" }
-    // The block's title starts four cells into its top border.
-    val popup = Rect(title.x - 4, title.y, POPUP_SIZE.width, POPUP_SIZE.height)
+    // The block's title starts three cells into its top border.
+    val popup = Rect(title.x - 3, title.y, POPUP_SIZE.width, POPUP_SIZE.height)
     harness.press("o")
     val closed = harness.draw()
     check("COLOR SCHEMES" !in closed.text()) { "the scheme popup did not close" }
