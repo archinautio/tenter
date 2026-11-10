@@ -43,15 +43,11 @@ internal fun textClusters(text: String): Sequence<TextCluster> = Sequence {
 /** The display width of the `[start, end)` code-unit slice of [text], segmented as if cut out of it. */
 internal fun clustersWidth(text: String, start: Int = 0, end: Int = text.length): Int {
     val scanner = ClusterScanner(text, start, end)
-    var width = 0
+    var width = scanner.skipAscii()
     while (scanner.hasNext()) {
         val clusterStart = scanner.position
-        val clusterEnd = scanner.next()
-        width += if (clusterEnd - clusterStart == 1 && isPrintableAscii(text[clusterStart])) {
-            1
-        } else {
-            clusterWidth(text, clusterStart, clusterEnd)
-        }
+        width += clusterWidth(text, clusterStart, scanner.next())
+        width += scanner.skipAscii()
     }
     return width
 }
@@ -78,12 +74,20 @@ internal class ClusterScanner(
 
     internal fun hasNext(): Boolean = position < end
 
+    /** Moves past the run of one-character ASCII clusters ahead, possibly empty, and returns its length. */
+    internal fun skipAscii(): Int {
+        val from = position
+        var index = from
+        while (index < end && isAsciiCluster(index)) index++
+        position = index
+        return index - from
+    }
+
     /** Moves past the next cluster and returns its end. */
     internal fun next(): Int {
         val start = position
-        val next = start + 1
-        position = if (isPrintableAscii(text[start]) && (next == end || text[next].code < ASCII_LIMIT)) {
-            next
+        position = if (isAsciiCluster(start)) {
+            start + 1
         } else {
             val matcher = matcher ?: GRAPHEME_PATTERN.matcher(matchedText()).also { matcher = it }
             matcher.region(start, end)
@@ -91,6 +95,12 @@ internal class ClusterScanner(
             matcher.end()
         }
         return position
+    }
+
+    /** Whether printable ASCII at [index] is followed by ASCII or [end], so it is a cluster of its own. */
+    private fun isAsciiCluster(index: Int): Boolean {
+        val next = index + 1
+        return isPrintableAscii(text[index]) && (next == end || text[next].code < ASCII_LIMIT)
     }
 
     /**
