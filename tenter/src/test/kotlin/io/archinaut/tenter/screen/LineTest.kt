@@ -78,6 +78,36 @@ internal class LineTest {
     }
 
     @Test
+    fun `each wrapped row of a one-style line is one span, its separators merged in`() {
+        val text = Line("alpha beta gamma delta", Style(StandardRole.DANGER))
+
+        val rows = text.wrap(10)
+
+        assertEquals(
+            listOf(
+                listOf(Span("alpha beta", Style(StandardRole.DANGER))),
+                listOf(Span("gamma", Style(StandardRole.DANGER))),
+                listOf(Span("delta", Style(StandardRole.DANGER))),
+            ),
+            rows.map { it.spans },
+        )
+    }
+
+    @Test
+    fun `a row cut beside a combining mark is normalized as a line of its own`() {
+        // The mark joins the space before it in the source, but starts a row of its own.
+        val text = Line(Span("ab ́", Style(StandardRole.DANGER)), Span("cd", Style(StandardRole.SUCCESS)))
+
+        val rows = text.wrap(2)
+
+        assertEquals(listOf("ab", "́cd"), rows.map { it.plain })
+        assertEquals(
+            listOf(Span("́", Style(StandardRole.DANGER)), Span("cd", Style(StandardRole.SUCCESS))),
+            rows[1].spans,
+        )
+    }
+
+    @Test
     fun `an over-long word inside one colored span hard-breaks and every fragment keeps the style`() {
         val text = Line(Span("supercalifragilistic", Style(StandardRole.DANGER)))
 

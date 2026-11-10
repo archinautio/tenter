@@ -6,6 +6,7 @@ package io.archinaut.tenter.screen
 import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.text.ClusterScanner
 import io.archinaut.tenter.text.firstSpacingBaseIndex
+import io.archinaut.tenter.text.isPrintableAscii
 import io.archinaut.tenter.text.TextTruncation
 import io.archinaut.tenter.text.TextWrap
 import io.archinaut.tenter.text.textClusters
@@ -36,14 +37,25 @@ public class Line private constructor(normalized: Normalized) {
     internal fun wrap(firstWidth: Int, continuationWidth: Int = firstWidth): List<Line> =
         TextWrap.wrapBy(plain, firstWidth, continuationWidth) { ranges ->
             val parts = mutableListOf<Span>()
+            var cutBetweenAscii = true
             ranges.forEachIndexed { i, range ->
                 // The separating space is the source's own, so it keeps the source's style —
                 // which matters the moment a span carries a background.
-                if (i > 0) parts += slice(range.first - 1, range.first)
-                parts += slice(range.first, range.last + 1)
+                val from = if (i > 0) range.first - 1 else range.first
+                val to = range.last + 1
+                cutBetweenAscii = cutBetweenAscii && isCutBetweenAscii(from) && isCutBetweenAscii(to)
+                parts += slice(from, to)
             }
-            Line(parts)
+            if (cutBetweenAscii) Line(mergeStyles(parts)) else Line(parts)
         }
+
+    /**
+     * Whether [index] of [plain] is an edge or falls after printable ASCII and before ASCII. No
+     * grapheme rule joins across such a cut or looks back past it, so pieces cut only there keep
+     * this line's clusters, each inside one of its normalized spans, and need no re-normalizing.
+     */
+    private fun isCutBetweenAscii(index: Int): Boolean =
+        index == 0 || index == plain.length || (isPrintableAscii(plain[index - 1]) && plain[index].code < ASCII_LIMIT)
 
     /** Span-aware [TextTruncation.ellipsize]; the ellipsis inherits the style it interrupts. */
     internal fun ellipsize(maxWidth: Int): Line {
@@ -109,6 +121,22 @@ public class Line private constructor(normalized: Normalized) {
     private companion object {
         /** Normalized spans and the plain text they were cut from, computed together so it is joined once. */
         class Normalized(val spans: List<Span>, val plain: String)
+
+        private const val ASCII_LIMIT: Int = 0x80
+
+        /** Pieces of normalized spans, each grapheme already styled by its base, with same-styled neighbours merged. */
+        fun mergeStyles(pieces: List<Span>): Normalized {
+            val merged = ArrayList<Span>(pieces.size)
+            val plain = StringBuilder()
+            var next = 0
+            while (next < pieces.size) {
+                val first = pieces[next]
+                val runStart = plain.length
+                while (next < pieces.size && pieces[next].style == first.style) plain.append(pieces[next++].text)
+                merged += if (plain.length - runStart == first.text.length) first else Span(plain.substring(runStart), first.style)
+            }
+            return Normalized(merged, plain.toString())
+        }
 
         /** Drops empty spans and merges same-styled neighbours, styling each grapheme by its base. */
         fun normalize(spans: List<Span>): Normalized {
