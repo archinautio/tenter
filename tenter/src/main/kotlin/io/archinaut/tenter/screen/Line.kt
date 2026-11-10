@@ -21,10 +21,10 @@ public class Line(spans: List<Span>) {
     public val spans: List<Span> = normalize(spans)
 
     /** Display width in terminal cells. */
-    public val width: Int get() = CellWidth.of(plain)
+    public val width: Int by lazy(LazyThreadSafetyMode.NONE) { CellWidth.of(plain) }
 
     /** The unstyled projection. Code-unit indices used internally refer to it. */
-    internal val plain: String by lazy(LazyThreadSafetyMode.NONE) { spans.joinToString("") { it.text } }
+    internal val plain: String by lazy(LazyThreadSafetyMode.NONE) { plainText(this.spans) }
 
     public operator fun plus(other: Line): Line = Line(spans + other.spans)
 
@@ -46,7 +46,7 @@ public class Line(spans: List<Span>) {
         val available = maxWidth.coerceAtLeast(0)
         if (width <= available) return this
         if (available == 0) return Line(emptyList())
-        val keep = TextTruncation.prefixLengthWithin(plain, available - CellWidth.of(TextTruncation.ELLIPSIS))
+        val keep = TextTruncation.prefixLengthWithin(plain, available - TextTruncation.ELLIPSIS_WIDTH)
         return Line(slice(0, keep) + Span(TextTruncation.ELLIPSIS, styleAt(spans, keep)))
     }
 
@@ -105,21 +105,25 @@ public class Line(spans: List<Span>) {
     private companion object {
         /** Drops empty spans and merges same-styled neighbours, styling each grapheme by its base. */
         fun normalize(spans: List<Span>): List<Span> {
-            if (spans.all { it.text.isEmpty() }) return emptyList()
-            val plain = spans.joinToString("") { it.text }
+            val texts = spans.filter { it.text.isNotEmpty() }
+            // One span styles every grapheme alike, so it is already normal.
+            if (texts.size <= 1) return texts
+            val plain = plainText(texts)
             val normalized = mutableListOf<Span>()
+            var runStart = 0
+            var runStyle: Style? = null
             for (cluster in textClusters(plain)) {
-                val index = cluster.firstSpacingBaseIndex ?: cluster.startIndex
-                val style = styleAt(spans, index)
-                val last = normalized.lastOrNull()
-                if (last != null && last.style == style) {
-                    normalized[normalized.lastIndex] = last.copy(text = last.text + cluster.sourceText)
-                } else {
-                    normalized += Span(cluster.sourceText, style)
-                }
+                val style = styleAt(texts, cluster.firstSpacingBaseIndex ?: cluster.startIndex)
+                if (style == runStyle) continue
+                if (runStyle != null) normalized += Span(plain.substring(runStart, cluster.startIndex), runStyle)
+                runStart = cluster.startIndex
+                runStyle = style
             }
+            normalized += Span(plain.substring(runStart), checkNotNull(runStyle))
             return normalized
         }
+
+        fun plainText(spans: List<Span>): String = spans.singleOrNull()?.text ?: spans.joinToString("") { it.text }
 
         /** The style covering code-unit [index]; clamps to the last span so an ellipsis at the end works. */
         fun styleAt(spans: List<Span>, index: Int): Style {

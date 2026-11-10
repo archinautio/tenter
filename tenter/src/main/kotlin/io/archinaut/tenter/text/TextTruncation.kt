@@ -7,12 +7,14 @@ internal object TextTruncation {
 
     const val ELLIPSIS: String = "…"
 
+    val ELLIPSIS_WIDTH: Int = CellWidth.of(ELLIPSIS)
+
     fun ellipsize(text: String, maxWidth: Int): String {
         val availableWidth = maxWidth.coerceAtLeast(0)
         if (CellWidth.of(text) <= availableWidth) return text
         if (availableWidth == 0) return ""
 
-        val keep = prefixLengthWithin(text, availableWidth - CellWidth.of(ELLIPSIS))
+        val keep = prefixLengthWithin(text, availableWidth - ELLIPSIS_WIDTH)
         return text.substring(0, keep) + ELLIPSIS
     }
 

@@ -8,7 +8,6 @@ import io.archinaut.tenter.screen.Line
 import io.archinaut.tenter.screen.Span
 import io.archinaut.tenter.screen.Style
 import io.archinaut.tenter.screen.offset
-import io.archinaut.tenter.text.CellWidth
 import io.archinaut.tenter.text.TextTruncation
 
 /** A run of titles placed on a block's row, starting at [column]. */
@@ -51,7 +50,7 @@ private fun fitted(title: Title, room: Int, textStyle: Style, paddingStyle: Styl
     val padding = title.padding
     val available = room - padding.left - padding.right
     val text = Line(title.line.spans.map { Span(it.text, textStyle.patch(it.style)) })
-    val shown = if (text.width <= available) text else text.ellipsize(available).takeIf { it.width > ELLIPSIS_WIDTH }
+    val shown = if (text.width <= available) text else text.ellipsize(available).takeIf { it.width > TextTruncation.ELLIPSIS_WIDTH }
     return shown?.let { Line(" ".repeat(padding.left), paddingStyle) + it + Line(" ".repeat(padding.right), paddingStyle) }
 }
 
@@ -65,5 +64,3 @@ private fun TextAlign.side(): Side = when (this) {
 
 /** Cells a title keeps clear of each edge of its row: the corner and one border cell. */
 private const val CORNER_GAP: Int = 2
-
-private val ELLIPSIS_WIDTH: Int = CellWidth.of(TextTruncation.ELLIPSIS)
