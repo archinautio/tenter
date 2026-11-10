@@ -135,7 +135,7 @@ internal class TerminalScreenTest {
     @Test
     fun `entry failure still attempts cleanup and preserves the entry failure`() {
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
-        val terminalInterface = FailingTerminalInterface(recorder, failOnCall = 2)
+        val terminalInterface = FailingTerminalInterface(recorder, failingCalls = 2..2)
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = terminalInterface))
 
         val thrown = assertThrows<IllegalStateException> {
@@ -150,7 +150,7 @@ internal class TerminalScreenTest {
     @Test
     fun `cleanup failure is suppressed on a block failure`() {
         val recorder = TerminalRecorder(ansiLevel = AnsiLevel.TRUECOLOR)
-        val terminalInterface = FailingTerminalInterface(recorder, failFromCall = 4)
+        val terminalInterface = FailingTerminalInterface(recorder, failingCalls = 4..5)
         val terminal = Terminal(MordantTerminal(ansiLevel = AnsiLevel.TRUECOLOR, terminalInterface = terminalInterface))
         val failure = IllegalStateException("block failed")
 
@@ -166,8 +166,7 @@ internal class TerminalScreenTest {
 
     private class FailingTerminalInterface(
         private val delegate: TerminalRecorder,
-        private val failOnCall: Int? = null,
-        private val failFromCall: Int? = null,
+        private val failingCalls: IntRange,
     ) : TerminalInterface {
         var printCalls: Int = 0
             private set
@@ -181,7 +180,7 @@ internal class TerminalScreenTest {
 
         public override fun completePrintRequest(request: PrintRequest) {
             printCalls++
-            if (printCalls == failOnCall || (failFromCall != null && printCalls >= failFromCall)) {
+            if (printCalls in failingCalls) {
                 throw IllegalStateException("output failed")
             }
             delegate.completePrintRequest(request)
