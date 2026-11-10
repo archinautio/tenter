@@ -84,7 +84,7 @@ public class Canvas private constructor(
         var column = x
         for (cluster in textClusters(text)) {
             if (cluster.width == 0) continue
-            buffer.write(bounds.x + column, bounds.y + y, cluster.drawableText, style, clip)
+            buffer.writeGlyph(bounds.x + column, bounds.y + y, cluster.drawableText, cluster.width, style, clip)
             column += cluster.width
         }
         return Point(column, y)

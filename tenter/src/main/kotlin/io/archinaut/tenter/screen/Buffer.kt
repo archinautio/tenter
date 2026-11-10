@@ -67,6 +67,21 @@ internal class Buffer(
             glyphSymbol = clusters.single().drawableText
             glyphWidth = clusters.single().width
         }
+        writeGlyph(x, y, glyphSymbol, glyphWidth, style, clip)
+    }
+
+    /**
+     * [write] for a [glyph] already known to be one sanitized, drawable grapheme cluster of
+     * [glyphWidth] 1 or 2, as a segmenting caller has it, so it is not segmented again.
+     */
+    internal fun writeGlyph(
+        x: Int,
+        y: Int,
+        glyph: String,
+        glyphWidth: Int,
+        style: Style,
+        clip: Rect,
+    ) {
         val clipLeft = clip.x
         val clipRight = clip.x + clip.width
         if (y !in clip.y until clip.y + clip.height) return
@@ -85,7 +100,7 @@ internal class Buffer(
         if (targetEnd > clipRight || targetEnd > width) return
         if (!canReplace(x, y, targetEnd, clip)) return
 
-        val painted = cells[y][x].cell.painted(glyphSymbol, style)
+        val painted = cells[y][x].cell.painted(glyph, style)
         clearGlyphAt(x, y)
         if (glyphWidth == 2) clearGlyphAt(x + 1, y)
         cells[y][x] = StoredCell(painted, glyphWidth, continuation = false)
@@ -141,9 +156,14 @@ internal class Buffer(
         return true
     }
 
+    /**
+     * Blanks the wide glyph covering ([x], [y]), so overwriting one of its columns leaves no half
+     * behind. Every caller then overwrites ([x], [y]) itself, so a narrow glyph there needs nothing.
+     */
     private fun clearGlyphAt(x: Int, y: Int) {
         val lead = glyphStart(x, y)
         val stored = cells[y][lead]
+        if (stored.width == 1) return
         val blank = StoredCell(stored.cell.copy(symbol = " "), width = 1, continuation = false)
         cells[y][lead] = blank
         if (stored.width == 2 && lead + 1 < width) {
