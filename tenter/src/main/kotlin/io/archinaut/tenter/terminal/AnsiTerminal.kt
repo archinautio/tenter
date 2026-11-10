@@ -34,8 +34,8 @@ internal class AnsiTerminal(
     }
 
     override fun followSize() {
-        // Mordant's Size compares by identity and the backend refreshes it on every print, so
-        // only a change in dimensions counts as a resize.
+        // Mordant's Size compares by identity and every `updateSize` poll replaces it, so only a
+        // change in dimensions counts as a resize.
         val size = backend.size
         if (size.width == backendSize.width && size.height == backendSize.height) return
         backendSize = size
@@ -125,25 +125,30 @@ internal class AnsiTerminal(
         private fun renderDiff(buffer: Buffer, prev: Buffer) {
             val sb = StringBuilder()
             for (y in 0 until buffer.height) {
-                val dirty = mutableListOf<IntRange>()
+                // The dirty span still growing, `[spanStart, spanEnd)`; empty while spanStart < 0.
+                var spanStart = -1
+                var spanEnd = -1
                 for (x in 0 until buffer.width) {
                     if (buffer.get(x, y) == prev.get(x, y)) continue
                     val start = minOf(buffer.glyphStart(x, y), prev.glyphStart(x, y))
                     val end = maxOf(buffer.glyphEndExclusive(x, y), prev.glyphEndExclusive(x, y))
-                    val last = dirty.lastOrNull()
-                    if (last != null && start <= last.last + 1) {
-                        dirty[dirty.lastIndex] = last.first..maxOf(last.last, end - 1)
+                    if (spanStart >= 0 && start <= spanEnd) {
+                        spanEnd = maxOf(spanEnd, end)
                     } else {
-                        dirty += start..<end
+                        if (spanStart >= 0) renderDirtySpan(sb, buffer, y, spanStart, spanEnd)
+                        spanStart = start
+                        spanEnd = end
                     }
                 }
-                for (span in dirty) {
-                    sb.append(backend.cursor.getMoves { setPosition(span.first, y) })
-                    renderSpan(sb, buffer, y, span.first, span.last + 1)
-                }
+                if (spanStart >= 0) renderDirtySpan(sb, buffer, y, spanStart, spanEnd)
             }
             if (sb.isEmpty()) return
             backend.rawPrint(sb)
+        }
+
+        private fun renderDirtySpan(sb: StringBuilder, buffer: Buffer, y: Int, xStart: Int, xEnd: Int) {
+            sb.append(backend.cursor.getMoves { setPosition(xStart, y) })
+            renderSpan(sb, buffer, y, xStart, xEnd)
         }
 
         /**
@@ -158,19 +163,17 @@ internal class AnsiTerminal(
             var activeTags: Tags = Tags.NONE
             while (x < xEnd) {
                 val lead = buffer.get(x, y)
-                val runChars = StringBuilder()
-                while (x < xEnd) {
-                    val cell: Cell = buffer.get(x, y)
-                    if (!cell.looksLike(lead)) break
-                    runChars.append(cell.symbol)
-                    x++
-                }
                 val tags = styles.tagsFor(lead)
                 if (activeAttributes != lead.attributes) sb.append(activeTags.close)
                 sb.append(tags.open)
                 activeAttributes = lead.attributes
                 activeTags = tags
-                sb.append(runChars)
+                while (x < xEnd) {
+                    val cell: Cell = buffer.get(x, y)
+                    if (!cell.looksLike(lead)) break
+                    sb.append(cell.symbol)
+                    x++
+                }
             }
             sb.append(activeTags.close)
         }
