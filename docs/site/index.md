@@ -45,10 +45,15 @@ dependencies {
 }
 
 kotlin { jvmToolchain(25) }
-application { mainClass.set("MainKt") }
+application {
+    mainClass.set("MainKt")
+    applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
+}
 ```
 
-The dependency above resolves from your machine's Maven Local repository.
+The dependency above resolves from your machine's Maven Local repository. The JVM argument
+lets the terminal backend call the operating system directly; see
+[native access](examples.md#jdk-native-access-warning) for why and for other ways to launch.
 
 ### The main loop
 

@@ -10,6 +10,8 @@ plugins {
 
 application {
     mainClass.set("tenterexample.ShowcaseMainKt")
+    // Lets Mordant use its FFM terminal backend instead of falling back to JNA, which warns at startup.
+    applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
 }
 
 dependencies {

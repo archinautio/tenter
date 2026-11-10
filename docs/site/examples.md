@@ -112,7 +112,26 @@ Follow the [screen lifetime and input collection rules](input.md#keep-drawing-an
 
 ## JDK native-access warning
 
-On JDK 25, the terminal backend may print a warning about `System.load` and JNA.
-The greeting still runs. If you choose to enable native access for that backend,
-add `applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")`
-to the consumer's `application` block and rebuild its launcher.
+Mordant drives the terminal through one of two backends. It prefers the JDK's Foreign
+Function & Memory (FFM) API, which runs only when the JVM grants native access. Without
+that access it falls back to JNA, and the JVM prints a warning at startup:
+
+```
+WARNING: java.lang.System::load has been called by com.sun.jna.Native in an unnamed module
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+```
+
+The application still runs, but a future JDK will block that call. Grant native access so
+Mordant uses FFM instead, the same way for every way you launch the application:
+
+- **Gradle launcher** (`installDist`): add
+  `applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")` to the
+  `application` block and rebuild the launcher.
+- **Executable jar** (`java -jar`): add the manifest attribute
+  `Enable-Native-Access: ALL-UNNAMED`. The JVM reads it only for `-jar`, not with `-cp`.
+- **IDE or a hand-written `java` command**: pass `--enable-native-access=ALL-UNNAMED` as a
+  VM option.
+
+If you merge dependencies into one jar, merge the files under `META-INF/services/` as
+well. Mordant lists each backend in its own service file, and keeping only one of them
+leaves Mordant on JNA even with native access granted.
