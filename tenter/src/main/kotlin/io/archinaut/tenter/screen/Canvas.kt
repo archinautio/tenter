@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.screen
 
-import io.archinaut.tenter.text.textClusters
+import io.archinaut.tenter.text.forEachGlyph
 
 /**
  * A clipped region of a [Buffer] in local coordinates, `(0, 0)` being its top-left corner. Writes
@@ -82,10 +82,9 @@ public class Canvas private constructor(
         style: Style = Style.DEFAULT,
     ): Point {
         var column = x
-        for (cluster in textClusters(text)) {
-            if (cluster.width == 0) continue
-            buffer.writeGlyph(bounds.x + column, bounds.y + y, cluster.drawableText, cluster.width, style, clip)
-            column += cluster.width
+        forEachGlyph(text) { glyph, width ->
+            buffer.writeGlyph(bounds.x + column, bounds.y + y, glyph, width, style, clip)
+            column += width
         }
         return Point(column, y)
     }

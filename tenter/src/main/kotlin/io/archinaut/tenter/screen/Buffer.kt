@@ -3,7 +3,7 @@
 
 package io.archinaut.tenter.screen
 
-import io.archinaut.tenter.text.textClusters
+import io.archinaut.tenter.text.singleCluster
 
 internal class Buffer(
     val width: Int,
@@ -60,12 +60,12 @@ internal class Buffer(
             glyphSymbol = symbol
             glyphWidth = 1
         } else {
-            val clusters = textClusters(symbol).toList()
-            require(clusters.size == 1 && clusters.single().width > 0) {
+            val cluster = singleCluster(symbol)
+            require(cluster != null && cluster.width > 0) {
                 "Cell must contain exactly one drawable grapheme cluster: ${symbol.toDebugString()}"
             }
-            glyphSymbol = clusters.single().drawableText
-            glyphWidth = clusters.single().width
+            glyphSymbol = cluster.drawableText
+            glyphWidth = cluster.width
         }
         writeGlyph(x, y, glyphSymbol, glyphWidth, style, clip)
     }

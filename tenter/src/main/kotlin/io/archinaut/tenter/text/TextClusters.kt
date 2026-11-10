@@ -40,6 +40,33 @@ internal fun textClusters(text: String): Sequence<TextCluster> = Sequence {
     }
 }
 
+/**
+ * Calls [action] with the drawable text and width of each cluster of [text] that takes cells, as
+ * [textClusters] would give them, without building a [TextCluster] for printable ASCII.
+ */
+internal inline fun forEachGlyph(text: String, action: (glyph: String, width: Int) -> Unit) {
+    val scanner = ClusterScanner(text)
+    while (scanner.hasNext()) {
+        val start = scanner.position
+        val end = scanner.next()
+        if (end - start == 1 && isPrintableAscii(text[start])) {
+            action(asciiGlyph(text[start]), 1)
+        } else {
+            val cluster = cluster(text, start, end)
+            if (cluster.width > 0) action(cluster.drawableText, cluster.width)
+        }
+    }
+}
+
+/** [text] as its one cluster, or null when it holds none or several. */
+internal fun singleCluster(text: String): TextCluster? {
+    if (text.isEmpty()) return null
+    // One code unit is one code point and so one cluster, without asking the regex.
+    if (text.length == 1) return cluster(text, 0, 1)
+    val scanner = ClusterScanner(text)
+    return if (scanner.next() == text.length) cluster(text, 0, text.length) else null
+}
+
 /** The display width of the `[start, end)` code-unit slice of [text], segmented as if cut out of it. */
 internal fun clustersWidth(text: String, start: Int = 0, end: Int = text.length): Int {
     val scanner = ClusterScanner(text, start, end)
@@ -116,7 +143,7 @@ internal class ClusterScanner(
 }
 
 /** The cluster `[start, end)` of [text], measured and sanitized code point by code point. */
-private fun cluster(text: String, start: Int, end: Int): TextCluster {
+internal fun cluster(text: String, start: Int, end: Int): TextCluster {
     var index = start
     var width = 0
     var firstSpacingBaseIndex: Int? = null
