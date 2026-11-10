@@ -138,6 +138,18 @@ private fun cluster(text: String, start: Int, end: Int): TextCluster {
     )
 }
 
+/** [TextCluster.firstSpacingBaseIndex] of the cluster `[start, end)` of [text], without building the cluster. */
+internal fun firstSpacingBaseIndex(text: String, start: Int, end: Int): Int? {
+    var index = start
+    while (index < end) {
+        val codePoint = codePointWithin(text, index, end)
+        val validCodePoint = if (codePoint in SURROGATE_RANGE) REPLACEMENT_CODE_POINT else codePoint
+        if (!isTerminalControl(validCodePoint) && CellWidth.of(validCodePoint) > 0) return index
+        index += Character.charCount(codePoint)
+    }
+    return null
+}
+
 /** [cluster]'s width, without building the cluster. */
 private fun clusterWidth(text: String, start: Int, end: Int): Int {
     var index = start

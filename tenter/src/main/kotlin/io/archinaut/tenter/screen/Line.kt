@@ -4,6 +4,8 @@
 package io.archinaut.tenter.screen
 
 import io.archinaut.tenter.text.CellWidth
+import io.archinaut.tenter.text.ClusterScanner
+import io.archinaut.tenter.text.firstSpacingBaseIndex
 import io.archinaut.tenter.text.TextTruncation
 import io.archinaut.tenter.text.TextWrap
 import io.archinaut.tenter.text.textClusters
@@ -12,19 +14,21 @@ import io.archinaut.tenter.text.textClusters
  * One line of text made of styled [Span]s, measured, wrapped, truncated, and painted as a unit.
  * Empty spans are dropped and same-styled neighbours merged, so lines that paint alike are equal.
  */
-public class Line(spans: List<Span>) {
+public class Line private constructor(normalized: Normalized) {
+
+    public constructor(spans: List<Span>) : this(normalize(spans))
 
     public constructor(vararg spans: Span) : this(spans.asList())
 
     public constructor(text: String, style: Style = Style.DEFAULT) : this(listOf(Span(text, style)))
 
-    public val spans: List<Span> = normalize(spans)
-
-    /** Display width in terminal cells. */
-    public val width: Int by lazy(LazyThreadSafetyMode.NONE) { CellWidth.of(plain) }
+    public val spans: List<Span> = normalized.spans
 
     /** The unstyled projection. Code-unit indices used internally refer to it. */
-    internal val plain: String by lazy(LazyThreadSafetyMode.NONE) { plainText(this.spans) }
+    internal val plain: String = normalized.plain
+
+    /** Display width in terminal cells. */
+    public val width: Int = CellWidth.of(plain)
 
     public operator fun plus(other: Line): Line = Line(spans + other.spans)
 
@@ -103,27 +107,40 @@ public class Line(spans: List<Span>) {
     override fun toString(): String = "Line($spans)"
 
     private companion object {
+        /** Normalized spans and the plain text they were cut from, computed together so it is joined once. */
+        class Normalized(val spans: List<Span>, val plain: String)
+
         /** Drops empty spans and merges same-styled neighbours, styling each grapheme by its base. */
-        fun normalize(spans: List<Span>): List<Span> {
+        fun normalize(spans: List<Span>): Normalized {
             val texts = spans.filter { it.text.isNotEmpty() }
             // One span styles every grapheme alike, so it is already normal.
-            if (texts.size <= 1) return texts
-            val plain = plainText(texts)
+            if (texts.size <= 1) return Normalized(texts, texts.singleOrNull()?.text ?: "")
+            val plain = texts.joinToString("") { it.text }
             val normalized = mutableListOf<Span>()
             var runStart = 0
             var runStyle: Style? = null
-            for (cluster in textClusters(plain)) {
-                val style = styleAt(texts, cluster.firstSpacingBaseIndex ?: cluster.startIndex)
+            // The span holding each cluster's start, advanced as the clusters are walked in order.
+            var spanIndex = 0
+            var spanEnd = texts[0].text.length
+            val scanner = ClusterScanner(plain)
+            while (scanner.hasNext()) {
+                val start = scanner.position
+                val end = scanner.next()
+                while (start >= spanEnd) spanEnd += texts[++spanIndex].text.length
+                // Only a cluster straddling spans can take its style from a span other than its first.
+                val style = if (end <= spanEnd) {
+                    texts[spanIndex].style
+                } else {
+                    styleAt(texts, firstSpacingBaseIndex(plain, start, end) ?: start)
+                }
                 if (style == runStyle) continue
-                if (runStyle != null) normalized += Span(plain.substring(runStart, cluster.startIndex), runStyle)
-                runStart = cluster.startIndex
+                if (runStyle != null) normalized += Span(plain.substring(runStart, start), runStyle)
+                runStart = start
                 runStyle = style
             }
             normalized += Span(plain.substring(runStart), checkNotNull(runStyle))
-            return normalized
+            return Normalized(normalized, plain)
         }
-
-        fun plainText(spans: List<Span>): String = spans.singleOrNull()?.text ?: spans.joinToString("") { it.text }
 
         /** The style covering code-unit [index]; clamps to the last span so an ellipsis at the end works. */
         fun styleAt(spans: List<Span>, index: Int): Style {
