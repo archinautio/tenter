@@ -14,13 +14,13 @@ public object CellWidth {
         else -> 1
     }
 
-    public fun of(text: String): Int = textClusters(text).sumOf(TextCluster::width)
+    public fun of(text: String): Int = clustersWidth(text)
 
     /** Display width of the `[startIndex, endIndex)` code-unit slice of [text]. */
     public fun of(text: String, startIndex: Int, endIndex: Int): Int {
         require(startIndex in 0..text.length) { "startIndex must be within text" }
         require(endIndex in startIndex..text.length) { "endIndex must be within text after startIndex" }
-        return textClusters(text.substring(startIndex, endIndex)).sumOf(TextCluster::width)
+        return clustersWidth(text, startIndex, endIndex)
     }
 
     /** Whether [text] is exactly one drawable grapheme occupying one terminal cell. */
