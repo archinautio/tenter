@@ -105,3 +105,54 @@ Push `main` and the tag when the release should become public:
 ```sh
 git push --follow-tags origin main
 ```
+
+The tag starts the [release workflow](../.github/workflows/release.yml), which:
+
+1. Fails if the tag differs from `v` plus the version in `gradle.properties`.
+2. Runs `build` and `:tenter-example:packagedSmoke` on the tagged commit.
+3. Creates the GitHub release `Tenter <version>`, with the [notes](#release-notes) and the
+   jar, sources jar, javadoc jar, POM, and module metadata attached.
+
+## Release notes
+
+[git-cliff](https://git-cliff.org/) writes the notes from the Conventional Commits between
+the previous `v*` tag and this one, configured in [`cliff.toml`](../cliff.toml):
+
+| Commits | Section |
+| --- | --- |
+| Any type with `!` or a `BREAKING CHANGE:` footer | Breaking changes, with the footer's text |
+| `feat` | Features |
+| `fix` | Bug fixes |
+| `perf` | Performance |
+| `build(deps)` | Dependency updates |
+| `docs` | Documentation |
+| Anything else, including the release's own `chore(release)` commits | Left out |
+
+After those sections, the notes add:
+
+- A **Public API** section: one sentence on how `tenter/api/tenter.api` changed since the
+  previous release, and its diff folded in a `<details>` block. The first release has no
+  earlier API to compare with.
+- A **Full changelog** link comparing the two tags.
+
+Write each commit subject as a line of the notes. Write a dependency bump as
+`build(deps): bump Mordant to 3.1.1` when callers get that dependency: the `api`
+dependencies and Kotlin. Bumps that only affect this repository's build, such as Gradle,
+plugins, and test libraries, stay `build: bump …` and are left out.
+
+With git-cliff installed (for example, `brew install git-cliff`), preview the notes of the
+latest tag, or of the commits not released yet:
+
+```sh
+git cliff --latest --strip header
+```
+
+```sh
+git cliff --unreleased --strip header
+```
+
+To write the Public API section as the workflow does:
+
+```sh
+./gradlew reportApiChanges -PapiNotes=build/api-notes.md
+```

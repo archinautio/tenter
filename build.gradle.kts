@@ -40,8 +40,10 @@ fun ApiDumpTask.useLibraryDump() {
 
 val reportApiChanges = tasks.register<ApiChangesReport>("reportApiChanges") {
     group = "help"
-    description = "Shows how tenter/api/tenter.api changed since the latest release tag."
+    description = "Shows how tenter/api/tenter.api changed since the latest release tag. " +
+        "-PapiNotes=<file> also writes it as the release notes' Public API section."
     useLibraryDump()
+    releaseNotes.set(layout.projectDirectory.file(providers.gradleProperty("apiNotes")))
 }
 
 val checkSemanticVersion = tasks.register<CheckSemanticVersion>("checkSemanticVersion") {

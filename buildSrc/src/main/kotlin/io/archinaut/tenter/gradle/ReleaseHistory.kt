@@ -8,8 +8,14 @@ import java.util.Properties
 
 /** The release tags of the git repository at [repository], and how files changed since them. */
 class ReleaseHistory(private val exec: ExecOperations, private val repository: File) {
-    /** The latest `v*` tag reachable from `HEAD`, or null before the first release. */
-    fun previousRelease(): String? = git("describe", "--tags", "--abbrev=0", "--match", "v*")
+    /**
+     * The latest `v*` tag before the release being made, or null before the first release. On a
+     * commit already tagged `v*`, as when building that release from its tag, it skips that tag.
+     */
+    fun previousRelease(): String? {
+        val releasedHere = git("tag", "--points-at", "HEAD", "--list", "v*").orEmpty().isNotBlank()
+        return git("describe", "--tags", "--abbrev=0", "--match", "v*", if (releasedHere) "HEAD^" else "HEAD")
+    }
 
     fun diffSince(tag: String, path: String): String =
         git("diff", "--no-color", tag, "--", path) ?: throw GradleException("git diff $tag -- $path failed")
