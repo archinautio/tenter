@@ -3,6 +3,8 @@
 
 package io.archinaut.tenter.terminal
 
+import io.archinaut.tenter.screen.Style
+
 /** Open/close ANSI escape strings for one [Style]; either may be empty. */
 internal class Tags(internal val open: String, internal val close: String) {
     internal companion object {
