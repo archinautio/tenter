@@ -8,6 +8,9 @@ plugins {
     id("tenter.kotlin-application")
 }
 
+// The packaged checks below read :tenter tasks while this script is configured.
+evaluationDependsOn(":tenter")
+
 application {
     mainClass.set("tenterexample.ShowcaseMainKt")
     // Lets Mordant use its FFM terminal backend instead of falling back to JNA, which warns at startup.

@@ -21,6 +21,9 @@ Kotlin 2.4, JVM 25, Gradle 9.9 (Kotlin DSL, convention plugins in `buildSrc/`), 
 
 # Rewrite the reference dump `tenter/api/tenter.api` from the current public API (`build` checks against it). Run only after intentionally accepting an API change
 ./gradlew :tenter:updateKotlinAbi
+
+# Release: tag the current snapshot as a version and install it in Maven Local, without pushing. See docs/releasing.md
+./gradlew release
 ```
 
 ## Where things are documented
@@ -28,6 +31,7 @@ Kotlin 2.4, JVM 25, Gradle 9.9 (Kotlin DSL, convention plugins in `buildSrc/`), 
 - [docs/architecture.md](docs/architecture.md): dependency boundaries, package layering, and implementation invariants. Read it before changing library structure.
 - [docs/site/](docs/site/index.md): every caller-facing contract. Update the guide that owns a behavior when changing it.
 - [docs/documentation.md](docs/documentation.md): where each kind of documentation belongs, and how to validate the site.
+- [docs/releasing.md](docs/releasing.md): what a release produces and how to cut one.
 
 ## Design principles
 

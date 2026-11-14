@@ -8,10 +8,12 @@ konsist = "0.18.1"
 mordant = "3.1.1"
 kotlinx-coroutines = "1.11.0"
 spotless = "8.10.4"
+release = "3.2.0"
 maven-publish = "0.37.0"
 dokka = "2.3.0"
 
 [plugins]
+release = { id = "net.researchgate.release", version.ref = "release" }
 maven-publish = { id = "com.vanniktech.maven.publish.base", version.ref = "maven-publish" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 
