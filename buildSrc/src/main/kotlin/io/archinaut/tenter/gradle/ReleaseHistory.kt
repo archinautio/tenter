@@ -17,6 +17,9 @@ class ReleaseHistory(private val exec: ExecOperations, private val repository: F
         return git("describe", "--tags", "--abbrev=0", "--match", "v*", if (releasedHere) "HEAD^" else "HEAD")
     }
 
+    /** The latest `v*` tag on or before HEAD, or null before the first release. */
+    fun latestRelease(): String? = git("describe", "--tags", "--abbrev=0", "--match", "v*", "HEAD")
+
     fun diffSince(tag: String, path: String): String =
         git("diff", "--no-color", tag, "--", path) ?: throw GradleException("git diff $tag -- $path failed")
 

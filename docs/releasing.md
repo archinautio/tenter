@@ -57,8 +57,9 @@ The release:
    compilation check, and the docs version check.
 6. Installs the release artifacts in `~/.m2/repository/io/archinaut/tenter/<version>/`.
 7. Commits both files, and tags that commit `v<version>`.
-8. Sets the next development version in both files and commits them. By default, that is
-   the next minor version.
+8. Sets the next development version in `gradle.properties` and commits it. By default,
+   that is the next minor version. The guide keeps showing the release, which is the
+   version readers can get from Maven Central.
 
 If a step fails, nothing is tagged. Restore `gradle.properties` and `docs/site/index.md`
 with `git restore` before trying again.
@@ -92,8 +93,13 @@ To see the report or run the check at any time:
 
 ## Docs version
 
-`check` fails when the getting-started guide shows a version other than the one in
-`gradle.properties`. After changing the version by hand, run:
+The [getting-started guide](site/index.md) shows the latest released version, the one
+readers can resolve from Maven Central, never a `-SNAPSHOT`. That is the version in
+`gradle.properties` while a release is being made, and the latest `v*` tag on the current
+commit or before it otherwise. `check` fails when the guide shows another version, so it
+needs the release tags: a clone without them, such as a shallow one, fails the check.
+
+After moving a tag or changing a release version by hand, run:
 
 ```sh
 ./gradlew syncDocsVersion

@@ -45,8 +45,9 @@ zensical build --clean --strict
   [packaged example check](site/examples.md#noninteractive-check).
 
 When changing installation requirements, update the getting-started page from the
-version catalog, `gradle.properties`, and the Gradle wrapper. Verify Maven Local installation in a separate
-consumer project.
+version catalog and the Gradle wrapper. Its Tenter version is the latest release, which
+`./gradlew syncDocsVersion` writes (see [docs version](releasing.md#docs-version)). Verify the
+installation from Maven Central in a separate consumer project.
 
 Do not commit `build/site/`, `.cache/`, or the virtual environment.
 

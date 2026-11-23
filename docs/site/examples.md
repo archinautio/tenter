@@ -82,8 +82,8 @@ package is application code, not library types to import into your own applicati
 
 ## Dependency cannot be resolved
 
-Check the local publication, repositories, and version against the
-[installation instructions](index.md#install-locally).
+Check the repositories and version against the [installation instructions](index.md#install).
+A `-SNAPSHOT` version also needs `mavenLocal()` and a local publication of `main`.
 
 ## Input does not work under Gradle
 

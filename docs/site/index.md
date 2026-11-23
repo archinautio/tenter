@@ -6,22 +6,14 @@ scrolling panels, keyboard and mouse input, and animation. It builds on Mordant.
 ![Tenter showcase: a page list, the Text page with wrapped and justified paragraphs and styled spans, and a key help panel](assets/showcase.png)
 
 !!! note "Development documentation"
-    These guides follow `main`, currently `0.3.0-SNAPSHOT`. The API is pre-2.0 and may
-    change. Pin the version and review API changes before upgrading. Installation
-    currently requires building the library locally.
+    These guides follow `main`, which can be ahead of the latest release, `0.2.1`. The
+    API is pre-2.0 and may change. Pin the version and review API changes before upgrading.
 
-## Install locally
+## Install
 
-Use **JDK 25** and **Kotlin 2.4.21**. Tenter is JVM-only. Its public API uses Mordant
-3.1.0 and kotlinx-coroutines 1.11.0; both are included as transitive dependencies.
-
-Clone the project and publish it to your local Maven repository:
-
-```sh
-git clone https://github.com/archinautio/tenter.git
-cd tenter
-./gradlew :tenter:publishToMavenLocal
-```
+Use **JDK 25** and **Kotlin 2.4.21**. Tenter is JVM-only and is published to Maven Central
+as `io.archinaut:tenter`. Its public API uses Mordant 3.1.0 and kotlinx-coroutines 1.11.0;
+both are included as transitive dependencies.
 
 ## Write your first application "hello-tenter"
 
@@ -36,12 +28,11 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
 dependencies {
-    implementation("io.archinaut:tenter:0.3.0-SNAPSHOT")
+    implementation("io.archinaut:tenter:0.2.1")
 }
 
 kotlin { jvmToolchain(25) }
@@ -51,9 +42,18 @@ application {
 }
 ```
 
-The dependency above resolves from your machine's Maven Local repository. The JVM argument
-lets the terminal backend call the operating system directly; see
+The JVM argument lets the terminal backend call the operating system directly; see
 [native access](examples.md#jdk-native-access-warning) for why and for other ways to launch.
+
+To try `main` before its release, publish it to your local Maven repository, add
+`mavenLocal()` before `mavenCentral()`, and depend on the `-SNAPSHOT` version in its
+`gradle.properties`:
+
+```sh
+git clone https://github.com/archinautio/tenter.git
+cd tenter
+./gradlew :tenter:publishToMavenLocal
+```
 
 ### The main loop
 

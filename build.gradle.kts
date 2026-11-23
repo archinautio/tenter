@@ -19,17 +19,18 @@ tasks.named("build") {
 fun DocsVersionTask.useProjectFiles() {
     versionFile.set(layout.projectDirectory.file("gradle.properties"))
     docsFile.set(layout.projectDirectory.file("docs/site/index.md"))
+    repository.set(layout.projectDirectory)
 }
 
 val checkDocsVersion = tasks.register<CheckDocsVersion>("checkDocsVersion") {
     group = "verification"
-    description = "Checks that the getting-started guide shows the version in gradle.properties."
+    description = "Checks that the getting-started guide shows the latest released version."
     useProjectFiles()
 }
 tasks.named("check") { dependsOn(checkDocsVersion) }
 
 tasks.register<SyncDocsVersion>("syncDocsVersion") {
-    description = "Rewrites the getting-started guide to show the version in gradle.properties."
+    description = "Rewrites the getting-started guide to show the latest released version."
     useProjectFiles()
 }
 
@@ -70,7 +71,7 @@ release {
     git {
         requireBranch.set("main")
         pushToRemote.set(false)
-        // Both version commits also carry the docs synced below.
+        // The release commit also carries the docs synced below.
         commitVersionFileOnly.set(false)
     }
 }
@@ -78,18 +79,12 @@ release {
 // Shows the API changes right before the release version is confirmed.
 tasks.named("confirmReleaseVersion") { dependsOn(reportApiChanges) }
 
-// A task runs once per build, so each version change in a release gets its own docs sync.
+// The guide shows the release from its release commit on, through the next snapshot's commits.
 val syncDocsReleaseVersion = tasks.register<SyncDocsVersion>("syncDocsReleaseVersion") {
     useProjectFiles()
     mustRunAfter("unSnapshotVersion", "confirmReleaseVersion", checkSemanticVersion)
 }
 tasks.named("runBuildTasks") { dependsOn(checkSemanticVersion, syncDocsReleaseVersion) }
-
-val syncDocsNextVersion = tasks.register<SyncDocsVersion>("syncDocsNextVersion") {
-    useProjectFiles()
-    mustRunAfter("updateVersion")
-}
-tasks.named("commitNewVersion") { dependsOn(syncDocsNextVersion) }
 
 // Installs the release artifacts while the version is still the release one. Maven Central gets
 // them from the release workflow instead, which holds the publishing secrets.
