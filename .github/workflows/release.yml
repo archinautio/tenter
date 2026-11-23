@@ -32,6 +32,27 @@ jobs:
           echo "VERSION=$version" >> "$GITHUB_ENV"
       - name: Build and package the release
         run: ./gradlew build :tenter-example:packagedSmoke :tenter:publishToMavenLocal
+      - name: Check for Maven Central credentials
+        id: central
+        env:
+          USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: |
+          if [ -n "$USERNAME" ] && [ -n "$SIGNING_KEY" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Maven Central secrets are not set, so this release is not published there."
+          fi
+      # Runs before the GitHub release, so a failed upload leaves no GitHub release announcing a
+      # version that Maven Central does not have.
+      - name: Publish to Maven Central
+        if: steps.central.outputs.configured == 'true'
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: ./gradlew :tenter:publishAndReleaseToMavenCentral
       - name: Find the previous release
         run: |
           previous="$(git describe --tags --abbrev=0 --match 'v*' HEAD^ 2>/dev/null || true)"

@@ -91,8 +91,8 @@ val syncDocsNextVersion = tasks.register<SyncDocsVersion>("syncDocsNextVersion")
 }
 tasks.named("commitNewVersion") { dependsOn(syncDocsNextVersion) }
 
-// Installs the release artifacts while the version is still the release one; publishing to
-// Maven Central will hook in here too.
+// Installs the release artifacts while the version is still the release one. Maven Central gets
+// them from the release workflow instead, which holds the publishing secrets.
 tasks.named("afterReleaseBuild") {
     dependsOn(":tenter:publishToMavenLocal")
 }

@@ -18,12 +18,13 @@ Central's artifact requirements:
 
 Publications are signed only when signing keys are configured, either as the
 `signingInMemoryKey` Gradle property or the standard `signing.keyId` properties. Without
-them, a release still installs locally unsigned.
+them, a release still installs locally unsigned. Maven Central needs them: see
+[Maven Central](#maven-central).
 
 ## Cut a release
 
-1. Start on `main` with a clean working tree; the release refuses uncommitted or
-   untracked files.
+1. Start on `main` with a clean working tree, and push it first: the release refuses
+   uncommitted or untracked files, and commits not yet on `origin/main`.
 2. Run the release, answering the prompts for the release version and the next
    development version:
 
@@ -110,8 +111,43 @@ The tag starts the [release workflow](../.github/workflows/release.yml), which:
 
 1. Fails if the tag differs from `v` plus the version in `gradle.properties`.
 2. Runs `build` and `:tenter-example:packagedSmoke` on the tagged commit.
-3. Creates the GitHub release `Tenter <version>`, with the [notes](#release-notes) and the
+3. Publishes to [Maven Central](#maven-central) when its secrets are set.
+4. Creates the GitHub release `Tenter <version>`, with the [notes](#release-notes) and the
    jar, sources jar, javadoc jar, POM, and module metadata attached.
+
+## Maven Central
+
+The release workflow publishes `io.archinaut:tenter` to Maven Central once these
+repository secrets exist (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+| --- | --- |
+| `MAVEN_CENTRAL_USERNAME` | Username of a Central Portal user token |
+| `MAVEN_CENTRAL_PASSWORD` | Password of that user token |
+| `SIGNING_KEY` | ASCII-armored private GPG key |
+| `SIGNING_KEY_PASSWORD` | Passphrase of that key |
+
+Without `MAVEN_CENTRAL_USERNAME` and `SIGNING_KEY`, the workflow skips the upload and only
+creates the GitHub release. The upload also needs the `io.archinaut` namespace verified in
+the Central Portal, and the signing key's public key on `keyserver.ubuntu.com` or
+`keys.openpgp.org`, where Maven Central checks signatures.
+
+The workflow uploads in the same step that releases, with
+`:tenter:publishAndReleaseToMavenCentral`, and before creating the GitHub release, so a
+failed upload leaves no GitHub release announcing a version Maven Central does not have.
+When the upload fails because the token or the key has expired, renew it, then rerun the
+failed workflow from the Actions tab: the tag does not need to change.
+
+A version on Maven Central can never be changed or removed. To check a release before its
+first real upload, upload it from a checkout of its tag without releasing it; the
+deployment then waits in the portal to be published or dropped by hand:
+
+```sh
+ORG_GRADLE_PROJECT_mavenCentralUsername=… ORG_GRADLE_PROJECT_mavenCentralPassword=… \
+ORG_GRADLE_PROJECT_signingInMemoryKey="$(gpg --armor --export-secret-keys <key id>)" \
+ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=… \
+./gradlew :tenter:publishToMavenCentral
+```
 
 ## Release notes
 

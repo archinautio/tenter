@@ -26,6 +26,8 @@ dependencies {
 
 mavenPublishing {
     configure(KotlinJvm(javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationHtml")))
+    // Uploads to the Central Portal with the mavenCentralUsername and mavenCentralPassword properties.
+    publishToMavenCentral()
     // Maven Central needs signed artifacts, but a release built without keys stays installable locally.
     val signingKey = providers.gradleProperty("signingInMemoryKey").orElse(providers.gradleProperty("signing.keyId"))
     if (signingKey.isPresent) signAllPublications()
