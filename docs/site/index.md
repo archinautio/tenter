@@ -7,12 +7,13 @@ scrolling panels, keyboard and mouse input, and animation. It builds on Mordant.
 
 !!! note "Development documentation"
     These guides follow `main`, which can be ahead of the latest release, `0.2.1`. The
-    API is pre-2.0 and may change. Pin the version and review API changes before upgrading.
+    API is pre-1.0, so any minor version may break it. Pin the version and review API
+    changes before upgrading.
 
 ## Install
 
 Use **JDK 25** and **Kotlin 2.4.21**. Tenter is JVM-only and is published to Maven Central
-as `io.archinaut:tenter`. Its public API uses Mordant 3.1.0 and kotlinx-coroutines 1.11.0;
+as `io.archinaut:tenter`. Its public API uses Mordant 3.1.1 and kotlinx-coroutines 1.11.0;
 both are included as transitive dependencies.
 
 ## Write your first application "hello-tenter"
