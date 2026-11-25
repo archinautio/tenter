@@ -32,5 +32,4 @@ invalid_link_anchors = true
 admonition = {}
 toc.permalink = true
 pymdownx.highlight = { pygments_lang_class = true }
-pymdownx.superfences = {}
 pymdownx.snippets = { base_path = ["."], check_paths = true, dedent_subsections = true }

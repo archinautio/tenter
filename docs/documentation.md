@@ -34,11 +34,11 @@ in PowerShell. Open the local URL printed by Zensical. Stop the preview with Ctr
 ## Validate changes
 
 ```sh
-zensical build --clean --strict
+zensical build --clean
 ```
 
-- Strict validation checks internal links and anchors, and the snippets extension fails on
-  missing source paths or named regions.
+- `strict = true` in `zensical.toml` aborts the build on any warning: it checks internal links and
+  anchors, and the snippets extension fails on missing source paths or named regions.
 - Prefer named regions in compiled example sources over duplicated Kotlin.
 - The greeting includes everything after its package line, so preserve its complete imports.
 - When changing example sources, run the [project checks](../CLAUDE.md#commands) and the
